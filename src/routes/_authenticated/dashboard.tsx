@@ -105,7 +105,9 @@ function Dashboard() {
                 <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{task.description}</p>
                 <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
                   <span>{t("dash.slots")}: {task.slots - task.slots_filled}/{task.slots}</span>
-                  <Button size="sm" variant="ghost" className="text-primary hover:bg-primary/10">{t("dash.start")}</Button>
+                  <Button size="sm" variant="ghost" asChild className="text-primary hover:bg-primary/10">
+                    <Link to="/tasks/$taskId" params={{ taskId: task.id }}>{t("dash.start")}</Link>
+                  </Button>
                 </div>
               </Card>
             ))}
