@@ -77,6 +77,93 @@ export type Database = {
         }
         Relationships: []
       }
+      partner_apis: {
+        Row: {
+          active: boolean
+          api_key: string | null
+          api_url: string | null
+          config: Json
+          created_at: string
+          id: string
+          name: string
+          notes: string | null
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          api_key?: string | null
+          api_url?: string | null
+          config?: Json
+          created_at?: string
+          id?: string
+          name: string
+          notes?: string | null
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          api_key?: string | null
+          api_url?: string | null
+          config?: Json
+          created_at?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      payment_providers: {
+        Row: {
+          active: boolean
+          api_key: string | null
+          api_secret: string | null
+          api_url: string | null
+          config: Json
+          created_at: string
+          currency: string
+          id: string
+          max_amount: number
+          min_amount: number
+          name: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          api_key?: string | null
+          api_secret?: string | null
+          api_url?: string | null
+          config?: Json
+          created_at?: string
+          currency?: string
+          id?: string
+          max_amount?: number
+          min_amount?: number
+          name: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          api_key?: string | null
+          api_secret?: string | null
+          api_url?: string | null
+          config?: Json
+          created_at?: string
+          currency?: string
+          id?: string
+          max_amount?: number
+          min_amount?: number
+          name?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -164,6 +251,7 @@ export type Database = {
           external_id: string | null
           external_source: string | null
           id: string
+          partner_api_id: string | null
           reward: number
           slots: number
           slots_filled: number
@@ -180,6 +268,7 @@ export type Database = {
           external_id?: string | null
           external_source?: string | null
           id?: string
+          partner_api_id?: string | null
           reward?: number
           slots?: number
           slots_filled?: number
@@ -196,6 +285,7 @@ export type Database = {
           external_id?: string | null
           external_source?: string | null
           id?: string
+          partner_api_id?: string | null
           reward?: number
           slots?: number
           slots_filled?: number
@@ -209,6 +299,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_partner_api_id_fkey"
+            columns: ["partner_api_id"]
+            isOneToOne: false
+            referencedRelation: "partner_apis"
             referencedColumns: ["id"]
           },
         ]
@@ -313,7 +410,10 @@ export type Database = {
           id: string
           method: string
           notes: string | null
+          processed_at: string | null
+          provider_id: string | null
           status: Database["public"]["Enums"]["withdrawal_status"]
+          transaction_id: string | null
           updated_at: string
           user_id: string
         }
@@ -326,7 +426,10 @@ export type Database = {
           id?: string
           method: string
           notes?: string | null
+          processed_at?: string | null
+          provider_id?: string | null
           status?: Database["public"]["Enums"]["withdrawal_status"]
+          transaction_id?: string | null
           updated_at?: string
           user_id: string
         }
@@ -339,11 +442,22 @@ export type Database = {
           id?: string
           method?: string
           notes?: string | null
+          processed_at?: string | null
+          provider_id?: string | null
           status?: Database["public"]["Enums"]["withdrawal_status"]
+          transaction_id?: string | null
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "withdrawals_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "payment_providers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
