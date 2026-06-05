@@ -48,6 +48,8 @@ function CompanyPanel() {
     e.preventDefault();
     if (!user) return;
     setBusy(true);
+    // Ensure user has the company role (idempotent)
+    await supabase.from("user_roles").insert({ user_id: user.id, role: "company" }).then(() => null);
     const { error } = await supabase.from("companies").insert({ owner_id: user.id, name, website: website || null, description: description || null });
     setBusy(false);
     if (error) return toast.error(error.message);
