@@ -1,0 +1,234 @@
+import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+
+export type Lang = "pt" | "en";
+
+const dict = {
+  pt: {
+    "nav.howItWorks": "Como funciona",
+    "nav.users": "Utilizadores",
+    "nav.companies": "Empresas",
+    "nav.login": "Entrar",
+    "nav.signup": "Criar conta",
+    "nav.dashboard": "Painel",
+    "nav.logout": "Sair",
+
+    "hero.tag": "Microtarefas remuneradas",
+    "hero.title": "Ganhe dinheiro realizando microtarefas",
+    "hero.subtitle":
+      "A Taskora conecta empresas a milhares de utilizadores prontos para divulgar, testar e completar tarefas remuneradas — começando em Moçambique, pronto para o mundo.",
+    "hero.cta.primary": "Criar conta grátis",
+    "hero.cta.secondary": "Já tenho conta",
+    "hero.stats.users": "Utilizadores",
+    "hero.stats.tasks": "Tarefas concluídas",
+    "hero.stats.paid": "Pago aos utilizadores",
+
+    "how.title": "Como funciona",
+    "how.subtitle": "Três passos simples para começar a ganhar",
+    "how.s1.title": "Crie a sua conta",
+    "how.s1.desc": "Registo gratuito em menos de 1 minuto.",
+    "how.s2.title": "Complete tarefas",
+    "how.s2.desc": "Escolha tarefas de empresas verificadas e envie a prova.",
+    "how.s3.title": "Receba o pagamento",
+    "how.s3.desc": "Solicite o saque por M-Pesa, e-Mola ou outros métodos.",
+
+    "users.title": "Vantagens para Utilizadores",
+    "users.b1": "Tarefas variadas e remuneradas",
+    "users.b2": "Saques rápidos por métodos locais",
+    "users.b3": "Carteira interna segura",
+    "users.b4": "Painel pessoal com histórico completo",
+
+    "companies.title": "Vantagens para Empresas",
+    "companies.b1": "Acesso a milhares de utilizadores ativos",
+    "companies.b2": "Crie campanhas em minutos",
+    "companies.b3": "Relatórios e métricas claras",
+    "companies.b4": "Pague apenas por tarefa concluída",
+
+    "footer.tagline": "Plataforma de microtarefas remuneradas.",
+    "footer.product": "Produto",
+    "footer.company": "Empresa",
+    "footer.legal": "Legal",
+    "footer.contact": "Contacto",
+    "footer.rights": "Todos os direitos reservados.",
+
+    "auth.welcome": "Bem-vindo à Taskora",
+    "auth.subtitle": "Entre ou crie a sua conta para começar.",
+    "auth.tab.login": "Entrar",
+    "auth.tab.signup": "Criar conta",
+    "auth.email": "Email",
+    "auth.password": "Senha",
+    "auth.fullName": "Nome completo",
+    "auth.phone": "Telefone (opcional)",
+    "auth.forgot": "Esqueceu a senha?",
+    "auth.continueGoogle": "Continuar com Google",
+    "auth.or": "ou",
+    "auth.haveAccount": "Já tem conta?",
+    "auth.noAccount": "Ainda não tem conta?",
+    "auth.signupSuccess": "Conta criada! Verifique o seu email.",
+    "auth.loginSuccess": "Bem-vindo de volta!",
+    "auth.recover.title": "Recuperar senha",
+    "auth.recover.desc": "Enviaremos um link para o seu email.",
+    "auth.recover.send": "Enviar link",
+    "auth.recover.sent": "Email enviado! Verifique a sua caixa de entrada.",
+    "auth.reset.title": "Nova senha",
+    "auth.reset.desc": "Defina a sua nova senha.",
+    "auth.reset.update": "Atualizar senha",
+    "auth.reset.done": "Senha atualizada!",
+
+    "dash.greeting": "Olá",
+    "dash.wallet": "Carteira",
+    "dash.available": "Saldo disponível",
+    "dash.pending": "Saldo pendente",
+    "dash.earned": "Total ganho",
+    "dash.withdrawn": "Total sacado",
+    "dash.requestWithdraw": "Solicitar saque",
+    "dash.availableTasks": "Tarefas disponíveis",
+    "dash.inProgress": "Em andamento",
+    "dash.history": "Histórico",
+    "dash.withdrawals": "Saques",
+    "dash.noTasks": "Sem tarefas disponíveis no momento.",
+    "dash.noHistory": "Sem histórico ainda.",
+    "dash.reward": "Recompensa",
+    "dash.slots": "Vagas",
+    "dash.start": "Começar",
+
+    "wd.title": "Solicitar saque",
+    "wd.method": "Método de pagamento",
+    "wd.holder": "Nome do titular",
+    "wd.account": "Número da carteira/conta",
+    "wd.amount": "Valor",
+    "wd.submit": "Enviar pedido",
+    "wd.success": "Pedido enviado!",
+    "wd.insufficient": "Saldo insuficiente.",
+  },
+  en: {
+    "nav.howItWorks": "How it works",
+    "nav.users": "Users",
+    "nav.companies": "Companies",
+    "nav.login": "Sign in",
+    "nav.signup": "Sign up",
+    "nav.dashboard": "Dashboard",
+    "nav.logout": "Sign out",
+
+    "hero.tag": "Paid microtasks",
+    "hero.title": "Earn money by completing microtasks",
+    "hero.subtitle":
+      "Taskora connects companies with thousands of users ready to promote, test and complete paid tasks — starting in Mozambique, built for the world.",
+    "hero.cta.primary": "Create free account",
+    "hero.cta.secondary": "I have an account",
+    "hero.stats.users": "Users",
+    "hero.stats.tasks": "Tasks completed",
+    "hero.stats.paid": "Paid to users",
+
+    "how.title": "How it works",
+    "how.subtitle": "Three simple steps to start earning",
+    "how.s1.title": "Create your account",
+    "how.s1.desc": "Free registration in under a minute.",
+    "how.s2.title": "Complete tasks",
+    "how.s2.desc": "Pick tasks from verified companies and submit proof.",
+    "how.s3.title": "Get paid",
+    "how.s3.desc": "Request a payout via M-Pesa, e-Mola or other methods.",
+
+    "users.title": "For Users",
+    "users.b1": "Varied, well-paid tasks",
+    "users.b2": "Fast local payouts",
+    "users.b3": "Secure internal wallet",
+    "users.b4": "Personal dashboard with full history",
+
+    "companies.title": "For Companies",
+    "companies.b1": "Reach thousands of active users",
+    "companies.b2": "Create campaigns in minutes",
+    "companies.b3": "Clear reports and metrics",
+    "companies.b4": "Pay only for completed tasks",
+
+    "footer.tagline": "Paid microtasks platform.",
+    "footer.product": "Product",
+    "footer.company": "Company",
+    "footer.legal": "Legal",
+    "footer.contact": "Contact",
+    "footer.rights": "All rights reserved.",
+
+    "auth.welcome": "Welcome to Taskora",
+    "auth.subtitle": "Sign in or create an account to start.",
+    "auth.tab.login": "Sign in",
+    "auth.tab.signup": "Sign up",
+    "auth.email": "Email",
+    "auth.password": "Password",
+    "auth.fullName": "Full name",
+    "auth.phone": "Phone (optional)",
+    "auth.forgot": "Forgot password?",
+    "auth.continueGoogle": "Continue with Google",
+    "auth.or": "or",
+    "auth.haveAccount": "Already have an account?",
+    "auth.noAccount": "Don't have an account?",
+    "auth.signupSuccess": "Account created! Check your email.",
+    "auth.loginSuccess": "Welcome back!",
+    "auth.recover.title": "Recover password",
+    "auth.recover.desc": "We'll send a link to your email.",
+    "auth.recover.send": "Send link",
+    "auth.recover.sent": "Email sent! Check your inbox.",
+    "auth.reset.title": "New password",
+    "auth.reset.desc": "Set your new password.",
+    "auth.reset.update": "Update password",
+    "auth.reset.done": "Password updated!",
+
+    "dash.greeting": "Hello",
+    "dash.wallet": "Wallet",
+    "dash.available": "Available balance",
+    "dash.pending": "Pending balance",
+    "dash.earned": "Total earned",
+    "dash.withdrawn": "Total withdrawn",
+    "dash.requestWithdraw": "Request withdrawal",
+    "dash.availableTasks": "Available tasks",
+    "dash.inProgress": "In progress",
+    "dash.history": "History",
+    "dash.withdrawals": "Withdrawals",
+    "dash.noTasks": "No tasks available right now.",
+    "dash.noHistory": "No history yet.",
+    "dash.reward": "Reward",
+    "dash.slots": "Slots",
+    "dash.start": "Start",
+
+    "wd.title": "Request withdrawal",
+    "wd.method": "Payment method",
+    "wd.holder": "Account holder name",
+    "wd.account": "Wallet/account number",
+    "wd.amount": "Amount",
+    "wd.submit": "Submit request",
+    "wd.success": "Request submitted!",
+    "wd.insufficient": "Insufficient balance.",
+  },
+} as const;
+
+type Key = keyof (typeof dict)["pt"];
+
+interface Ctx {
+  lang: Lang;
+  setLang: (l: Lang) => void;
+  t: (k: Key) => string;
+}
+
+const I18nContext = createContext<Ctx | null>(null);
+
+export function I18nProvider({ children }: { children: ReactNode }) {
+  const [lang, setLangState] = useState<Lang>("pt");
+
+  useEffect(() => {
+    const saved = typeof window !== "undefined" ? (localStorage.getItem("taskora-lang") as Lang | null) : null;
+    if (saved === "pt" || saved === "en") setLangState(saved);
+  }, []);
+
+  const setLang = (l: Lang) => {
+    setLangState(l);
+    if (typeof window !== "undefined") localStorage.setItem("taskora-lang", l);
+  };
+
+  const t = (k: Key) => dict[lang][k] ?? k;
+
+  return <I18nContext.Provider value={{ lang, setLang, t }}>{children}</I18nContext.Provider>;
+}
+
+export function useI18n() {
+  const ctx = useContext(I18nContext);
+  if (!ctx) throw new Error("useI18n must be used within I18nProvider");
+  return ctx;
+}
