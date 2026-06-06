@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Wallet, Clock, TrendingUp, Banknote, ListChecks, History, ArrowUpRight } from "lucide-react";
+import { Wallet, Clock, Banknote, ListChecks, History, ArrowUpRight } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
