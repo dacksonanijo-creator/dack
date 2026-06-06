@@ -215,14 +215,21 @@ const dict = {
     "admin.txid": "Transaction ID",
 
     "hero.tag": "Paid microtasks",
-    "hero.title": "Earn money by completing microtasks",
+    "hero.title": "Work from home and earn money",
     "hero.subtitle":
-      "Taskora connects companies with thousands of users ready to promote, test and complete paid tasks — starting in Mozambique, built for the world.",
+      "Quick tasks, paid in your currency. Get started in minutes.",
     "hero.cta.primary": "Create free account",
     "hero.cta.secondary": "I have an account",
+    "hero.role.q": "Are you a company or want to earn money?",
+    "hero.role.user": "I want to earn money",
+    "hero.role.company": "I'm a company",
     "hero.stats.users": "Users",
     "hero.stats.tasks": "Tasks completed",
     "hero.stats.paid": "Paid to users",
+    "auth.country": "Country / Currency",
+    "auth.accountType": "Account type",
+    "auth.type.user": "Worker",
+    "auth.type.company": "Company",
 
     "how.title": "How it works",
     "how.subtitle": "Three simple steps to start earning",
