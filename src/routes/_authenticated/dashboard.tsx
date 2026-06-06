@@ -59,52 +59,54 @@ function Dashboard() {
   const fmt = (n: number) => `${n.toLocaleString("pt-PT", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${cur}`;
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <p className="text-sm text-muted-foreground">{t("dash.greeting")},</p>
-          <h1 className="font-display text-3xl font-bold">{profile?.full_name || user?.email}</h1>
+    <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6">
+      {/* Wallet bar — topo, tipo casa de apostas */}
+      <div className="sticky top-16 z-30 -mx-4 mb-4 border-b border-border/50 bg-background/85 px-4 py-2 backdrop-blur sm:-mx-6 sm:px-6">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex flex-1 flex-wrap items-center gap-2 sm:gap-3">
+            <WalletPill icon={<Wallet className="h-3.5 w-3.5" />} label={t("dash.available")} value={fmt(wallet?.available_balance ?? 0)} highlight />
+            <WalletPill icon={<Clock className="h-3.5 w-3.5" />} label={t("dash.pending")} value={fmt(wallet?.pending_balance ?? 0)} />
+            <WalletPill icon={<Banknote className="h-3.5 w-3.5" />} label={t("dash.withdrawn")} value={fmt(wallet?.total_withdrawn ?? 0)} />
+          </div>
+          <Button asChild size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
+            <Link to="/withdraw">
+              <ArrowUpRight className="mr-1 h-3.5 w-3.5" /> {t("dash.requestWithdraw")}
+            </Link>
+          </Button>
         </div>
-        <Button asChild className="bg-gradient-primary text-primary-foreground hover:opacity-90">
-          <Link to="/withdraw">
-            <ArrowUpRight className="mr-1 h-4 w-4" /> {t("dash.requestWithdraw")}
-          </Link>
-        </Button>
       </div>
 
-      {/* Wallet cards — topo, alinhados horizontalmente */}
-      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <WalletCard icon={<Wallet />} label={t("dash.available")} value={fmt(wallet?.available_balance ?? 0)} highlight />
-        <WalletCard icon={<Clock />} label={t("dash.pending")} value={fmt(wallet?.pending_balance ?? 0)} />
-        <WalletCard icon={<Banknote />} label={t("dash.withdrawn")} value={fmt(wallet?.total_withdrawn ?? 0)} />
+      <div>
+        <p className="text-xs text-muted-foreground">{t("dash.greeting")},</p>
+        <h1 className="font-display text-2xl font-bold sm:text-3xl">{profile?.full_name || user?.email}</h1>
       </div>
 
       {/* Tasks */}
-      <section className="mt-10">
-        <div className="mb-4 flex items-center gap-2">
+      <section className="mt-6">
+        <div className="mb-3 flex items-center gap-2">
           <ListChecks className="h-5 w-5 text-primary" />
-          <h2 className="font-display text-xl font-semibold">{t("dash.availableTasks")}</h2>
+          <h2 className="font-display text-lg font-semibold">{t("dash.availableTasks")}</h2>
         </div>
         {tasks.length === 0 ? (
-          <Card className="border-dashed border-border/60 bg-card/40 p-10 text-center text-sm text-muted-foreground">
+          <Card className="border-dashed border-border/60 bg-card/40 p-8 text-center text-sm text-muted-foreground">
             {t("dash.noTasks")}
           </Card>
         ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
             {tasks.map((task) => (
-              <Card key={task.id} className="border-border/50 bg-card/50 p-5 transition-all hover:border-primary/40 hover:shadow-glow">
+              <Card key={task.id} className="border-border/50 bg-card/50 p-4 transition-all hover:border-primary/40 hover:shadow-glow">
                 <div className="flex items-start justify-between gap-2">
                   <Badge variant="outline" className="border-primary/30 text-primary">{task.category}</Badge>
                   <div className="text-right">
-                    <div className="text-xs text-muted-foreground">{t("dash.reward")}</div>
-                    <div className="font-display text-lg font-bold text-primary">{fmt(task.reward)}</div>
+                    <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{t("dash.reward")}</div>
+                    <div className="font-display text-base font-bold text-primary">{fmt(task.reward)}</div>
                   </div>
                 </div>
-                <h3 className="mt-3 font-semibold">{task.title}</h3>
-                <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{task.description}</p>
-                <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
+                <h3 className="mt-2 text-sm font-semibold">{task.title}</h3>
+                <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{task.description}</p>
+                <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
                   <span>{t("dash.slots")}: {task.slots - task.slots_filled}/{task.slots}</span>
-                  <Button size="sm" variant="ghost" asChild className="text-primary hover:bg-primary/10">
+                  <Button size="sm" variant="ghost" asChild className="h-7 text-primary hover:bg-primary/10">
                     <Link to="/tasks/$taskId" params={{ taskId: task.id }}>{t("dash.start")}</Link>
                   </Button>
                 </div>
@@ -114,13 +116,12 @@ function Dashboard() {
         )}
       </section>
 
-      {/* History placeholder */}
-      <section className="mt-10">
-        <div className="mb-4 flex items-center gap-2">
+      <section className="mt-8">
+        <div className="mb-3 flex items-center gap-2">
           <History className="h-5 w-5 text-primary" />
-          <h2 className="font-display text-xl font-semibold">{t("dash.history")}</h2>
+          <h2 className="font-display text-lg font-semibold">{t("dash.history")}</h2>
         </div>
-        <Card className="border-dashed border-border/60 bg-card/40 p-10 text-center text-sm text-muted-foreground">
+        <Card className="border-dashed border-border/60 bg-card/40 p-8 text-center text-sm text-muted-foreground">
           {t("dash.noHistory")}
         </Card>
       </section>
@@ -128,14 +129,14 @@ function Dashboard() {
   );
 }
 
-function WalletCard({ icon, label, value, highlight }: { icon: React.ReactNode; label: string; value: string; highlight?: boolean }) {
+function WalletPill({ icon, label, value, highlight }: { icon: React.ReactNode; label: string; value: string; highlight?: boolean }) {
   return (
-    <Card className={`relative overflow-hidden border-border/50 p-5 ${highlight ? "bg-gradient-primary text-primary-foreground shadow-glow" : "bg-card/50"}`}>
-      <div className={`grid h-10 w-10 place-items-center rounded-lg ${highlight ? "bg-primary-foreground/10" : "bg-primary/15 text-primary"}`}>
-        {icon}
+    <div className={`flex items-center gap-2 rounded-md border px-3 py-1.5 ${highlight ? "border-primary/40 bg-primary/10 text-foreground" : "border-border/60 bg-card/60"}`}>
+      <span className={highlight ? "text-primary" : "text-muted-foreground"}>{icon}</span>
+      <div className="leading-tight">
+        <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</div>
+        <div className={`font-display text-sm font-bold ${highlight ? "text-primary" : ""}`}>{value}</div>
       </div>
-      <div className={`mt-4 text-xs ${highlight ? "text-primary-foreground/80" : "text-muted-foreground"}`}>{label}</div>
-      <div className="mt-1 font-display text-2xl font-bold">{value}</div>
-    </Card>
+    </div>
   );
 }
