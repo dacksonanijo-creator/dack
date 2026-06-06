@@ -72,11 +72,10 @@ function Dashboard() {
         </Button>
       </div>
 
-      {/* Wallet cards */}
-      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {/* Wallet cards — topo, alinhados horizontalmente */}
+      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <WalletCard icon={<Wallet />} label={t("dash.available")} value={fmt(wallet?.available_balance ?? 0)} highlight />
         <WalletCard icon={<Clock />} label={t("dash.pending")} value={fmt(wallet?.pending_balance ?? 0)} />
-        <WalletCard icon={<TrendingUp />} label={t("dash.earned")} value={fmt(wallet?.total_earned ?? 0)} />
         <WalletCard icon={<Banknote />} label={t("dash.withdrawn")} value={fmt(wallet?.total_withdrawn ?? 0)} />
       </div>
 
