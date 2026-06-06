@@ -137,5 +137,3 @@ function Stat({ icon, value, label }: { icon: React.ReactNode; value: string; la
   );
 }
 
-// Keep imports referenced
-void Rocket; void Coins;
