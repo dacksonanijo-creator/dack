@@ -62,14 +62,21 @@ const dict = {
     "admin.txid": "ID transação",
 
     "hero.tag": "Microtarefas remuneradas",
-    "hero.title": "Ganhe dinheiro realizando microtarefas",
+    "hero.title": "Trabalha em casa e ganha dinheiro",
     "hero.subtitle":
-      "A Taskora conecta empresas a milhares de utilizadores prontos para divulgar, testar e completar tarefas remuneradas — começando em Moçambique, pronto para o mundo.",
+      "Tarefas rápidas, pagamento na tua moeda. Começa hoje em poucos minutos.",
     "hero.cta.primary": "Criar conta grátis",
     "hero.cta.secondary": "Já tenho conta",
+    "hero.role.q": "És empresa ou queres ganhar dinheiro?",
+    "hero.role.user": "Quero ganhar dinheiro",
+    "hero.role.company": "Sou empresa",
     "hero.stats.users": "Utilizadores",
     "hero.stats.tasks": "Tarefas concluídas",
     "hero.stats.paid": "Pago aos utilizadores",
+    "auth.country": "País / Moeda",
+    "auth.accountType": "Tipo de conta",
+    "auth.type.user": "Funcionário",
+    "auth.type.company": "Empresa",
 
     "how.title": "Como funciona",
     "how.subtitle": "Três passos simples para começar a ganhar",
