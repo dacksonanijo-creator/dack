@@ -161,7 +161,7 @@ export function SiteHeader() {
                 <Link to="/withdraw" onClick={() => setOpen(false)} className="rounded-md px-2 py-2 hover:bg-accent">{t("nav.withdraw")}</Link>
                 <Link to="/history" onClick={() => setOpen(false)} className="rounded-md px-2 py-2 hover:bg-accent">{t("nav.history")}</Link>
                 {isCompany && <Link to="/company" onClick={() => setOpen(false)} className="rounded-md px-2 py-2 hover:bg-accent">{t("nav.company")}</Link>}
-                {isAdmin && <Link to="/admin" onClick={() => setOpen(false)} className="rounded-md px-2 py-2 hover:bg-accent">{t("nav.admin")}</Link>}
+                {/* Admin link hidden from mobile nav too */}
               </>
             )}
           </nav>
