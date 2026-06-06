@@ -63,11 +63,7 @@ export function SiteHeader() {
                   {t("nav.company")}
                 </Link>
               )}
-              {isAdmin && (
-                <Link to="/admin" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
-                  {t("nav.admin")}
-                </Link>
-              )}
+              {/* Admin link is intentionally hidden from main nav — admins access via profile dropdown */}
             </>
           )}
         </nav>
