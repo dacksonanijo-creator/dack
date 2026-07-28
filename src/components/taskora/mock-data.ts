@@ -8,7 +8,16 @@ export interface MockTask {
   tint: string;
   description: string;
   steps: string[];
+  rules?: string[];
+  deadline?: string;
 }
+
+export const taskRules = [
+  "Concluir todos os passos indicados antes de submeter.",
+  "Enviar provas legíveis e sem edição.",
+  "Uma submissão por conta e por tarefa.",
+];
+
 
 export const tasks: MockTask[] = [
   {
