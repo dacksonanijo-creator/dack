@@ -66,7 +66,7 @@ function Dashboard() {
           <div className="flex flex-1 flex-wrap items-center gap-2 sm:gap-3">
             <WalletPill icon={<Wallet className="h-3.5 w-3.5" />} label={t("dash.available")} value={fmt(wallet?.available_balance ?? 0)} highlight />
             <WalletPill icon={<Clock className="h-3.5 w-3.5" />} label={t("dash.pending")} value={fmt(wallet?.pending_balance ?? 0)} />
-            <WalletPill icon={<Banknote className="h-3.5 w-3.5" />} label={t("dash.withdrawn")} value={fmt(wallet?.total_withdrawn ?? 0)} />
+            <WalletPill icon={<Banknote className="h-3.5 w-3.5" />} label={t("dash.earned")} value={fmt(wallet?.total_earned ?? 0)} />
           </div>
           <Button asChild size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
             <Link to="/withdraw">
@@ -99,7 +99,7 @@ function Dashboard() {
                   <Badge variant="outline" className="border-primary/30 text-primary">{task.category}</Badge>
                   <div className="text-right">
                     <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{t("dash.reward")}</div>
-                    <div className="font-display text-base font-bold text-primary">{fmt(task.reward)}</div>
+                    <div className="font-display text-base font-bold text-money">{fmt(task.reward)}</div>
                   </div>
                 </div>
                 <h3 className="mt-2 text-sm font-semibold">{task.title}</h3>
@@ -131,11 +131,11 @@ function Dashboard() {
 
 function WalletPill({ icon, label, value, highlight }: { icon: React.ReactNode; label: string; value: string; highlight?: boolean }) {
   return (
-    <div className={`flex items-center gap-2 rounded-md border px-3 py-1.5 ${highlight ? "border-primary/40 bg-primary/10 text-foreground" : "border-border/60 bg-card/60"}`}>
-      <span className={highlight ? "text-primary" : "text-muted-foreground"}>{icon}</span>
+    <div className={`flex items-center gap-2 rounded-md border px-3 py-1.5 ${highlight ? "border-money/40 bg-money/10" : "border-border/60 bg-card/60"}`}>
+      <span className={highlight ? "text-money" : "text-muted-foreground"}>{icon}</span>
       <div className="leading-tight">
         <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</div>
-        <div className={`font-display text-sm font-bold ${highlight ? "text-primary" : ""}`}>{value}</div>
+        <div className={`font-display text-sm font-bold ${highlight ? "text-money" : "text-foreground"}`}>{value}</div>
       </div>
     </div>
   );
