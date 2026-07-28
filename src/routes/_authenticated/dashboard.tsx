@@ -131,11 +131,11 @@ function Dashboard() {
 
 function WalletPill({ icon, label, value, highlight }: { icon: React.ReactNode; label: string; value: string; highlight?: boolean }) {
   return (
-    <div className={`flex items-center gap-2 rounded-md border px-3 py-1.5 ${highlight ? "border-primary/40 bg-primary/10 text-foreground" : "border-border/60 bg-card/60"}`}>
-      <span className={highlight ? "text-primary" : "text-muted-foreground"}>{icon}</span>
+    <div className={`flex items-center gap-2 rounded-md border px-3 py-1.5 ${highlight ? "border-money/40 bg-money/10" : "border-border/60 bg-card/60"}`}>
+      <span className={highlight ? "text-money" : "text-muted-foreground"}>{icon}</span>
       <div className="leading-tight">
         <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</div>
-        <div className={`font-display text-sm font-bold ${highlight ? "text-primary" : ""}`}>{value}</div>
+        <div className={`font-display text-sm font-bold ${highlight ? "text-money" : "text-foreground"}`}>{value}</div>
       </div>
     </div>
   );
