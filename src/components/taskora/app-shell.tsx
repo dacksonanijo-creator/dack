@@ -1,7 +1,7 @@
 import { Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { Bell, Home, ListChecks, User } from "lucide-react";
 import { TaskoraLogo } from "./logo";
-import { user, notifications } from "./mock-data";
+import { user } from "./mock-data";
 import { cn } from "@/lib/utils";
 
 const nav = [
@@ -26,7 +26,6 @@ export function Avatar({ className }: { className?: string }) {
 
 export function AppShell() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const unread = notifications.filter((n) => n.unread).length;
 
   return (
     <div className="min-h-screen bg-gradient-hero pb-24 md:pb-0">
