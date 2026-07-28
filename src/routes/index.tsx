@@ -30,22 +30,14 @@ function Index() {
             {t("hero.subtitle")}
           </p>
 
-          {/* Escolha tipo de conta */}
-          <p className="mt-6 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-            {t("hero.role.q")}
-          </p>
-          <div className="mx-auto mt-3 grid max-w-md grid-cols-1 gap-2 sm:grid-cols-2">
+          <div className="mx-auto mt-6 grid max-w-xs grid-cols-1 gap-2">
             <Button asChild size="default" className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-glow">
               <Link to="/auth" search={{ mode: "signup", role: "user" }}>
                 <UserIcon className="mr-1 h-4 w-4" /> {t("hero.role.user")}
               </Link>
             </Button>
-            <Button asChild size="default" variant="outline">
-              <Link to="/auth" search={{ mode: "signup", role: "company" }}>
-                <Briefcase className="mr-1 h-4 w-4" /> {t("hero.role.company")}
-              </Link>
-            </Button>
           </div>
+
           <div className="mt-3 text-xs text-muted-foreground">
             <Link to="/auth" search={{ mode: "login" }} className="hover:text-foreground hover:underline">
               {t("hero.cta.secondary")} →
