@@ -1,7 +1,7 @@
 import { Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { Bell, Home, ListChecks, User } from "lucide-react";
 import { TaskoraLogo } from "./logo";
-import { user, notifications } from "./mock-data";
+import { user } from "./mock-data";
 import { cn } from "@/lib/utils";
 
 const nav = [
@@ -26,7 +26,6 @@ export function Avatar({ className }: { className?: string }) {
 
 export function AppShell() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const unread = notifications.filter((n) => n.unread).length;
 
   return (
     <div className="min-h-screen bg-gradient-hero pb-24 md:pb-0">
@@ -61,11 +60,6 @@ export function AppShell() {
               className="relative grid h-9 w-9 place-items-center rounded-full border border-border bg-card text-muted-foreground transition-colors hover:text-foreground"
             >
               <Bell className="h-4 w-4" />
-              {unread > 0 && (
-                <span className="absolute -right-0.5 -top-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-money px-1 text-[10px] font-bold text-success-foreground">
-                  {unread}
-                </span>
-              )}
             </Link>
             <Link to="/app/profile" aria-label="Perfil">
               <Avatar />
