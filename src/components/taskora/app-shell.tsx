@@ -60,11 +60,6 @@ export function AppShell() {
               className="relative grid h-9 w-9 place-items-center rounded-full border border-border bg-card text-muted-foreground transition-colors hover:text-foreground"
             >
               <Bell className="h-4 w-4" />
-              {unread > 0 && (
-                <span className="absolute -right-0.5 -top-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-money px-1 text-[10px] font-bold text-success-foreground">
-                  {unread}
-                </span>
-              )}
             </Link>
             <Link to="/app/profile" aria-label="Perfil">
               <Avatar />
