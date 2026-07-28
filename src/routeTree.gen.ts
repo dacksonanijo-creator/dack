@@ -22,10 +22,12 @@ import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AppWithdrawalsRouteImport } from './routes/app.withdrawals'
 import { Route as AppWalletRouteImport } from './routes/app.wallet'
 import { Route as AppSettingsRouteImport } from './routes/app.settings'
+import { Route as AppRewardsRouteImport } from './routes/app.rewards'
 import { Route as AppProfileRouteImport } from './routes/app.profile'
 import { Route as AppNotificationsRouteImport } from './routes/app.notifications'
 import { Route as AppHistoryRouteImport } from './routes/app.history'
 import { Route as AppHelpRouteImport } from './routes/app.help'
+import { Route as AppActivityRouteImport } from './routes/app.activity'
 import { Route as AppTasksIndexRouteImport } from './routes/app.tasks.index'
 import { Route as AppTasksTaskIdRouteImport } from './routes/app.tasks.$taskId'
 
@@ -94,6 +96,11 @@ const AppSettingsRoute = AppSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AppRoute,
 } as any)
+const AppRewardsRoute = AppRewardsRouteImport.update({
+  id: '/rewards',
+  path: '/rewards',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppProfileRoute = AppProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -112,6 +119,11 @@ const AppHistoryRoute = AppHistoryRouteImport.update({
 const AppHelpRoute = AppHelpRouteImport.update({
   id: '/help',
   path: '/help',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppActivityRoute = AppActivityRouteImport.update({
+  id: '/activity',
+  path: '/activity',
   getParentRoute: () => AppRoute,
 } as any)
 const AppTasksIndexRoute = AppTasksIndexRouteImport.update({
@@ -135,10 +147,12 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/terms': typeof TermsRoute
   '/welcome': typeof WelcomeRoute
+  '/app/activity': typeof AppActivityRoute
   '/app/help': typeof AppHelpRoute
   '/app/history': typeof AppHistoryRoute
   '/app/notifications': typeof AppNotificationsRoute
   '/app/profile': typeof AppProfileRoute
+  '/app/rewards': typeof AppRewardsRoute
   '/app/settings': typeof AppSettingsRoute
   '/app/wallet': typeof AppWalletRoute
   '/app/withdrawals': typeof AppWithdrawalsRoute
@@ -155,10 +169,12 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/terms': typeof TermsRoute
   '/welcome': typeof WelcomeRoute
+  '/app/activity': typeof AppActivityRoute
   '/app/help': typeof AppHelpRoute
   '/app/history': typeof AppHistoryRoute
   '/app/notifications': typeof AppNotificationsRoute
   '/app/profile': typeof AppProfileRoute
+  '/app/rewards': typeof AppRewardsRoute
   '/app/settings': typeof AppSettingsRoute
   '/app/wallet': typeof AppWalletRoute
   '/app/withdrawals': typeof AppWithdrawalsRoute
@@ -177,10 +193,12 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/terms': typeof TermsRoute
   '/welcome': typeof WelcomeRoute
+  '/app/activity': typeof AppActivityRoute
   '/app/help': typeof AppHelpRoute
   '/app/history': typeof AppHistoryRoute
   '/app/notifications': typeof AppNotificationsRoute
   '/app/profile': typeof AppProfileRoute
+  '/app/rewards': typeof AppRewardsRoute
   '/app/settings': typeof AppSettingsRoute
   '/app/wallet': typeof AppWalletRoute
   '/app/withdrawals': typeof AppWithdrawalsRoute
@@ -200,10 +218,12 @@ export interface FileRouteTypes {
     | '/signup'
     | '/terms'
     | '/welcome'
+    | '/app/activity'
     | '/app/help'
     | '/app/history'
     | '/app/notifications'
     | '/app/profile'
+    | '/app/rewards'
     | '/app/settings'
     | '/app/wallet'
     | '/app/withdrawals'
@@ -220,10 +240,12 @@ export interface FileRouteTypes {
     | '/signup'
     | '/terms'
     | '/welcome'
+    | '/app/activity'
     | '/app/help'
     | '/app/history'
     | '/app/notifications'
     | '/app/profile'
+    | '/app/rewards'
     | '/app/settings'
     | '/app/wallet'
     | '/app/withdrawals'
@@ -241,10 +263,12 @@ export interface FileRouteTypes {
     | '/signup'
     | '/terms'
     | '/welcome'
+    | '/app/activity'
     | '/app/help'
     | '/app/history'
     | '/app/notifications'
     | '/app/profile'
+    | '/app/rewards'
     | '/app/settings'
     | '/app/wallet'
     | '/app/withdrawals'
@@ -358,6 +382,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppSettingsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/rewards': {
+      id: '/app/rewards'
+      path: '/rewards'
+      fullPath: '/app/rewards'
+      preLoaderRoute: typeof AppRewardsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/profile': {
       id: '/app/profile'
       path: '/profile'
@@ -386,6 +417,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppHelpRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/activity': {
+      id: '/app/activity'
+      path: '/activity'
+      fullPath: '/app/activity'
+      preLoaderRoute: typeof AppActivityRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/tasks/': {
       id: '/app/tasks/'
       path: '/tasks'
@@ -404,10 +442,12 @@ declare module '@tanstack/react-router' {
 }
 
 interface AppRouteChildren {
+  AppActivityRoute: typeof AppActivityRoute
   AppHelpRoute: typeof AppHelpRoute
   AppHistoryRoute: typeof AppHistoryRoute
   AppNotificationsRoute: typeof AppNotificationsRoute
   AppProfileRoute: typeof AppProfileRoute
+  AppRewardsRoute: typeof AppRewardsRoute
   AppSettingsRoute: typeof AppSettingsRoute
   AppWalletRoute: typeof AppWalletRoute
   AppWithdrawalsRoute: typeof AppWithdrawalsRoute
@@ -417,10 +457,12 @@ interface AppRouteChildren {
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppActivityRoute: AppActivityRoute,
   AppHelpRoute: AppHelpRoute,
   AppHistoryRoute: AppHistoryRoute,
   AppNotificationsRoute: AppNotificationsRoute,
   AppProfileRoute: AppProfileRoute,
+  AppRewardsRoute: AppRewardsRoute,
   AppSettingsRoute: AppSettingsRoute,
   AppWalletRoute: AppWalletRoute,
   AppWithdrawalsRoute: AppWithdrawalsRoute,
