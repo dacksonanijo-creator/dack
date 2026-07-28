@@ -29,6 +29,7 @@
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-success: var(--success);
+  --color-money: var(--money);
   --color-success-foreground: var(--success-foreground);
   --color-warning: var(--warning);
   --color-warning-foreground: var(--warning-foreground);
@@ -49,66 +50,65 @@
 }
 
 :root {
-  --radius: 0.625rem;
+  --radius: 0.5rem;
 
-  /* Taskora — Azul escuro + Laranja */
-  --background: oklch(0.27 0.04 235);
-  --foreground: oklch(0.98 0.005 230);
+  /* Taskora — Azul escuro profundo + Dourado + Verde monetário */
+  --background: oklch(0.16 0.015 265);
+  --foreground: oklch(0.97 0.005 265);
 
-  --card: oklch(0.31 0.04 235);
-  --card-foreground: oklch(0.98 0.005 230);
+  --card: oklch(0.21 0.016 265);
+  --card-foreground: oklch(0.97 0.005 265);
 
-  --popover: oklch(0.31 0.04 235);
-  --popover-foreground: oklch(0.98 0.005 230);
+  --popover: oklch(0.21 0.016 265);
+  --popover-foreground: oklch(0.97 0.005 265);
 
-  --primary: oklch(0.76 0.13 60);
-  --primary-foreground: oklch(0.2 0.04 235);
-  --primary-glow: oklch(0.82 0.13 60);
+  --primary: oklch(0.887 0.182 95.3);
+  --primary-foreground: oklch(0.16 0.015 265);
+  --primary-glow: oklch(0.93 0.15 95);
 
-  --secondary: oklch(0.35 0.04 235);
-  --secondary-foreground: oklch(0.98 0.005 230);
+  --secondary: oklch(0.26 0.016 265);
+  --secondary-foreground: oklch(0.97 0.005 265);
 
-  --muted: oklch(0.35 0.035 235);
-  --muted-foreground: oklch(0.74 0.02 230);
+  --muted: oklch(0.26 0.016 265);
+  --muted-foreground: oklch(0.72 0.015 265);
 
-  --accent: oklch(0.76 0.13 60);
-  --accent-foreground: oklch(0.2 0.04 235);
+  --accent: oklch(0.887 0.182 95.3);
+  --accent-foreground: oklch(0.16 0.015 265);
 
-  --success: oklch(0.72 0.17 162);
-  --success-foreground: oklch(0.15 0.02 165);
+  --money: oklch(0.84 0.175 166);
+  --success: oklch(0.84 0.175 166);
+  --success-foreground: oklch(0.16 0.015 265);
 
-  --warning: oklch(0.82 0.16 86);
-  --warning-foreground: oklch(0.2 0.04 80);
+  --warning: oklch(0.85 0.16 86);
+  --warning-foreground: oklch(0.18 0.02 80);
 
   --destructive: oklch(0.62 0.22 25);
   --destructive-foreground: oklch(0.98 0.005 180);
 
-  --border: oklch(0.4 0.035 235);
-  --input: oklch(0.35 0.04 235);
-  --ring: oklch(0.76 0.13 60);
+  --border: oklch(0.29 0.016 265);
+  --input: oklch(0.26 0.016 265);
+  --ring: oklch(0.887 0.182 95.3);
 
-  --sidebar: oklch(0.24 0.04 235);
-  --sidebar-foreground: oklch(0.98 0.005 230);
-  --sidebar-primary: oklch(0.76 0.13 60);
-  --sidebar-primary-foreground: oklch(0.2 0.04 235);
-  --sidebar-accent: oklch(0.35 0.04 235);
-  --sidebar-accent-foreground: oklch(0.98 0.005 230);
-  --sidebar-border: oklch(0.4 0.035 235);
-  --sidebar-ring: oklch(0.76 0.13 60);
+  --sidebar: oklch(0.18 0.015 265);
+  --sidebar-foreground: oklch(0.97 0.005 265);
+  --sidebar-primary: oklch(0.887 0.182 95.3);
+  --sidebar-primary-foreground: oklch(0.16 0.015 265);
+  --sidebar-accent: oklch(0.26 0.016 265);
+  --sidebar-accent-foreground: oklch(0.97 0.005 265);
+  --sidebar-border: oklch(0.29 0.016 265);
+  --sidebar-ring: oklch(0.887 0.182 95.3);
 
-  --gradient-hero: radial-gradient(ellipse at top, oklch(0.4 0.08 235 / 0.6), transparent 60%),
-    linear-gradient(180deg, oklch(0.3 0.04 235), oklch(0.24 0.04 235));
+  --gradient-hero: radial-gradient(ellipse at top, oklch(0.887 0.182 95.3 / 0.10), transparent 62%),
+    linear-gradient(180deg, oklch(0.18 0.015 265), oklch(0.16 0.015 265));
   --gradient-primary: linear-gradient(135deg, var(--primary), var(--primary-glow));
-  --gradient-accent: linear-gradient(135deg, var(--accent), oklch(0.7 0.14 50));
+  --gradient-accent: linear-gradient(135deg, var(--money), oklch(0.78 0.16 172));
 
-  --shadow-glow: 0 18px 50px -20px color-mix(in oklab, var(--primary) 55%, transparent);
-  --shadow-card: 0 8px 30px -12px oklch(0 0 0 / 0.4);
+  --shadow-glow: 0 16px 44px -22px color-mix(in oklab, var(--primary) 60%, transparent);
+  --shadow-card: 0 8px 26px -14px oklch(0 0 0 / 0.6);
 }
 
 .dark {
-  /* Mesmo tema — a app é dark por defeito */
-  --background: oklch(0.18 0.022 165);
-  --foreground: oklch(0.98 0.005 180);
+  /* A app é dark por defeito — tokens iguais ao :root */
 }
 
 @layer base {
