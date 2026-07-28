@@ -1,13 +1,14 @@
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
-import { ArrowLeft, CheckCircle2, Clock3, Wallet } from "lucide-react";
-import { tasks } from "@/components/taskora/mock-data";
-import { Button } from "@/components/ui/button";
+import { ArrowLeft, CalendarClock, CheckCircle2, Clock3, ShieldCheck, Wallet } from "lucide-react";
+import { tasks, taskRules } from "@/components/taskora/mock-data";
+import { stateClasses, stateLabels, useTaskStates } from "@/components/taskora/task-state";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/app/tasks/$taskId")({
   head: () => ({
     meta: [
       { title: "Detalhes da tarefa — Taskora" },
-      { name: "description", content: "Instruções, tempo estimado e recompensa da microtarefa selecionada." },
+      { name: "description", content: "Instruções, regras, prazo e recompensa da microtarefa selecionada." },
       { property: "og:title", content: "Detalhes da tarefa — Taskora" },
       { property: "og:description", content: "Vê as instruções e inicia a tarefa em segundos." },
       { property: "og:type", content: "article" },
@@ -20,57 +21,110 @@ export const Route = createFileRoute("/app/tasks/$taskId")({
 function TaskDetail() {
   const { taskId } = useParams({ from: "/app/tasks/$taskId" });
   const task = tasks.find((t) => t.id === taskId) ?? tasks[0];
+  const { getState, setState } = useTaskStates();
+  const state = getState(task.id);
+
+  const action =
+    state === "available"
+      ? { label: "Iniciar tarefa", next: "progress" as const }
+      : state === "progress"
+        ? { label: "Enviar para avaliação", next: "submitted" as const }
+        : null;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <Link
         to="/app/tasks"
-        className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground"
+        className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground"
       >
-        <ArrowLeft className="h-4 w-4" /> Todas as tarefas
+        <ArrowLeft className="h-3.5 w-3.5" /> Tarefas
       </Link>
 
-      <div className={`grid h-44 place-items-center rounded-3xl bg-gradient-to-br text-6xl shadow-soft ${task.tint}`}>
-        {task.emoji}
-      </div>
-
-      <div>
-        <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-primary">
-          {task.category}
-        </span>
-        <h1 className="mt-3 font-display text-2xl font-extrabold leading-tight">{task.title}</h1>
-        <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{task.description}</p>
-      </div>
-
-      <div className="grid grid-cols-2 gap-3">
-        <div className="rounded-2xl border border-border/70 bg-card p-4 shadow-soft">
-          <Clock3 className="h-4.5 w-4.5 text-primary" />
-          <p className="mt-2 text-xs uppercase tracking-wide text-muted-foreground">Tempo</p>
-          <p className="font-display text-lg font-bold">{task.minutes} min</p>
+      <div className="rounded-xl border border-border/70 bg-card p-4">
+        <div className="flex items-start gap-3">
+          <span className={cn("grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-gradient-to-br text-xl", task.tint)}>
+            {task.emoji}
+          </span>
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary">
+                {task.category}
+              </span>
+              <span className={cn("rounded-full px-2 py-0.5 text-[10px] font-semibold", stateClasses[state])}>
+                {stateLabels[state]}
+              </span>
+            </div>
+            <h1 className="mt-1.5 font-display text-base font-extrabold leading-snug">{task.title}</h1>
+          </div>
         </div>
-        <div className="rounded-2xl border border-money/30 bg-accent/60 p-4 shadow-soft">
-          <Wallet className="h-4.5 w-4.5 text-money" />
-          <p className="mt-2 text-xs uppercase tracking-wide text-muted-foreground">Recompensa</p>
-          <p className="font-display text-lg font-bold text-money">{task.reward}</p>
+
+        <p className="mt-3 text-xs leading-relaxed text-muted-foreground">{task.description}</p>
+
+        <div className="mt-3 grid grid-cols-3 gap-2 border-t border-border pt-3 text-center">
+          <div>
+            <Wallet className="mx-auto h-3.5 w-3.5 text-money" />
+            <p className="mt-1 text-[10px] uppercase tracking-wide text-muted-foreground">Recompensa</p>
+            <p className="font-display text-sm font-bold text-money">{task.reward}</p>
+          </div>
+          <div>
+            <Clock3 className="mx-auto h-3.5 w-3.5 text-primary" />
+            <p className="mt-1 text-[10px] uppercase tracking-wide text-muted-foreground">Tempo</p>
+            <p className="font-display text-sm font-bold">{task.minutes} min</p>
+          </div>
+          <div>
+            <CalendarClock className="mx-auto h-3.5 w-3.5 text-muted-foreground" />
+            <p className="mt-1 text-[10px] uppercase tracking-wide text-muted-foreground">Prazo</p>
+            <p className="font-display text-sm font-bold">{task.deadline ?? "Sem prazo"}</p>
+          </div>
         </div>
       </div>
 
-      <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-soft">
-        <h2 className="font-display text-base font-bold">Como concluir</h2>
-        <ul className="mt-3 space-y-3">
-          {task.steps.map((s) => (
-            <li key={s} className="flex items-start gap-3 text-sm">
-              <CheckCircle2 className="mt-0.5 h-4.5 w-4.5 shrink-0 text-money" />
+      <div className="rounded-xl border border-border/70 bg-card p-4">
+        <h2 className="font-display text-sm font-bold">Instruções</h2>
+        <ol className="mt-2 space-y-2">
+          {task.steps.map((s, i) => (
+            <li key={s} className="flex items-start gap-2 text-xs leading-relaxed">
+              <span className="mt-0.5 grid h-4 w-4 shrink-0 place-items-center rounded-full bg-primary/10 text-[10px] font-bold text-primary">
+                {i + 1}
+              </span>
               <span>{s}</span>
+            </li>
+          ))}
+        </ol>
+      </div>
+
+      <div className="rounded-xl border border-border/70 bg-card p-4">
+        <h2 className="flex items-center gap-1.5 font-display text-sm font-bold">
+          <ShieldCheck className="h-3.5 w-3.5 text-primary" /> Regras de conclusão
+        </h2>
+        <ul className="mt-2 space-y-1.5">
+          {(task.rules ?? taskRules).map((r) => (
+            <li key={r} className="flex items-start gap-2 text-xs leading-relaxed text-muted-foreground">
+              <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-money" />
+              <span>{r}</span>
             </li>
           ))}
         </ul>
       </div>
 
-      <div className="sticky bottom-24 md:bottom-6">
-        <Button asChild size="lg" className="h-12 w-full rounded-xl text-base shadow-glow">
-          <Link to="/app/history">Iniciar tarefa</Link>
-        </Button>
+      <div className="flex items-center justify-between gap-3 rounded-xl border border-border/70 bg-card px-4 py-3">
+        <p className="text-xs text-muted-foreground">
+          {state === "submitted"
+            ? "Submissão em avaliação."
+            : state === "approved"
+              ? "Tarefa aprovada e concluída."
+              : state === "rejected"
+                ? "Submissão rejeitada."
+                : "Segue as instruções para concluir."}
+        </p>
+        {action && (
+          <button
+            onClick={() => setState(task.id, action.next)}
+            className="shrink-0 rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground transition-opacity hover:opacity-90"
+          >
+            {action.label}
+          </button>
+        )}
       </div>
     </div>
   );
