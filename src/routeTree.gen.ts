@@ -15,6 +15,12 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as AppProfileRouteImport } from './routes/app.profile'
+import { Route as AppNotificationsRouteImport } from './routes/app.notifications'
+import { Route as AppHistoryRouteImport } from './routes/app.history'
+import { Route as AppTasksIndexRouteImport } from './routes/app.tasks.index'
+import { Route as AppTasksTaskIdRouteImport } from './routes/app.tasks.$taskId'
 
 const WelcomeRoute = WelcomeRouteImport.update({
   id: '/welcome',
@@ -46,31 +52,78 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppIndexRoute = AppIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppProfileRoute = AppProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppNotificationsRoute = AppNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppHistoryRoute = AppHistoryRouteImport.update({
+  id: '/history',
+  path: '/history',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppTasksIndexRoute = AppTasksIndexRouteImport.update({
+  id: '/tasks/',
+  path: '/tasks/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppTasksTaskIdRoute = AppTasksTaskIdRouteImport.update({
+  id: '/tasks/$taskId',
+  path: '/tasks/$taskId',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/app': typeof AppRoute
+  '/app': typeof AppRouteWithChildren
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/welcome': typeof WelcomeRoute
+  '/app/history': typeof AppHistoryRoute
+  '/app/notifications': typeof AppNotificationsRoute
+  '/app/profile': typeof AppProfileRoute
+  '/app/': typeof AppIndexRoute
+  '/app/tasks/$taskId': typeof AppTasksTaskIdRoute
+  '/app/tasks/': typeof AppTasksIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/app': typeof AppRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/welcome': typeof WelcomeRoute
+  '/app/history': typeof AppHistoryRoute
+  '/app/notifications': typeof AppNotificationsRoute
+  '/app/profile': typeof AppProfileRoute
+  '/app': typeof AppIndexRoute
+  '/app/tasks/$taskId': typeof AppTasksTaskIdRoute
+  '/app/tasks': typeof AppTasksIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/app': typeof AppRoute
+  '/app': typeof AppRouteWithChildren
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/welcome': typeof WelcomeRoute
+  '/app/history': typeof AppHistoryRoute
+  '/app/notifications': typeof AppNotificationsRoute
+  '/app/profile': typeof AppProfileRoute
+  '/app/': typeof AppIndexRoute
+  '/app/tasks/$taskId': typeof AppTasksTaskIdRoute
+  '/app/tasks/': typeof AppTasksIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -81,8 +134,25 @@ export interface FileRouteTypes {
     | '/login'
     | '/signup'
     | '/welcome'
+    | '/app/history'
+    | '/app/notifications'
+    | '/app/profile'
+    | '/app/'
+    | '/app/tasks/$taskId'
+    | '/app/tasks/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/app' | '/forgot-password' | '/login' | '/signup' | '/welcome'
+  to:
+    | '/'
+    | '/forgot-password'
+    | '/login'
+    | '/signup'
+    | '/welcome'
+    | '/app/history'
+    | '/app/notifications'
+    | '/app/profile'
+    | '/app'
+    | '/app/tasks/$taskId'
+    | '/app/tasks'
   id:
     | '__root__'
     | '/'
@@ -91,11 +161,17 @@ export interface FileRouteTypes {
     | '/login'
     | '/signup'
     | '/welcome'
+    | '/app/history'
+    | '/app/notifications'
+    | '/app/profile'
+    | '/app/'
+    | '/app/tasks/$taskId'
+    | '/app/tasks/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AppRoute: typeof AppRoute
+  AppRoute: typeof AppRouteWithChildren
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
   SignupRoute: typeof SignupRoute
@@ -146,12 +222,74 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/': {
+      id: '/app/'
+      path: '/'
+      fullPath: '/app/'
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/profile': {
+      id: '/app/profile'
+      path: '/profile'
+      fullPath: '/app/profile'
+      preLoaderRoute: typeof AppProfileRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/notifications': {
+      id: '/app/notifications'
+      path: '/notifications'
+      fullPath: '/app/notifications'
+      preLoaderRoute: typeof AppNotificationsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/history': {
+      id: '/app/history'
+      path: '/history'
+      fullPath: '/app/history'
+      preLoaderRoute: typeof AppHistoryRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/tasks/': {
+      id: '/app/tasks/'
+      path: '/tasks'
+      fullPath: '/app/tasks/'
+      preLoaderRoute: typeof AppTasksIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/tasks/$taskId': {
+      id: '/app/tasks/$taskId'
+      path: '/tasks/$taskId'
+      fullPath: '/app/tasks/$taskId'
+      preLoaderRoute: typeof AppTasksTaskIdRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
+interface AppRouteChildren {
+  AppHistoryRoute: typeof AppHistoryRoute
+  AppNotificationsRoute: typeof AppNotificationsRoute
+  AppProfileRoute: typeof AppProfileRoute
+  AppIndexRoute: typeof AppIndexRoute
+  AppTasksTaskIdRoute: typeof AppTasksTaskIdRoute
+  AppTasksIndexRoute: typeof AppTasksIndexRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppHistoryRoute: AppHistoryRoute,
+  AppNotificationsRoute: AppNotificationsRoute,
+  AppProfileRoute: AppProfileRoute,
+  AppIndexRoute: AppIndexRoute,
+  AppTasksTaskIdRoute: AppTasksTaskIdRoute,
+  AppTasksIndexRoute: AppTasksIndexRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AppRoute: AppRoute,
+  AppRoute: AppRouteWithChildren,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
   SignupRoute: SignupRoute,
