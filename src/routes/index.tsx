@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, CheckCircle2, UserPlus, ListChecks, Wallet, Users, BarChart3, Briefcase, User as UserIcon } from "lucide-react";
+import { ArrowRight, CheckCircle2, UserPlus, ListChecks, Wallet, Users, BarChart3, User as UserIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { SiteHeader } from "@/components/site-header";
