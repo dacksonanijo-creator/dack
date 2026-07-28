@@ -82,7 +82,7 @@ function TaskDetailsPage() {
           <Badge variant="outline" className="border-primary/30 text-primary">{task.category}</Badge>
           <div className="text-right">
             <div className="text-xs text-muted-foreground">{t("dash.reward")}</div>
-            <div className="font-display text-2xl font-bold text-primary">{Number(task.reward).toFixed(2)} MZN</div>
+            <div className="font-display text-2xl font-bold text-money">{Number(task.reward).toFixed(2)} MZN</div>
           </div>
         </div>
         <h1 className="mt-4 font-display text-2xl font-bold">{task.title}</h1>
