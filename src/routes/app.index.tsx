@@ -1,22 +1,18 @@
+import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import {
-  ArrowRight,
-  Banknote,
-  CircleHelp,
-  ListChecks,
-  Settings,
-  Sparkles,
-  User,
-  Wallet,
-} from "lucide-react";
+import { ArrowRight, Sparkles } from "lucide-react";
+import { user } from "@/components/taskora/mock-data";
 
 export const Route = createFileRoute("/app/")({
   head: () => ({
     meta: [
       { title: "Painel — Taskora" },
-      { name: "description", content: "O teu painel Taskora: atalhos rápidos e primeiros passos na plataforma." },
+      {
+        name: "description",
+        content: "A tua página de entrada na Taskora: saudação personalizada e acesso à plataforma.",
+      },
       { property: "og:title", content: "Painel — Taskora" },
-      { property: "og:description", content: "Atalhos rápidos e primeiros passos na Taskora." },
+      { property: "og:description", content: "A tua página de entrada na Taskora." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -24,49 +20,61 @@ export const Route = createFileRoute("/app/")({
   component: Dashboard,
 });
 
-const shortcuts = [
-  { to: "/app/tasks", label: "Tarefas", icon: ListChecks },
-  { to: "/app/wallet", label: "Carteira", icon: Wallet },
-  { to: "/app/withdrawals", label: "Saques", icon: Banknote },
-  { to: "/app/profile", label: "Perfil", icon: User },
-  { to: "/app/settings", label: "Definições", icon: Settings },
-  { to: "/app/help", label: "Ajuda", icon: CircleHelp },
-] as const;
+function greetingFor(hour: number) {
+  if (hour < 12) return "Bom dia";
+  if (hour < 19) return "Boa tarde";
+  return "Boa noite";
+}
 
 function Dashboard() {
+  const [greeting, setGreeting] = useState("Olá");
+
+  useEffect(() => {
+    setGreeting(greetingFor(new Date().getHours()));
+  }, []);
+
+  const firstName = user.name.split(" ").slice(-1)[0];
+
   return (
-    <div className="space-y-8">
-      <section className="animate-rise grid grid-cols-3 gap-2.5 sm:grid-cols-6">
-        {shortcuts.map((s) => (
-          <Link
-            key={s.to}
-            to={s.to}
-            className="group flex flex-col items-center gap-2 rounded-2xl border border-border/70 bg-card px-2 py-3 shadow-soft transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-card"
-          >
-            <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
-              <s.icon className="h-4.5 w-4.5" />
-            </span>
-            <span className="text-center text-[11px] font-semibold leading-tight">{s.label}</span>
-          </Link>
-        ))}
+    <div className="mx-auto flex w-full max-w-2xl flex-col gap-5">
+      <section className="animate-rise">
+        <h1 className="font-display text-2xl font-extrabold leading-tight sm:text-3xl">
+          {greeting}, {firstName} <span aria-hidden>👋</span>
+        </h1>
+        <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+          Bem-vindo à Taskora. Estamos felizes por ter você connosco.
+        </p>
       </section>
 
-      <section className="animate-rise grid place-items-center rounded-3xl border border-border/70 bg-card px-6 py-14 text-center shadow-soft [animation-delay:80ms]">
-        <span className="grid h-14 w-14 place-items-center rounded-2xl bg-gradient-primary text-primary-foreground shadow-glow">
-          <Sparkles className="h-6 w-6" />
-        </span>
-        <h1 className="mt-5 font-display text-2xl font-extrabold">Bem-vindo à Taskora!</h1>
-        <p className="mt-2 max-w-md text-sm leading-relaxed text-muted-foreground">
-          A tua conta foi criada com sucesso. Explora a plataforma e começa a realizar tarefas quando
-          estiverem disponíveis.
-        </p>
-        <Link
-          to="/app/tasks"
-          className="mt-6 inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
-        >
-          Explorar Tarefas <ArrowRight className="h-4 w-4" />
-        </Link>
+      <section className="animate-rise relative overflow-hidden rounded-3xl border border-border/70 bg-card px-6 py-10 shadow-soft [animation-delay:80ms] sm:px-10 sm:py-12">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-gradient-primary opacity-10 blur-2xl"
+        />
+        <div className="relative flex flex-col items-center text-center">
+          <span className="relative grid h-14 w-14 place-items-center rounded-2xl bg-gradient-primary text-primary-foreground shadow-glow">
+            <span className="absolute inset-0 animate-pulse-ring rounded-2xl bg-primary/30" />
+            <Sparkles className="relative h-6 w-6" />
+          </span>
+          <h2 className="mt-5 font-display text-xl font-extrabold sm:text-2xl">
+            A tua conta está pronta
+          </h2>
+          <p className="mt-2 max-w-sm text-sm leading-relaxed text-muted-foreground">
+            Transformamos tempo em oportunidades. Explora a Taskora e prepara-te para começar assim
+            que as tarefas estiverem disponíveis.
+          </p>
+          <Link
+            to="/app/tasks"
+            className="mt-6 inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-glow transition-transform hover:-translate-y-0.5"
+          >
+            Explorar a plataforma <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
       </section>
+
+      <p className="animate-rise text-center text-xs text-muted-foreground/80 [animation-delay:140ms]">
+        Novas funcionalidades serão ativadas em breve na tua conta.
+      </p>
     </div>
   );
 }
