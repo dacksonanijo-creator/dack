@@ -45,6 +45,12 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-task-bg: var(--task-bg);
+  --color-task-card: var(--task-card);
+  --color-task-border: var(--task-border);
+  --color-task-title: var(--task-title);
+  --color-task-muted: var(--task-muted);
+  --color-task-accent: var(--task-accent);
   --font-display: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
   --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
 }
@@ -55,6 +61,14 @@
   /* Taskora — azul moderno + verde, base branca */
   --background: oklch(1 0 0);
   --foreground: oklch(0.21 0.03 260);
+
+  /* Superfície densa da área de tarefas */
+  --task-bg: #0F1117;
+  --task-card: #1A1D27;
+  --task-border: #2A2D3A;
+  --task-title: #FFFFFF;
+  --task-muted: #8B90A0;
+  --task-accent: #00E5A0;
 
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.21 0.03 260);

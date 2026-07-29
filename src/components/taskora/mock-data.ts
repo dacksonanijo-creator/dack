@@ -10,6 +10,7 @@ export interface MockTask {
   steps: string[];
   rules?: string[];
   deadline?: string;
+  slots?: number;
 }
 
 export const taskRules = [
@@ -22,6 +23,7 @@ export const taskRules = [
 export const tasks: MockTask[] = [
   {
     id: "app-review",
+    slots: 42,
     title: "Testar app de finanças e escrever review",
     category: "Testes de App",
     minutes: 12,
@@ -39,6 +41,7 @@ export const tasks: MockTask[] = [
   },
   {
     id: "survey-mobile",
+    slots: 180,
     title: "Questionário sobre hábitos de consumo móvel",
     category: "Inquéritos",
     minutes: 6,
@@ -51,6 +54,7 @@ export const tasks: MockTask[] = [
   },
   {
     id: "social-share",
+    slots: 65,
     title: "Partilhar campanha nas redes sociais",
     category: "Redes Sociais",
     minutes: 4,
@@ -63,6 +67,7 @@ export const tasks: MockTask[] = [
   },
   {
     id: "photo-store",
+    slots: 12,
     title: "Fotografar prateleira em loja local",
     category: "Trabalho de Campo",
     minutes: 20,
@@ -75,6 +80,7 @@ export const tasks: MockTask[] = [
   },
   {
     id: "transcribe",
+    slots: 28,
     title: "Transcrever áudio curto em português",
     category: "Transcrição",
     minutes: 15,
@@ -86,6 +92,7 @@ export const tasks: MockTask[] = [
   },
   {
     id: "data-label",
+    slots: 90,
     title: "Classificar imagens para modelo de IA",
     category: "Dados & IA",
     minutes: 9,
