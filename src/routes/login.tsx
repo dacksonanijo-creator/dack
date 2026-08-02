@@ -1,6 +1,9 @@
+import { useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { toast } from "sonner";
 import { AuthLayout, Field } from "@/components/taskora/auth-layout";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
@@ -21,29 +24,67 @@ const input =
 
 function Login() {
   const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password,
+    });
+    setLoading(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    navigate({ to: "/app" });
+  };
+
   return (
     <AuthLayout title="Bem-vindo de volta" subtitle="Entra para continuares onde ficaste.">
-      <form
-        className="space-y-4"
-        onSubmit={(e) => {
-          e.preventDefault();
-          navigate({ to: "/app" });
-        }}
-      >
-        <Field label="Email ou nome de utilizador">
-          <input className={input} placeholder="ana@email.com" defaultValue="" />
+      <form className="space-y-4" onSubmit={onSubmit}>
+        <Field label="Email">
+          <input
+            type="email"
+            required
+            className={input}
+            placeholder="nome@email.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
         </Field>
         <Field label="Palavra-passe">
-          <input type="password" className={input} placeholder="••••••••" />
+          <input
+            type="password"
+            required
+            className={input}
+            placeholder="••••••••"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
         </Field>
         <div className="flex justify-end">
           <Link to="/forgot-password" className="text-xs font-medium text-primary hover:underline">
             Esqueci a palavra-passe
           </Link>
         </div>
-        <Button type="submit" size="lg" className="h-12 w-full rounded-xl text-base shadow-glow">
-          Entrar
+        <Button
+          type="submit"
+          size="lg"
+          disabled={loading}
+          className="h-12 w-full rounded-xl text-base shadow-glow"
+        >
+          {loading ? "A entrar…" : "Entrar"}
         </Button>
+        <p className="text-center text-xs text-muted-foreground">
+          Ainda não tens conta?{" "}
+          <Link to="/signup" className="font-semibold text-primary hover:underline">
+            Criar conta
+          </Link>
+        </p>
       </form>
     </AuthLayout>
   );

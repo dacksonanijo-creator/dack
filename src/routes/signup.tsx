@@ -1,7 +1,10 @@
+import { useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { toast } from "sonner";
 import { AuthLayout, Field } from "@/components/taskora/auth-layout";
 import { Button } from "@/components/ui/button";
 import { countries } from "@/components/taskora/mock-data";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/signup")({
   head: () => ({
@@ -22,6 +25,56 @@ const input =
 
 function Signup() {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [form, setForm] = useState({
+    fullName: "",
+    email: "",
+    country: countries[0],
+    password: "",
+    confirm: "",
+  });
+
+  const set = (k: keyof typeof form) => (e: { target: { value: string } }) =>
+    setForm((f) => ({ ...f, [k]: e.target.value }));
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (form.password !== form.confirm) {
+      toast.error("As palavras-passe não coincidem.");
+      return;
+    }
+    setLoading(true);
+    const { data, error } = await supabase.auth.signUp({
+      email: form.email.trim(),
+      password: form.password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/app`,
+        data: { full_name: form.fullName.trim(), country: form.country },
+      },
+    });
+    if (error) {
+      setLoading(false);
+      toast.error(error.message);
+      return;
+    }
+
+    if (data.session && data.user) {
+      await supabase.from("profiles").upsert({
+        id: data.user.id,
+        full_name: form.fullName.trim(),
+        email: form.email.trim(),
+        country: form.country,
+      });
+      setLoading(false);
+      navigate({ to: "/app" });
+      return;
+    }
+
+    setLoading(false);
+    toast.success("Conta criada. Confirma o teu email para entrares.");
+    navigate({ to: "/login" });
+  };
+
   return (
     <AuthLayout
       title="Criar conta"
@@ -35,24 +88,28 @@ function Signup() {
         </>
       }
     >
-      <form
-        className="space-y-4"
-        onSubmit={(e) => {
-          e.preventDefault();
-          navigate({ to: "/app" });
-        }}
-      >
+      <form className="space-y-4" onSubmit={onSubmit}>
         <Field label="Nome completo">
-          <input className={input} placeholder="Ana Mucavele" />
-        </Field>
-        <Field label="Nome de utilizador">
-          <input className={input} placeholder="anamuc" />
+          <input
+            required
+            className={input}
+            placeholder="O teu nome completo"
+            value={form.fullName}
+            onChange={set("fullName")}
+          />
         </Field>
         <Field label="Email">
-          <input type="email" className={input} placeholder="ana@email.com" />
+          <input
+            type="email"
+            required
+            className={input}
+            placeholder="nome@email.com"
+            value={form.email}
+            onChange={set("email")}
+          />
         </Field>
         <Field label="País">
-          <select className={input} defaultValue={countries[0]}>
+          <select className={input} value={form.country} onChange={set("country")}>
             {countries.map((c) => (
               <option key={c}>{c}</option>
             ))}
@@ -60,14 +117,34 @@ function Signup() {
         </Field>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Palavra-passe">
-            <input type="password" className={input} placeholder="••••••••" />
+            <input
+              type="password"
+              required
+              minLength={6}
+              className={input}
+              placeholder="••••••••"
+              value={form.password}
+              onChange={set("password")}
+            />
           </Field>
           <Field label="Confirmar">
-            <input type="password" className={input} placeholder="••••••••" />
+            <input
+              type="password"
+              required
+              minLength={6}
+              className={input}
+              placeholder="••••••••"
+              value={form.confirm}
+              onChange={set("confirm")}
+            />
           </Field>
         </div>
         <label className="flex items-start gap-2.5 text-xs text-muted-foreground">
-          <input type="checkbox" className="mt-0.5 h-4 w-4 rounded border-input accent-[var(--primary)]" />
+          <input
+            type="checkbox"
+            required
+            className="mt-0.5 h-4 w-4 rounded border-input accent-[var(--primary)]"
+          />
           <span>
             Aceito os{" "}
             <Link to="/terms" className="text-primary hover:underline">
@@ -80,8 +157,13 @@ function Signup() {
             .
           </span>
         </label>
-        <Button type="submit" size="lg" className="h-12 w-full rounded-xl text-base shadow-glow">
-          Criar conta
+        <Button
+          type="submit"
+          size="lg"
+          disabled={loading}
+          className="h-12 w-full rounded-xl text-base shadow-glow"
+        >
+          {loading ? "A criar conta…" : "Criar conta"}
         </Button>
       </form>
     </AuthLayout>

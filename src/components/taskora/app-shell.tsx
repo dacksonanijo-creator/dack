@@ -16,9 +16,11 @@ import {
   Wallet,
 } from "lucide-react";
 import { TaskoraLogo } from "./logo";
-import { user } from "./mock-data";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { useProfile } from "@/hooks/use-profile";
+import { useAuth } from "@/hooks/use-auth";
+import { useNavigate } from "@tanstack/react-router";
 
 const tabs = [
   { to: "/app", label: "Início", icon: Home, exact: true },
@@ -57,6 +59,7 @@ const groups = [
 ] as const;
 
 export function Avatar({ className }: { className?: string }) {
+  const { initials } = useProfile();
   return (
     <span
       className={cn(
@@ -64,7 +67,7 @@ export function Avatar({ className }: { className?: string }) {
         className,
       )}
     >
-      {user.initials}
+      {initials}
     </span>
   );
 }
@@ -72,6 +75,8 @@ export function Avatar({ className }: { className?: string }) {
 export function AppShell() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [open, setOpen] = useState(false);
+  const { signOut } = useAuth();
+  const navigate = useNavigate();
 
   const isActive = (to: string, exact: boolean) =>
     exact ? pathname === to : pathname.startsWith(to);
@@ -125,14 +130,18 @@ export function AppShell() {
                     <p className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70">
                       Sessão
                     </p>
-                    <Link
-                      to="/login"
-                      onClick={() => setOpen(false)}
-                      className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10"
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        setOpen(false);
+                        await signOut();
+                        navigate({ to: "/login", replace: true });
+                      }}
+                      className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm font-medium text-destructive transition-colors hover:bg-destructive/10"
                     >
                       <LogOut className="h-4 w-4 shrink-0" />
                       Terminar sessão
-                    </Link>
+                    </button>
                   </div>
                 </nav>
               </div>

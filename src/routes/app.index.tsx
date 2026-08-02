@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Sparkles } from "lucide-react";
-import { user } from "@/components/taskora/mock-data";
+import { useProfile } from "@/hooks/use-profile";
 
 export const Route = createFileRoute("/app/")({
   head: () => ({
@@ -21,25 +21,34 @@ export const Route = createFileRoute("/app/")({
 });
 
 function greetingFor(hour: number) {
-  if (hour < 12) return "Bom dia";
-  if (hour < 19) return "Boa tarde";
+  if (hour >= 5 && hour < 12) return "Bom dia";
+  if (hour >= 12 && hour < 18) return "Boa tarde";
   return "Boa noite";
 }
 
 function Dashboard() {
-  const [greeting, setGreeting] = useState("Olá");
+  const [greeting, setGreeting] = useState("");
+  const { firstName, loading } = useProfile();
 
   useEffect(() => {
-    setGreeting(greetingFor(new Date().getHours()));
+    const update = () => setGreeting(greetingFor(new Date().getHours()));
+    update();
+    const id = window.setInterval(update, 60_000);
+    return () => window.clearInterval(id);
   }, []);
-
-  const firstName = user.name.split(" ").slice(-1)[0];
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-5">
       <section className="animate-rise">
         <h1 className="font-display text-2xl font-extrabold leading-tight sm:text-3xl">
-          {greeting}, {firstName} <span aria-hidden>👋</span>
+          {loading || !greeting ? (
+            <span className="inline-block h-7 w-52 animate-pulse rounded-md bg-muted align-middle" />
+          ) : (
+            <>
+              {greeting}
+              {firstName ? `, ${firstName}` : ""} <span aria-hidden>👋</span>
+            </>
+          )}
         </h1>
         <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
           Bem-vindo à Taskora. Estamos felizes por ter você connosco.
