@@ -59,6 +59,7 @@ const groups = [
 ] as const;
 
 export function Avatar({ className }: { className?: string }) {
+  const { initials } = useProfile();
   return (
     <span
       className={cn(
@@ -66,7 +67,7 @@ export function Avatar({ className }: { className?: string }) {
         className,
       )}
     >
-      {user.initials}
+      {initials}
     </span>
   );
 }
