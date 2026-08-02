@@ -16,9 +16,11 @@ import {
   Wallet,
 } from "lucide-react";
 import { TaskoraLogo } from "./logo";
-import { user } from "./mock-data";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { useProfile } from "@/hooks/use-profile";
+import { useAuth } from "@/hooks/use-auth";
+import { useNavigate } from "@tanstack/react-router";
 
 const tabs = [
   { to: "/app", label: "Início", icon: Home, exact: true },
