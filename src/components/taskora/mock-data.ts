@@ -147,16 +147,6 @@ export const history = [
   { id: "h5", title: "Testar app de finanças", date: "18 Jul 2026", status: "Aprovada", reward: "120 MT" },
 ];
 
-export const user = {
-  name: "Ana Mucavele",
-  username: "@anamuc",
-  email: "ana.mucavele@email.com",
-  country: "Moçambique",
-  joined: "12 Março 2026",
-  status: "Verificada",
-  initials: "AM",
-};
-
 export const countries = [
   "Moçambique",
   "Angola",
