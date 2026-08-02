@@ -128,14 +128,18 @@ export function AppShell() {
                     <p className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70">
                       Sessão
                     </p>
-                    <Link
-                      to="/login"
-                      onClick={() => setOpen(false)}
-                      className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10"
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        setOpen(false);
+                        await signOut();
+                        navigate({ to: "/login", replace: true });
+                      }}
+                      className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm font-medium text-destructive transition-colors hover:bg-destructive/10"
                     >
                       <LogOut className="h-4 w-4 shrink-0" />
                       Terminar sessão
-                    </Link>
+                    </button>
                   </div>
                 </nav>
               </div>
