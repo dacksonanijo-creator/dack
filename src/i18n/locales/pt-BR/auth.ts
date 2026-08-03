@@ -14,7 +14,7 @@ const messages: Messages = {
   "auth.login.createAccount": "Criar conta",
   "auth.login.emailRequired": "Digite um email válido.",
   "auth.login.passwordRequired": "Digite sua senha.",
-  "auth.login.noSession": "Não foi possível iniciar sessão. Tente novamente.",
+  "auth.login.noSession": "Não foi possível entrar. Tente novamente.",
   "auth.signup.title": "Criar conta",
   "auth.signup.subtitle": "Preencha seus dados e comece hoje mesmo.",
   "auth.signup.haveAccount": "Já tem conta?",

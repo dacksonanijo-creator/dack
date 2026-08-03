@@ -9,7 +9,7 @@ const messages: Messages = {
   "shell.group.account": "Conta",
   "shell.group.system": "Sistema",
   "shell.group.session": "Sessão",
-  "shell.item.withdrawals": "Saques",
+  "shell.item.withdrawals": "Levantamentos",
   "shell.item.activity": "Atividade",
   "shell.item.rewards": "Recompensas",
   "shell.item.notifications": "Notificações",
