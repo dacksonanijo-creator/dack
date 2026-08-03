@@ -161,7 +161,9 @@ function Signup() {
         <Field label={t("auth.signup.countryLabel")}>
           <select className={input} value={form.country} onChange={set("country")}>
             {countries.map((c) => (
-              <option key={c}>{c}</option>
+              <option key={c} value={c}>
+                {t(c)}
+              </option>
             ))}
           </select>
         </Field>

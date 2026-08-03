@@ -160,7 +160,7 @@ function TaskList() {
                   : "border-transparent text-task-muted hover:text-task-title",
               )}
             >
-              {c === "all" ? t("tasks.category.all") : c}
+              {c === "all" ? t("tasks.category.all") : t(c)}
             </button>
           ))}
         </div>
