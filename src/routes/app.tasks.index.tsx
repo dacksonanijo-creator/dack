@@ -60,7 +60,7 @@ function TaskList() {
   };
 
   const categories = useMemo(
-    () => ["all", ...Array.from(new Set(tasks.map((task) => task.category)))],
+    () => ["all", ...Array.from(new Set(tasks.map((task) => task.categoryKey)))],
     [],
   );
 
@@ -74,8 +74,8 @@ function TaskList() {
   const list = tasks.filter(
     (task) =>
       matches(getState(task.id), filter) &&
-      (category === "all" || task.category === category) &&
-      task.title.toLowerCase().includes(query.trim().toLowerCase()),
+      (category === "all" || task.categoryKey === category) &&
+      t(task.titleKey).toLowerCase().includes(query.trim().toLowerCase()),
   );
 
   const showEmpty = screen === "empty" || (screen === "normal" && list.length === 0);
@@ -160,7 +160,7 @@ function TaskList() {
                   : "border-transparent text-task-muted hover:text-task-title",
               )}
             >
-              {c === "all" ? t("tasks.category.all") : c}
+              {c === "all" ? t("tasks.category.all") : t(c)}
             </button>
           ))}
         </div>
@@ -228,17 +228,17 @@ function TaskList() {
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-2">
                         <span className="truncate text-[10px] uppercase tracking-wide text-task-muted">
-                          {task.category}
+                          {t(task.categoryKey)}
                         </span>
                         <span className={cn("shrink-0 text-[10px] font-semibold", stateTone[state])}>
                           {stateLabels[state]}
                         </span>
                       </div>
                       <h2 className="mt-0.5 truncate font-display text-[13px] font-semibold text-task-title">
-                        {task.title}
+                        {t(task.titleKey)}
                       </h2>
                       <p className="mt-0.5 line-clamp-2 text-[11px] leading-snug text-task-muted">
-                        {task.description}
+                        {t(task.descriptionKey)}
                       </p>
                     </div>
                   </div>

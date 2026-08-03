@@ -1,11 +1,9 @@
-import type { LocaleCode } from "./config";
-
 /**
- * A message namespace: one entry per key, holding every locale side by side.
- * Adding a new language = add its code to LOCALES and one string per entry.
+ * Each locale owns its own translation files under ./locales/<locale>/*.ts.
+ * A namespace file is a flat map of message key -> translated string.
  */
-export type MessageNamespace = Record<string, Record<LocaleCode, string>>;
+export type Messages = Record<string, string>;
 
-export function defineMessages<T extends MessageNamespace>(messages: T): T {
+export function defineMessages<T extends Messages>(messages: T): T {
   return messages;
 }
