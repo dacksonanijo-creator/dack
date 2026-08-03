@@ -12,6 +12,7 @@ import {
   LogOut,
   Menu,
   Settings,
+  ShieldCheck,
   User,
   Wallet,
 } from "lucide-react";
@@ -22,6 +23,7 @@ import { useProfile } from "@/hooks/use-profile";
 import { useAuth } from "@/hooks/use-auth";
 import { useNavigate } from "@tanstack/react-router";
 import { useT } from "@/i18n";
+import { isAdminEmail } from "@/lib/admin";
 
 export function Avatar({ className }: { className?: string }) {
   const { initials } = useProfile();
@@ -128,6 +130,21 @@ export function AppShell() {
                       </div>
                     </div>
                   ))}
+                  {isAdmin && (
+                    <div className="mb-3">
+                      <p className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70">
+                        Administração
+                      </p>
+                      <Link
+                        to="/admin"
+                        onClick={() => setOpen(false)}
+                        className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/10"
+                      >
+                        <ShieldCheck className="h-4 w-4 shrink-0" />
+                        Painel Administrativo
+                      </Link>
+                    </div>
+                  )}
                   <div className="mb-1">
                     <p className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70">
                       {t("shell.group.session")}

@@ -32,6 +32,20 @@ import { Route as AppNotificationsRouteImport } from './routes/app.notifications
 import { Route as AppHistoryRouteImport } from './routes/app.history'
 import { Route as AppHelpRouteImport } from './routes/app.help'
 import { Route as AppActivityRouteImport } from './routes/app.activity'
+import { Route as AdminWithdrawalsRouteImport } from './routes/admin.withdrawals'
+import { Route as AdminWalletRouteImport } from './routes/admin.wallet'
+import { Route as AdminUsersRouteImport } from './routes/admin.users'
+import { Route as AdminTasksRouteImport } from './routes/admin.tasks'
+import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
+import { Route as AdminSecurityRouteImport } from './routes/admin.security'
+import { Route as AdminReportsRouteImport } from './routes/admin.reports'
+import { Route as AdminPaymentsRouteImport } from './routes/admin.payments'
+import { Route as AdminPaymentMethodsRouteImport } from './routes/admin.payment-methods'
+import { Route as AdminNotificationsRouteImport } from './routes/admin.notifications'
+import { Route as AdminLogsRouteImport } from './routes/admin.logs'
+import { Route as AdminCompaniesRouteImport } from './routes/admin.companies'
+import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
+import { Route as AdminApisRouteImport } from './routes/admin.apis'
 import { Route as AppTasksIndexRouteImport } from './routes/app.tasks.index'
 import { Route as AppTasksTaskIdRouteImport } from './routes/app.tasks.$taskId'
 
@@ -150,6 +164,76 @@ const AppActivityRoute = AppActivityRouteImport.update({
   path: '/activity',
   getParentRoute: () => AppRoute,
 } as any)
+const AdminWithdrawalsRoute = AdminWithdrawalsRouteImport.update({
+  id: '/withdrawals',
+  path: '/withdrawals',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminWalletRoute = AdminWalletRouteImport.update({
+  id: '/wallet',
+  path: '/wallet',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminUsersRoute = AdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminTasksRoute = AdminTasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSettingsRoute = AdminSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSecurityRoute = AdminSecurityRouteImport.update({
+  id: '/security',
+  path: '/security',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminReportsRoute = AdminReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminPaymentsRoute = AdminPaymentsRouteImport.update({
+  id: '/payments',
+  path: '/payments',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminPaymentMethodsRoute = AdminPaymentMethodsRouteImport.update({
+  id: '/payment-methods',
+  path: '/payment-methods',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminNotificationsRoute = AdminNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminLogsRoute = AdminLogsRouteImport.update({
+  id: '/logs',
+  path: '/logs',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminCompaniesRoute = AdminCompaniesRouteImport.update({
+  id: '/companies',
+  path: '/companies',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminCategoriesRoute = AdminCategoriesRouteImport.update({
+  id: '/categories',
+  path: '/categories',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminApisRoute = AdminApisRouteImport.update({
+  id: '/apis',
+  path: '/apis',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AppTasksIndexRoute = AppTasksIndexRouteImport.update({
   id: '/tasks/',
   path: '/tasks/',
@@ -173,6 +257,20 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/terms': typeof TermsRoute
   '/welcome': typeof WelcomeRoute
+  '/admin/apis': typeof AdminApisRoute
+  '/admin/categories': typeof AdminCategoriesRoute
+  '/admin/companies': typeof AdminCompaniesRoute
+  '/admin/logs': typeof AdminLogsRoute
+  '/admin/notifications': typeof AdminNotificationsRoute
+  '/admin/payment-methods': typeof AdminPaymentMethodsRoute
+  '/admin/payments': typeof AdminPaymentsRoute
+  '/admin/reports': typeof AdminReportsRoute
+  '/admin/security': typeof AdminSecurityRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/tasks': typeof AdminTasksRoute
+  '/admin/users': typeof AdminUsersRoute
+  '/admin/wallet': typeof AdminWalletRoute
+  '/admin/withdrawals': typeof AdminWithdrawalsRoute
   '/app/activity': typeof AppActivityRoute
   '/app/help': typeof AppHelpRoute
   '/app/history': typeof AppHistoryRoute
@@ -198,6 +296,20 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/terms': typeof TermsRoute
   '/welcome': typeof WelcomeRoute
+  '/admin/apis': typeof AdminApisRoute
+  '/admin/categories': typeof AdminCategoriesRoute
+  '/admin/companies': typeof AdminCompaniesRoute
+  '/admin/logs': typeof AdminLogsRoute
+  '/admin/notifications': typeof AdminNotificationsRoute
+  '/admin/payment-methods': typeof AdminPaymentMethodsRoute
+  '/admin/payments': typeof AdminPaymentsRoute
+  '/admin/reports': typeof AdminReportsRoute
+  '/admin/security': typeof AdminSecurityRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/tasks': typeof AdminTasksRoute
+  '/admin/users': typeof AdminUsersRoute
+  '/admin/wallet': typeof AdminWalletRoute
+  '/admin/withdrawals': typeof AdminWithdrawalsRoute
   '/app/activity': typeof AppActivityRoute
   '/app/help': typeof AppHelpRoute
   '/app/history': typeof AppHistoryRoute
@@ -226,6 +338,20 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/terms': typeof TermsRoute
   '/welcome': typeof WelcomeRoute
+  '/admin/apis': typeof AdminApisRoute
+  '/admin/categories': typeof AdminCategoriesRoute
+  '/admin/companies': typeof AdminCompaniesRoute
+  '/admin/logs': typeof AdminLogsRoute
+  '/admin/notifications': typeof AdminNotificationsRoute
+  '/admin/payment-methods': typeof AdminPaymentMethodsRoute
+  '/admin/payments': typeof AdminPaymentsRoute
+  '/admin/reports': typeof AdminReportsRoute
+  '/admin/security': typeof AdminSecurityRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/tasks': typeof AdminTasksRoute
+  '/admin/users': typeof AdminUsersRoute
+  '/admin/wallet': typeof AdminWalletRoute
+  '/admin/withdrawals': typeof AdminWithdrawalsRoute
   '/app/activity': typeof AppActivityRoute
   '/app/help': typeof AppHelpRoute
   '/app/history': typeof AppHistoryRoute
@@ -255,6 +381,20 @@ export interface FileRouteTypes {
     | '/signup'
     | '/terms'
     | '/welcome'
+    | '/admin/apis'
+    | '/admin/categories'
+    | '/admin/companies'
+    | '/admin/logs'
+    | '/admin/notifications'
+    | '/admin/payment-methods'
+    | '/admin/payments'
+    | '/admin/reports'
+    | '/admin/security'
+    | '/admin/settings'
+    | '/admin/tasks'
+    | '/admin/users'
+    | '/admin/wallet'
+    | '/admin/withdrawals'
     | '/app/activity'
     | '/app/help'
     | '/app/history'
@@ -280,6 +420,20 @@ export interface FileRouteTypes {
     | '/signup'
     | '/terms'
     | '/welcome'
+    | '/admin/apis'
+    | '/admin/categories'
+    | '/admin/companies'
+    | '/admin/logs'
+    | '/admin/notifications'
+    | '/admin/payment-methods'
+    | '/admin/payments'
+    | '/admin/reports'
+    | '/admin/security'
+    | '/admin/settings'
+    | '/admin/tasks'
+    | '/admin/users'
+    | '/admin/wallet'
+    | '/admin/withdrawals'
     | '/app/activity'
     | '/app/help'
     | '/app/history'
@@ -307,6 +461,20 @@ export interface FileRouteTypes {
     | '/signup'
     | '/terms'
     | '/welcome'
+    | '/admin/apis'
+    | '/admin/categories'
+    | '/admin/companies'
+    | '/admin/logs'
+    | '/admin/notifications'
+    | '/admin/payment-methods'
+    | '/admin/payments'
+    | '/admin/reports'
+    | '/admin/security'
+    | '/admin/settings'
+    | '/admin/tasks'
+    | '/admin/users'
+    | '/admin/wallet'
+    | '/admin/withdrawals'
     | '/app/activity'
     | '/app/help'
     | '/app/history'
@@ -500,6 +668,104 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppActivityRouteImport
       parentRoute: typeof AppRoute
     }
+    '/admin/withdrawals': {
+      id: '/admin/withdrawals'
+      path: '/withdrawals'
+      fullPath: '/admin/withdrawals'
+      preLoaderRoute: typeof AdminWithdrawalsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/wallet': {
+      id: '/admin/wallet'
+      path: '/wallet'
+      fullPath: '/admin/wallet'
+      preLoaderRoute: typeof AdminWalletRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/users': {
+      id: '/admin/users'
+      path: '/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/tasks': {
+      id: '/admin/tasks'
+      path: '/tasks'
+      fullPath: '/admin/tasks'
+      preLoaderRoute: typeof AdminTasksRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/settings': {
+      id: '/admin/settings'
+      path: '/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminSettingsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/security': {
+      id: '/admin/security'
+      path: '/security'
+      fullPath: '/admin/security'
+      preLoaderRoute: typeof AdminSecurityRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/reports': {
+      id: '/admin/reports'
+      path: '/reports'
+      fullPath: '/admin/reports'
+      preLoaderRoute: typeof AdminReportsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/payments': {
+      id: '/admin/payments'
+      path: '/payments'
+      fullPath: '/admin/payments'
+      preLoaderRoute: typeof AdminPaymentsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/payment-methods': {
+      id: '/admin/payment-methods'
+      path: '/payment-methods'
+      fullPath: '/admin/payment-methods'
+      preLoaderRoute: typeof AdminPaymentMethodsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/notifications': {
+      id: '/admin/notifications'
+      path: '/notifications'
+      fullPath: '/admin/notifications'
+      preLoaderRoute: typeof AdminNotificationsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/logs': {
+      id: '/admin/logs'
+      path: '/logs'
+      fullPath: '/admin/logs'
+      preLoaderRoute: typeof AdminLogsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/companies': {
+      id: '/admin/companies'
+      path: '/companies'
+      fullPath: '/admin/companies'
+      preLoaderRoute: typeof AdminCompaniesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/categories': {
+      id: '/admin/categories'
+      path: '/categories'
+      fullPath: '/admin/categories'
+      preLoaderRoute: typeof AdminCategoriesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/apis': {
+      id: '/admin/apis'
+      path: '/apis'
+      fullPath: '/admin/apis'
+      preLoaderRoute: typeof AdminApisRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/app/tasks/': {
       id: '/app/tasks/'
       path: '/tasks'
@@ -518,10 +784,38 @@ declare module '@tanstack/react-router' {
 }
 
 interface AdminRouteChildren {
+  AdminApisRoute: typeof AdminApisRoute
+  AdminCategoriesRoute: typeof AdminCategoriesRoute
+  AdminCompaniesRoute: typeof AdminCompaniesRoute
+  AdminLogsRoute: typeof AdminLogsRoute
+  AdminNotificationsRoute: typeof AdminNotificationsRoute
+  AdminPaymentMethodsRoute: typeof AdminPaymentMethodsRoute
+  AdminPaymentsRoute: typeof AdminPaymentsRoute
+  AdminReportsRoute: typeof AdminReportsRoute
+  AdminSecurityRoute: typeof AdminSecurityRoute
+  AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminTasksRoute: typeof AdminTasksRoute
+  AdminUsersRoute: typeof AdminUsersRoute
+  AdminWalletRoute: typeof AdminWalletRoute
+  AdminWithdrawalsRoute: typeof AdminWithdrawalsRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminApisRoute: AdminApisRoute,
+  AdminCategoriesRoute: AdminCategoriesRoute,
+  AdminCompaniesRoute: AdminCompaniesRoute,
+  AdminLogsRoute: AdminLogsRoute,
+  AdminNotificationsRoute: AdminNotificationsRoute,
+  AdminPaymentMethodsRoute: AdminPaymentMethodsRoute,
+  AdminPaymentsRoute: AdminPaymentsRoute,
+  AdminReportsRoute: AdminReportsRoute,
+  AdminSecurityRoute: AdminSecurityRoute,
+  AdminSettingsRoute: AdminSettingsRoute,
+  AdminTasksRoute: AdminTasksRoute,
+  AdminUsersRoute: AdminUsersRoute,
+  AdminWalletRoute: AdminWalletRoute,
+  AdminWithdrawalsRoute: AdminWithdrawalsRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 
