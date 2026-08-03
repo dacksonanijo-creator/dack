@@ -51,17 +51,17 @@ function TaskDetail() {
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-1.5">
               <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary">
-                {task.category}
+                {t(task.categoryKey)}
               </span>
               <span className={cn("rounded-full px-2 py-0.5 text-[10px] font-semibold", stateClasses[state])}>
                 {stateLabels[state]}
               </span>
             </div>
-            <h1 className="mt-1.5 font-display text-base font-extrabold leading-snug">{task.title}</h1>
+            <h1 className="mt-1.5 font-display text-base font-extrabold leading-snug">{t(task.titleKey)}</h1>
           </div>
         </div>
 
-        <p className="mt-3 text-xs leading-relaxed text-muted-foreground">{task.description}</p>
+        <p className="mt-3 text-xs leading-relaxed text-muted-foreground">{t(task.descriptionKey)}</p>
 
         <div className="mt-3 grid grid-cols-3 gap-2 border-t border-border pt-3 text-center">
           <div>
@@ -85,12 +85,12 @@ function TaskDetail() {
       <div className="rounded-xl border border-border/70 bg-card p-4">
         <h2 className="font-display text-sm font-bold">{t("tasks.instructions")}</h2>
         <ol className="mt-2 space-y-2">
-          {task.steps.map((s, i) => (
+          {task.stepKeys.map((s, i) => (
             <li key={s} className="flex items-start gap-2 text-xs leading-relaxed">
               <span className="mt-0.5 grid h-4 w-4 shrink-0 place-items-center rounded-full bg-primary/10 text-[10px] font-bold text-primary">
                 {i + 1}
               </span>
-              <span>{s}</span>
+              <span>{t(s)}</span>
             </li>
           ))}
         </ol>
@@ -101,10 +101,10 @@ function TaskDetail() {
           <ShieldCheck className="h-3.5 w-3.5 text-primary" /> {t("tasks.completionRules")}
         </h2>
         <ul className="mt-2 space-y-1.5">
-          {(task.rules ?? taskRules).map((r) => (
+          {(task.ruleKeys ?? taskRules).map((r) => (
             <li key={r} className="flex items-start gap-2 text-xs leading-relaxed text-muted-foreground">
               <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-money" />
-              <span>{r}</span>
+              <span>{t(r)}</span>
             </li>
           ))}
         </ul>
