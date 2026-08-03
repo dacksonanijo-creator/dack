@@ -1,5 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useTheme } from "@/hooks/use-theme";
+
 import {
   Bell,
   BellRing,
@@ -137,16 +139,13 @@ function SegBar<T extends string>({
 }
 
 function SettingsPage() {
-  const [theme, setTheme] = useState<"light" | "dark">("light");
+  const { theme, setTheme } = useTheme();
   const [lang, setLang] = useState<"pt" | "en">("pt");
   const [density, setDensity] = useState<"cozy" | "compact">("cozy");
   const [notifications, setNotifications] = useState(true);
   const [taskAlerts, setTaskAlerts] = useState(true);
   const [emailAlerts, setEmailAlerts] = useState(false);
 
-  useEffect(() => {
-    document.documentElement.classList.toggle("dark", theme === "dark");
-  }, [theme]);
 
   return (
     <div className="space-y-6 bg-background">
