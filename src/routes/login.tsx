@@ -5,6 +5,7 @@ import { AuthLayout, Field } from "@/components/taskora/auth-layout";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { authErrorMessage, emailRe } from "@/lib/auth-errors";
+import { useT } from "@/i18n";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
@@ -24,6 +25,7 @@ const input =
   "w-full rounded-xl border border-input bg-background px-4 py-3 text-sm outline-none transition-shadow placeholder:text-muted-foreground focus:border-primary focus:ring-4 focus:ring-primary/10";
 
 function Login() {
+  const t = useT();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -36,11 +38,11 @@ function Login() {
     setError(null);
 
     if (!emailRe.test(email.trim())) {
-      setError("Introduz um email válido.");
+      setError(t("auth.login.emailRequired"));
       return;
     }
     if (!password) {
-      setError("Introduz a tua palavra-passe.");
+      setError(t("auth.login.passwordRequired"));
       return;
     }
 
@@ -51,18 +53,18 @@ function Login() {
         password,
       });
       if (err) {
-        const msg = authErrorMessage(err.message);
+        const msg = t(authErrorMessage(err.message));
         setError(msg);
         toast.error(msg);
         return;
       }
       if (!data.session) {
-        setError("Não foi possível iniciar sessão. Tenta novamente.");
+        setError(t("auth.login.noSession"));
         return;
       }
       navigate({ to: "/app" });
     } catch (err) {
-      const msg = authErrorMessage(err instanceof Error ? err.message : String(err));
+      const msg = t(authErrorMessage(err instanceof Error ? err.message : String(err)));
       setError(msg);
       toast.error(msg);
     } finally {
@@ -71,13 +73,13 @@ function Login() {
   };
 
   return (
-    <AuthLayout title="Bem-vindo de volta" subtitle="Entra para continuares onde ficaste.">
+    <AuthLayout title={t("auth.login.title")} subtitle={t("auth.login.subtitle")}>
       <form className="space-y-4" onSubmit={onSubmit} noValidate>
-        <Field label="Email">
+        <Field label={t("auth.login.emailLabel")}>
           <input
             type="email"
             className={input}
-            placeholder="nome@email.com"
+            placeholder={t("auth.login.emailPlaceholder")}
             value={email}
             onChange={(e) => {
               setEmail(e.target.value);
@@ -85,7 +87,7 @@ function Login() {
             }}
           />
         </Field>
-        <Field label="Palavra-passe">
+        <Field label={t("auth.login.passwordLabel")}>
           <input
             type="password"
             className={input}
@@ -104,7 +106,7 @@ function Login() {
         )}
         <div className="flex justify-end">
           <Link to="/forgot-password" className="text-xs font-medium text-primary hover:underline">
-            Esqueci a palavra-passe
+            {t("auth.login.forgotPassword")}
           </Link>
         </div>
         <Button
@@ -113,12 +115,12 @@ function Login() {
           disabled={loading}
           className="h-12 w-full rounded-xl text-base shadow-glow"
         >
-          {loading ? "A entrar…" : "Entrar"}
+          {loading ? t("auth.login.submitLoading") : t("auth.login.submit")}
         </Button>
         <p className="text-center text-xs text-muted-foreground">
-          Ainda não tens conta?{" "}
+          {t("auth.login.noAccount")}{" "}
           <Link to="/signup" className="font-semibold text-primary hover:underline">
-            Criar conta
+            {t("auth.login.createAccount")}
           </Link>
         </p>
       </form>

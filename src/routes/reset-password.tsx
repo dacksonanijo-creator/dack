@@ -5,6 +5,7 @@ import { AuthLayout, Field } from "@/components/taskora/auth-layout";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { authErrorMessage } from "@/lib/auth-errors";
+import { useT } from "@/i18n";
 
 export const Route = createFileRoute("/reset-password")({
   ssr: false,
@@ -25,6 +26,7 @@ const input =
   "w-full rounded-xl border border-input bg-background px-4 py-3 text-sm outline-none transition-shadow placeholder:text-muted-foreground focus:border-primary focus:ring-4 focus:ring-primary/10";
 
 function ResetPassword() {
+  const t = useT();
   const navigate = useNavigate();
   const [ready, setReady] = useState(false);
   const [password, setPassword] = useState("");
@@ -42,11 +44,11 @@ function ResetPassword() {
     e.preventDefault();
     if (loading) return;
     if (password.length < 6) {
-      setError("A palavra-passe deve ter pelo menos 6 caracteres.");
+      setError(t("auth.reset.passwordMinLength"));
       return;
     }
     if (password !== confirm) {
-      setError("As palavras-passe não coincidem.");
+      setError(t("auth.reset.passwordsMismatch"));
       return;
     }
     setError(null);
@@ -54,33 +56,33 @@ function ResetPassword() {
     const { error: err } = await supabase.auth.updateUser({ password });
     setLoading(false);
     if (err) {
-      const msg = authErrorMessage(err.message);
+      const msg = t(authErrorMessage(err.message));
       setError(msg);
       toast.error(msg);
       return;
     }
-    toast.success("Palavra-passe atualizada.");
+    toast.success(t("auth.reset.updatedSuccess"));
     navigate({ to: "/app" });
   };
 
   return (
     <AuthLayout
-      title="Nova palavra-passe"
-      subtitle="Define uma nova palavra-passe para a tua conta."
+      title={t("auth.reset.title")}
+      subtitle={t("auth.reset.subtitle")}
       backTo="/login"
       footer={
         <Link to="/login" className="font-semibold text-primary hover:underline">
-          Voltar ao login
+          {t("auth.reset.backToLogin")}
         </Link>
       }
     >
       {!ready ? (
         <p className="rounded-xl bg-accent/60 px-4 py-3 text-xs text-muted-foreground">
-          Abre esta página a partir do link de recuperação enviado para o teu email.
+          {t("auth.reset.notReady")}
         </p>
       ) : (
         <form className="space-y-4" onSubmit={onSubmit} noValidate>
-          <Field label="Nova palavra-passe">
+          <Field label={t("auth.reset.newPasswordLabel")}>
             <input
               type="password"
               className={input}
@@ -92,7 +94,7 @@ function ResetPassword() {
               }}
             />
           </Field>
-          <Field label="Confirmar">
+          <Field label={t("auth.reset.confirmLabel")}>
             <input
               type="password"
               className={input}
@@ -115,7 +117,7 @@ function ResetPassword() {
             disabled={loading}
             className="h-12 w-full rounded-xl text-base shadow-glow"
           >
-            {loading ? "A guardar…" : "Guardar"}
+            {loading ? t("auth.reset.submitLoading") : t("auth.reset.submit")}
           </Button>
         </form>
       )}
