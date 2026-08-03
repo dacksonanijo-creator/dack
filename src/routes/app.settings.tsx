@@ -5,18 +5,30 @@ import { useLocale, useT } from "@/i18n";
 import { LanguageSelect } from "@/components/taskora/language-select";
 
 import {
+  BadgeCheck,
   Bell,
   BellRing,
+  CalendarClock,
+  CheckCircle2,
   ChevronRight,
-  Database,
+  CircleHelp,
+  Clock,
   FileText,
   Globe2,
-  KeyRound,
-  Laptop,
+  Info,
+  LifeBuoy,
+  Lightbulb,
+  Mail,
+  Megaphone,
+  Monitor,
   Moon,
+  RefreshCw,
+  Scale,
   ShieldCheck,
   Sun,
-  Type,
+  TriangleAlert,
+  Wallet,
+  XCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -24,9 +36,9 @@ export const Route = createFileRoute("/app/settings")({
   head: () => ({
     meta: [
       { title: "Definições — Taskora" },
-      { name: "description", content: "Gere conta, notificações, aparência, idioma e privacidade na Taskora." },
+      { name: "description", content: "Central de preferências: idioma, tema, segurança, notificações, privacidade e suporte." },
       { property: "og:title", content: "Definições — Taskora" },
-      { property: "og:description", content: "Personaliza conta, notificações, aparência, idioma e privacidade." },
+      { property: "og:description", content: "Personaliza preferências, segurança, notificações e privacidade na Taskora." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -34,14 +46,25 @@ export const Route = createFileRoute("/app/settings")({
   component: SettingsPage,
 });
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({ title, hint, children }: { title: string; hint?: string; children: React.ReactNode }) {
   return (
     <section className="space-y-2">
-      <h2 className="px-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">{title}</h2>
-      <div className="divide-y divide-border/70 overflow-hidden rounded-2xl border border-border/70 bg-card">
+      <div className="px-1">
+        <h2 className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">{title}</h2>
+        {hint ? <p className="mt-0.5 text-[11px] text-muted-foreground/80">{hint}</p> : null}
+      </div>
+      <div className="divide-y divide-border/70 overflow-hidden rounded-2xl border border-border/70 bg-card shadow-soft">
         {children}
       </div>
     </section>
+  );
+}
+
+function SoonBadge({ label }: { label: string }) {
+  return (
+    <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+      {label}
+    </span>
   );
 }
 
@@ -116,13 +139,15 @@ function SegBar<T extends string>({
   value,
   options,
   onChange,
+  ariaLabel,
 }: {
   value: T;
   options: { id: T; label: string }[];
   onChange: (v: T) => void;
+  ariaLabel?: string;
 }) {
   return (
-    <div className="flex shrink-0 gap-0.5 rounded-full bg-muted p-0.5">
+    <div role="group" aria-label={ariaLabel} className="flex shrink-0 gap-0.5 rounded-full bg-muted p-0.5">
       {options.map((o) => (
         <button
           key={o.id}
@@ -142,110 +167,213 @@ function SegBar<T extends string>({
 
 function SettingsPage() {
   const t = useT();
-  const { theme, setTheme } = useTheme();
+  const { preference, setPreference } = useTheme();
   const { locale, locales } = useLocale();
   const currentLanguageLabel = locales.find((l) => l.code === locale)?.label ?? locale;
-  const [density, setDensity] = useState<"cozy" | "compact">("cozy");
-  const [notifications, setNotifications] = useState(true);
-  const [taskAlerts, setTaskAlerts] = useState(true);
-  const [emailAlerts, setEmailAlerts] = useState(false);
 
+  const [dateFormat, setDateFormat] = useState<"dmy" | "mdy">("dmy");
+  const [timeFormat, setTimeFormat] = useState<"h24" | "h12">("h24");
+  const [autoTimezone, setAutoTimezone] = useState(true);
+  const deviceTimezone =
+    typeof Intl !== "undefined" ? (Intl.DateTimeFormat().resolvedOptions().timeZone ?? "UTC") : "UTC";
+
+  const [notif, setNotif] = useState({
+    platform: true,
+    email: false,
+    newTasks: true,
+    approved: true,
+    rejected: true,
+    payments: true,
+    campaigns: false,
+  });
+  const setFlag = (key: keyof typeof notif) => (v: boolean) => setNotif((s) => ({ ...s, [key]: v }));
 
   return (
-    <div className="space-y-6 bg-background">
+    <div className="space-y-6 bg-background pb-4">
       <div>
         <h1 className="font-display text-2xl font-extrabold">{t("settings.title")}</h1>
-        <p className="mt-0.5 text-sm text-muted-foreground">{t("settings.subtitle")}</p>
+        <p className="mt-0.5 text-sm text-muted-foreground">{t("settings.pref.subtitle")}</p>
       </div>
 
-      <Section title={t("settings.account")}>
-        <Row icon={KeyRound} label={t("settings.changePassword")} desc={t("settings.changePasswordDesc")} />
-        <Row icon={ShieldCheck} label={t("settings.security")} desc={t("settings.securityDesc")} />
-        <Row
-          icon={Laptop}
-          label={t("settings.activeSessions")}
-          desc={t("settings.activeSessionsDesc")}
-          right={
-            <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
-              {t("common.soon")}
-            </span>
-          }
-        />
-      </Section>
-
-      <Section title={t("settings.notifications")}>
-        <Row
-          icon={Bell}
-          label={t("settings.appNotifications")}
-          desc={t("settings.appNotificationsDesc")}
-          right={<Toggle on={notifications} onChange={setNotifications} label={t("settings.appNotifications")} />}
-        />
-        <Row
-          icon={BellRing}
-          label={t("settings.taskAlerts")}
-          desc={t("settings.taskAlertsDesc")}
-          right={
-            <Toggle
-              on={notifications && taskAlerts}
-              onChange={(v) => setTaskAlerts(v)}
-              label={t("settings.taskAlerts")}
-            />
-          }
-        />
-        <Row
-          icon={FileText}
-          label={t("settings.emailDigest")}
-          desc={t("settings.emailDigestDesc")}
-          right={<Toggle on={emailAlerts} onChange={setEmailAlerts} label={t("settings.emailDigest")} />}
-        />
-      </Section>
-
-      <Section title={t("settings.appearance")}>
-        <Row
-          icon={theme === "dark" ? Moon : Sun}
-          label={t("settings.theme")}
-          desc={t("settings.themeDesc")}
-          right={
-            <SegBar
-              value={theme}
-              onChange={setTheme}
-              options={[
-                { id: "light", label: t("settings.themeLight") },
-                { id: "dark", label: t("settings.themeDark") },
-              ]}
-            />
-          }
-        />
-        <Row
-          icon={Type}
-          label={t("settings.density")}
-          desc={t("settings.densityDesc")}
-          right={
-            <SegBar
-              value={density}
-              onChange={setDensity}
-              options={[
-                { id: "cozy", label: t("settings.densityCozy") },
-                { id: "compact", label: t("settings.densityCompact") },
-              ]}
-            />
-          }
-        />
-      </Section>
-
-      <Section title={t("settings.language")}>
+      {/* Preferências */}
+      <Section title={t("settings.pref.section")}>
         <Row
           icon={Globe2}
           label={t("language.title")}
           desc={currentLanguageLabel}
           right={<LanguageSelect variant="compact" />}
         />
+        <Row
+          icon={preference === "dark" ? Moon : preference === "system" ? Monitor : Sun}
+          label={t("settings.theme")}
+          desc={t("settings.pref.themeDesc")}
+          right={
+            <SegBar
+              ariaLabel={t("settings.theme")}
+              value={preference}
+              onChange={setPreference}
+              options={[
+                { id: "light", label: t("settings.themeLight") },
+                { id: "dark", label: t("settings.themeDark") },
+                { id: "system", label: t("settings.pref.themeSystem") },
+              ]}
+            />
+          }
+        />
+        <Row
+          icon={CalendarClock}
+          label={t("settings.pref.dateFormat")}
+          desc={t("settings.pref.dateFormatDesc")}
+          right={
+            <SegBar
+              ariaLabel={t("settings.pref.dateFormat")}
+              value={dateFormat}
+              onChange={setDateFormat}
+              options={[
+                { id: "dmy", label: "DD/MM" },
+                { id: "mdy", label: "MM/DD" },
+              ]}
+            />
+          }
+        />
+        <Row
+          icon={Clock}
+          label={t("settings.pref.timeFormat")}
+          desc={t("settings.pref.timeFormatDesc")}
+          right={
+            <SegBar
+              ariaLabel={t("settings.pref.timeFormat")}
+              value={timeFormat}
+              onChange={setTimeFormat}
+              options={[
+                { id: "h24", label: "24h" },
+                { id: "h12", label: "12h" },
+              ]}
+            />
+          }
+        />
+        <Row
+          icon={Globe2}
+          label={t("settings.pref.timezone")}
+          desc={autoTimezone ? t("settings.pref.timezoneAuto", { zone: deviceTimezone }) : deviceTimezone}
+          right={
+            <Toggle on={autoTimezone} onChange={setAutoTimezone} label={t("settings.pref.timezone")} />
+          }
+        />
       </Section>
 
+      {/* Segurança */}
+      <Section title={t("settings.security")}>
+        <Row
+          icon={ShieldCheck}
+          label={t("security.title")}
+          desc={t("security.entryDesc")}
+          to="/app/security"
+        />
+      </Section>
+
+      {/* Notificações */}
+      <Section title={t("settings.notifications")}>
+        <Row
+          icon={Bell}
+          label={t("settings.appNotifications")}
+          desc={t("settings.appNotificationsDesc")}
+          right={<Toggle on={notif.platform} onChange={setFlag("platform")} label={t("settings.appNotifications")} />}
+        />
+        <Row
+          icon={Mail}
+          label={t("settings.notif.email")}
+          desc={t("settings.notif.emailDesc")}
+          right={<Toggle on={notif.email} onChange={setFlag("email")} label={t("settings.notif.email")} />}
+        />
+        <Row
+          icon={BellRing}
+          label={t("settings.notif.newTasks")}
+          desc={t("settings.notif.newTasksDesc")}
+          right={<Toggle on={notif.newTasks} onChange={setFlag("newTasks")} label={t("settings.notif.newTasks")} />}
+        />
+        <Row
+          icon={CheckCircle2}
+          label={t("settings.notif.approved")}
+          desc={t("settings.notif.approvedDesc")}
+          right={<Toggle on={notif.approved} onChange={setFlag("approved")} label={t("settings.notif.approved")} />}
+        />
+        <Row
+          icon={XCircle}
+          label={t("settings.notif.rejected")}
+          desc={t("settings.notif.rejectedDesc")}
+          right={<Toggle on={notif.rejected} onChange={setFlag("rejected")} label={t("settings.notif.rejected")} />}
+        />
+        <Row
+          icon={Wallet}
+          label={t("settings.notif.payments")}
+          desc={t("settings.notif.paymentsDesc")}
+          right={<Toggle on={notif.payments} onChange={setFlag("payments")} label={t("settings.notif.payments")} />}
+        />
+        <Row
+          icon={Megaphone}
+          label={t("settings.notif.campaigns")}
+          desc={t("settings.notif.campaignsDesc")}
+          right={<Toggle on={notif.campaigns} onChange={setFlag("campaigns")} label={t("settings.notif.campaigns")} />}
+        />
+      </Section>
+
+      {/* Privacidade */}
       <Section title={t("settings.privacy")}>
         <Row icon={ShieldCheck} label={t("settings.privacyPolicy")} desc={t("settings.privacyPolicyDesc")} to="/privacy" />
         <Row icon={FileText} label={t("settings.terms")} desc={t("settings.termsDesc")} to="/terms" />
-        <Row icon={Database} label={t("settings.dataControl")} desc={t("settings.dataControlDesc")} />
+        <Row
+          icon={BadgeCheck}
+          label={t("settings.privacy.consents")}
+          desc={t("settings.privacy.consentsDesc")}
+          right={<SoonBadge label={t("common.soon")} />}
+        />
+      </Section>
+
+      {/* Ajuda e Suporte */}
+      <Section title={t("settings.help.section")}>
+        <Row icon={CircleHelp} label={t("settings.help.center")} desc={t("settings.help.centerDesc")} to="/app/help" />
+        <Row
+          icon={LifeBuoy}
+          label={t("settings.help.contact")}
+          desc={t("settings.help.contactDesc")}
+          right={<SoonBadge label={t("common.soon")} />}
+        />
+        <Row
+          icon={TriangleAlert}
+          label={t("settings.help.report")}
+          desc={t("settings.help.reportDesc")}
+          right={<SoonBadge label={t("common.soon")} />}
+        />
+        <Row
+          icon={Lightbulb}
+          label={t("settings.help.suggest")}
+          desc={t("settings.help.suggestDesc")}
+          right={<SoonBadge label={t("common.soon")} />}
+        />
+      </Section>
+
+      {/* Sobre */}
+      <Section title={t("settings.about.section")}>
+        <Row icon={Info} label={t("settings.about.app")} desc={t("settings.about.appDesc")} to="/about" />
+        <Row
+          icon={BadgeCheck}
+          label={t("settings.about.version")}
+          desc="1.0.0"
+          right={<span className="shrink-0 text-xs font-semibold text-muted-foreground">1.0.0</span>}
+        />
+        <Row
+          icon={Scale}
+          label={t("settings.about.licenses")}
+          desc={t("settings.about.licensesDesc")}
+          right={<SoonBadge label={t("common.soon")} />}
+        />
+        <Row
+          icon={RefreshCw}
+          label={t("settings.about.updates")}
+          desc={t("settings.about.updatesDesc")}
+          right={<SoonBadge label={t("common.soon")} />}
+        />
       </Section>
 
       <p className="pb-2 text-center text-xs text-muted-foreground">{t("settings.version")}</p>
