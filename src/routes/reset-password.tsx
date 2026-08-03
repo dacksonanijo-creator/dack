@@ -1,0 +1,124 @@
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { AuthLayout, Field } from "@/components/taskora/auth-layout";
+import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { authErrorMessage } from "@/lib/auth-errors";
+
+export const Route = createFileRoute("/reset-password")({
+  ssr: false,
+  head: () => ({
+    meta: [
+      { title: "Nova palavra-passe — Taskora" },
+      { name: "description", content: "Define uma nova palavra-passe para a tua conta Taskora." },
+      { property: "og:title", content: "Nova palavra-passe — Taskora" },
+      { property: "og:description", content: "Define uma nova palavra-passe em segurança." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
+  component: ResetPassword,
+});
+
+const input =
+  "w-full rounded-xl border border-input bg-background px-4 py-3 text-sm outline-none transition-shadow placeholder:text-muted-foreground focus:border-primary focus:ring-4 focus:ring-primary/10";
+
+function ResetPassword() {
+  const navigate = useNavigate();
+  const [ready, setReady] = useState(false);
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => setReady(Boolean(data.session)));
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => setReady(Boolean(s)));
+    return () => sub.subscription.unsubscribe();
+  }, []);
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (loading) return;
+    if (password.length < 6) {
+      setError("A palavra-passe deve ter pelo menos 6 caracteres.");
+      return;
+    }
+    if (password !== confirm) {
+      setError("As palavras-passe não coincidem.");
+      return;
+    }
+    setError(null);
+    setLoading(true);
+    const { error: err } = await supabase.auth.updateUser({ password });
+    setLoading(false);
+    if (err) {
+      const msg = authErrorMessage(err.message);
+      setError(msg);
+      toast.error(msg);
+      return;
+    }
+    toast.success("Palavra-passe atualizada.");
+    navigate({ to: "/app" });
+  };
+
+  return (
+    <AuthLayout
+      title="Nova palavra-passe"
+      subtitle="Define uma nova palavra-passe para a tua conta."
+      backTo="/login"
+      footer={
+        <Link to="/login" className="font-semibold text-primary hover:underline">
+          Voltar ao login
+        </Link>
+      }
+    >
+      {!ready ? (
+        <p className="rounded-xl bg-accent/60 px-4 py-3 text-xs text-muted-foreground">
+          Abre esta página a partir do link de recuperação enviado para o teu email.
+        </p>
+      ) : (
+        <form className="space-y-4" onSubmit={onSubmit} noValidate>
+          <Field label="Nova palavra-passe">
+            <input
+              type="password"
+              className={input}
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setError(null);
+              }}
+            />
+          </Field>
+          <Field label="Confirmar">
+            <input
+              type="password"
+              className={input}
+              placeholder="••••••••"
+              value={confirm}
+              onChange={(e) => {
+                setConfirm(e.target.value);
+                setError(null);
+              }}
+            />
+          </Field>
+          {error && (
+            <p className="rounded-xl bg-destructive/10 px-3 py-2 text-xs font-medium text-destructive">
+              {error}
+            </p>
+          )}
+          <Button
+            type="submit"
+            size="lg"
+            disabled={loading}
+            className="h-12 w-full rounded-xl text-base shadow-glow"
+          >
+            {loading ? "A guardar…" : "Guardar"}
+          </Button>
+        </form>
+      )}
+    </AuthLayout>
+  );
+}
