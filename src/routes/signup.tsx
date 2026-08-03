@@ -5,6 +5,7 @@ import { AuthLayout, Field } from "@/components/taskora/auth-layout";
 import { Button } from "@/components/ui/button";
 import { countries } from "@/components/taskora/mock-data";
 import { supabase } from "@/integrations/supabase/client";
+import { authErrorMessage, emailRe } from "@/lib/auth-errors";
 
 export const Route = createFileRoute("/signup")({
   head: () => ({
@@ -23,9 +24,13 @@ export const Route = createFileRoute("/signup")({
 const input =
   "w-full rounded-xl border border-input bg-background px-4 py-3 text-sm outline-none transition-shadow placeholder:text-muted-foreground focus:border-primary focus:ring-4 focus:ring-primary/10";
 
+type Errors = Partial<Record<"fullName" | "email" | "password" | "confirm" | "terms", string>>;
+
 function Signup() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<Errors>({});
+  const [accepted, setAccepted] = useState(false);
   const [form, setForm] = useState({
     fullName: "",
     email: "",
@@ -34,46 +39,89 @@ function Signup() {
     confirm: "",
   });
 
-  const set = (k: keyof typeof form) => (e: { target: { value: string } }) =>
+  const set = (k: keyof typeof form) => (e: { target: { value: string } }) => {
     setForm((f) => ({ ...f, [k]: e.target.value }));
+    setErrors((prev) => ({ ...prev, [k]: undefined }));
+  };
+
+  const validate = () => {
+    const next: Errors = {};
+    if (form.fullName.trim().length < 3) next.fullName = "Indica o teu nome completo.";
+    if (!emailRe.test(form.email.trim())) next.email = "Introduz um email válido.";
+    if (form.password.length < 6) next.password = "Mínimo de 6 caracteres.";
+    if (form.confirm !== form.password) next.confirm = "As palavras-passe não coincidem.";
+    if (!accepted) next.terms = "Tens de aceitar os Termos e a Política de Privacidade.";
+    setErrors(next);
+    return Object.keys(next).length === 0;
+  };
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (form.password !== form.confirm) {
-      toast.error("As palavras-passe não coincidem.");
+    if (loading) return;
+    if (!validate()) {
+      toast.error("Corrige os campos assinalados.");
       return;
     }
+
     setLoading(true);
-    const { data, error } = await supabase.auth.signUp({
-      email: form.email.trim(),
-      password: form.password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/app`,
-        data: { full_name: form.fullName.trim(), country: form.country },
-      },
-    });
-    if (error) {
-      setLoading(false);
-      toast.error(error.message);
-      return;
-    }
-
-    if (data.session && data.user) {
-      await supabase.from("profiles").upsert({
-        id: data.user.id,
-        full_name: form.fullName.trim(),
-        email: form.email.trim(),
-        country: form.country,
+    try {
+      const email = form.email.trim().toLowerCase();
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password: form.password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/app`,
+          data: { full_name: form.fullName.trim(), country: form.country },
+        },
       });
-      setLoading(false);
-      navigate({ to: "/app" });
-      return;
-    }
 
-    setLoading(false);
-    toast.success("Conta criada. Confirma o teu email para entrares.");
-    navigate({ to: "/login" });
+      if (error) {
+        const msg = authErrorMessage(error.message);
+        setErrors({ email: msg });
+        toast.error(msg);
+        return;
+      }
+
+      // Conta já existente devolve user sem identidades associadas.
+      if (data.user && (data.user.identities?.length ?? 0) === 0) {
+        const msg = "Já existe uma conta com este email. Entra em vez de criar conta.";
+        setErrors({ email: msg });
+        toast.error(msg);
+        return;
+      }
+
+      let session = data.session;
+      if (!session) {
+        const signIn = await supabase.auth.signInWithPassword({ email, password: form.password });
+        if (signIn.error) {
+          toast.success("Conta criada. Confirma o teu email para entrares.");
+          navigate({ to: "/login" });
+          return;
+        }
+        session = signIn.data.session;
+      }
+
+      if (session?.user) {
+        const { error: profileError } = await supabase.from("profiles").upsert({
+          id: session.user.id,
+          full_name: form.fullName.trim(),
+          email,
+          country: form.country,
+        });
+        if (profileError) console.error("[signup] perfil:", profileError.message);
+      }
+
+      toast.success("Conta criada com sucesso.");
+      navigate({ to: "/app" });
+    } catch (err) {
+      toast.error(authErrorMessage(err instanceof Error ? err.message : String(err)));
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const errText = (k: keyof Errors) =>
+    errors[k] ? <span className="mt-1 block text-xs font-medium text-destructive">{errors[k]}</span> : null;
 
   return (
     <AuthLayout
@@ -88,25 +136,25 @@ function Signup() {
         </>
       }
     >
-      <form className="space-y-4" onSubmit={onSubmit}>
+      <form className="space-y-4" onSubmit={onSubmit} noValidate>
         <Field label="Nome completo">
           <input
-            required
             className={input}
             placeholder="O teu nome completo"
             value={form.fullName}
             onChange={set("fullName")}
           />
+          {errText("fullName")}
         </Field>
         <Field label="Email">
           <input
             type="email"
-            required
             className={input}
             placeholder="nome@email.com"
             value={form.email}
             onChange={set("email")}
           />
+          {errText("email")}
         </Field>
         <Field label="País">
           <select className={input} value={form.country} onChange={set("country")}>
@@ -119,44 +167,49 @@ function Signup() {
           <Field label="Palavra-passe">
             <input
               type="password"
-              required
-              minLength={6}
               className={input}
               placeholder="••••••••"
               value={form.password}
               onChange={set("password")}
             />
+            {errText("password")}
           </Field>
           <Field label="Confirmar">
             <input
               type="password"
-              required
-              minLength={6}
               className={input}
               placeholder="••••••••"
               value={form.confirm}
               onChange={set("confirm")}
             />
+            {errText("confirm")}
           </Field>
         </div>
-        <label className="flex items-start gap-2.5 text-xs text-muted-foreground">
-          <input
-            type="checkbox"
-            required
-            className="mt-0.5 h-4 w-4 rounded border-input accent-[var(--primary)]"
-          />
-          <span>
-            Aceito os{" "}
-            <Link to="/terms" className="text-primary hover:underline">
-              Termos
-            </Link>{" "}
-            e a{" "}
-            <Link to="/privacy" className="text-primary hover:underline">
-              Política de Privacidade
-            </Link>
-            .
-          </span>
-        </label>
+        <div>
+          <label className="flex items-start gap-2.5 text-xs text-muted-foreground">
+            <input
+              type="checkbox"
+              checked={accepted}
+              onChange={(e) => {
+                setAccepted(e.target.checked);
+                setErrors((p) => ({ ...p, terms: undefined }));
+              }}
+              className="mt-0.5 h-4 w-4 rounded border-input accent-[var(--primary)]"
+            />
+            <span>
+              Aceito os{" "}
+              <Link to="/terms" className="text-primary hover:underline">
+                Termos
+              </Link>{" "}
+              e a{" "}
+              <Link to="/privacy" className="text-primary hover:underline">
+                Política de Privacidade
+              </Link>
+              .
+            </span>
+          </label>
+          {errText("terms")}
+        </div>
         <Button
           type="submit"
           size="lg"

@@ -1,8 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { CheckCircle2 } from "lucide-react";
+import { toast } from "sonner";
 import { AuthLayout, Field } from "@/components/taskora/auth-layout";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { authErrorMessage, emailRe } from "@/lib/auth-errors";
 
 export const Route = createFileRoute("/forgot-password")({
   head: () => ({
@@ -23,6 +26,32 @@ const input =
 
 function Forgot() {
   const [sent, setSent] = useState(false);
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (loading) return;
+    if (!emailRe.test(email.trim())) {
+      setError("Introduz um email válido.");
+      return;
+    }
+    setError(null);
+    setLoading(true);
+    const { error: err } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    setLoading(false);
+    if (err) {
+      const msg = authErrorMessage(err.message);
+      setError(msg);
+      toast.error(msg);
+      return;
+    }
+    setSent(true);
+  };
+
   return (
     <AuthLayout
       title="Recuperar palavra-passe"
@@ -43,18 +72,31 @@ function Forgot() {
           </p>
         </div>
       ) : (
-        <form
-          className="space-y-4"
-          onSubmit={(e) => {
-            e.preventDefault();
-            setSent(true);
-          }}
-        >
+        <form className="space-y-4" onSubmit={onSubmit} noValidate>
           <Field label="Email">
-            <input type="email" className={input} placeholder="ana@email.com" />
+            <input
+              type="email"
+              className={input}
+              placeholder="nome@email.com"
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setError(null);
+              }}
+            />
           </Field>
-          <Button type="submit" size="lg" className="h-12 w-full rounded-xl text-base shadow-glow">
-            Enviar
+          {error && (
+            <p className="rounded-xl bg-destructive/10 px-3 py-2 text-xs font-medium text-destructive">
+              {error}
+            </p>
+          )}
+          <Button
+            type="submit"
+            size="lg"
+            disabled={loading}
+            className="h-12 w-full rounded-xl text-base shadow-glow"
+          >
+            {loading ? "A enviar…" : "Enviar"}
           </Button>
         </form>
       )}
