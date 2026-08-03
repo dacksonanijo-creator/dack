@@ -82,6 +82,36 @@ export default defineMessages({
     fr: "Envoyer pour évaluation",
   },
 
+  "tasks.filter.all": { "pt-PT": "Todas", "pt-BR": "Todas", en: "All", fr: "Toutes" },
+  "tasks.category.all": { "pt-PT": "Todos", "pt-BR": "Todos", en: "All", fr: "Tous" },
+  "tasks.viewDetails": { "pt-PT": "Ver detalhes", "pt-BR": "Ver detalhes", en: "View details", fr: "Voir les détails" },
+  "tasks.search.open": { "pt-PT": "Pesquisar tarefas", "pt-BR": "Pesquisar tarefas", en: "Search tasks", fr: "Rechercher des tâches" },
+  "tasks.search.placeholderLong": {
+    "pt-PT": "Pesquisar tarefas...",
+    "pt-BR": "Pesquisar tarefas...",
+    en: "Search tasks...",
+    fr: "Rechercher des tâches...",
+  },
+  "tasks.emptyState.title": {
+    "pt-PT": "Nenhuma tarefa disponível no momento.",
+    "pt-BR": "Nenhuma tarefa disponível no momento.",
+    en: "No tasks available right now.",
+    fr: "Aucune tâche disponible pour le moment.",
+  },
+  "tasks.refresh": { "pt-PT": "Atualizar", "pt-BR": "Atualizar", en: "Refresh", fr: "Actualiser" },
+  "tasks.error.title": {
+    "pt-PT": "Não foi possível carregar as tarefas. Verifique sua ligação à internet ou tente novamente.",
+    "pt-BR": "Não foi possível carregar as tarefas. Verifique sua conexão com a internet ou tente novamente.",
+    en: "We couldn't load the tasks. Check your internet connection or try again.",
+    fr: "Impossible de charger les tâches. Vérifie ta connexion internet ou réessaie.",
+  },
+  "tasks.retry": { "pt-PT": "Tentar novamente", "pt-BR": "Tentar novamente", en: "Try again", fr: "Réessayer" },
+  "tasks.preview.states": { "pt-PT": "Pré-visualizar estados", "pt-BR": "Pré-visualizar estados", en: "Preview states", fr: "Aperçu des états" },
+  "tasks.preview.normal": { "pt-PT": "Normal", "pt-BR": "Normal", en: "Normal", fr: "Normal" },
+  "tasks.preview.loading": { "pt-PT": "Carregando", "pt-BR": "Carregando", en: "Loading", fr: "Chargement" },
+  "tasks.preview.empty": { "pt-PT": "Vazio", "pt-BR": "Vazio", en: "Empty", fr: "Vide" },
+  "tasks.preview.error": { "pt-PT": "Erro", "pt-BR": "Erro", en: "Error", fr: "Erreur" },
+
   // ===== Wallet =====
   "wallet.title": { "pt-PT": "Carteira", "pt-BR": "Carteira", en: "Wallet", fr: "Portefeuille" },
   "wallet.movementsCount": {
