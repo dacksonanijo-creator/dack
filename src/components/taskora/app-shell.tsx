@@ -42,9 +42,10 @@ export function Avatar({ className }: { className?: string }) {
 export function AppShell() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [open, setOpen] = useState(false);
-  const { signOut } = useAuth();
+  const { signOut, user } = useAuth();
   const navigate = useNavigate();
   const t = useT();
+  const isAdmin = isAdminEmail(user?.email);
 
   const tabs = [
     { to: "/app", label: t("shell.nav.home"), icon: Home, exact: true },
