@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useT } from "@/i18n";
 
 export const Route = createFileRoute("/app/help")({
   head: () => ({
@@ -14,31 +15,19 @@ export const Route = createFileRoute("/app/help")({
   component: Help,
 });
 
-const faqs = [
-  {
-    q: "Como escolho uma tarefa?",
-    a: "Abre o separador Tarefas, filtra por categoria e toca em Ver detalhes para leres as instruções completas.",
-  },
-  {
-    q: "Quanto tempo demora a revisão?",
-    a: "Normalmente as submissões são revistas em menos de 48 horas úteis.",
-  },
-  {
-    q: "Posso usar a Taskora no telemóvel?",
-    a: "Sim. A interface foi desenhada primeiro para telemóvel e adapta-se a tablets e computadores.",
-  },
-  {
-    q: "Como falo com o suporte?",
-    a: "Escreve para apoio@taskora.app e respondemos em português dentro de 24 horas.",
-  },
-];
-
 function Help() {
+  const t = useT();
+  const faqs = [
+    { q: t("pages.help.q1"), a: t("pages.help.a1") },
+    { q: t("pages.help.q2"), a: t("pages.help.a2") },
+    { q: t("pages.help.q3"), a: t("pages.help.a3") },
+    { q: t("pages.help.q4"), a: t("pages.help.a4") },
+  ];
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-display text-2xl font-extrabold">Ajuda</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Perguntas frequentes sobre a plataforma.</p>
+        <h1 className="font-display text-2xl font-extrabold">{t("pages.help.title")}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">{t("pages.help.subtitle")}</p>
       </div>
       <div className="space-y-3">
         {faqs.map((f) => (

@@ -1,7 +1,8 @@
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { ArrowLeft, CalendarClock, CheckCircle2, Clock3, ShieldCheck, Wallet } from "lucide-react";
 import { tasks, taskRules } from "@/components/taskora/mock-data";
-import { stateClasses, stateLabels, useTaskStates } from "@/components/taskora/task-state";
+import { stateClasses, useStateLabels, useTaskStates } from "@/components/taskora/task-state";
+import { useT } from "@/i18n";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/app/tasks/$taskId")({
@@ -19,6 +20,8 @@ export const Route = createFileRoute("/app/tasks/$taskId")({
 });
 
 function TaskDetail() {
+  const t = useT();
+  const stateLabels = useStateLabels();
   const { taskId } = useParams({ from: "/app/tasks/$taskId" });
   const task = tasks.find((t) => t.id === taskId) ?? tasks[0];
   const { getState, setState } = useTaskStates();
@@ -26,9 +29,9 @@ function TaskDetail() {
 
   const action =
     state === "available"
-      ? { label: "Iniciar tarefa", next: "progress" as const }
+      ? { label: t("tasks.action.start"), next: "progress" as const }
       : state === "progress"
-        ? { label: "Enviar para avaliação", next: "submitted" as const }
+        ? { label: t("tasks.action.submit"), next: "submitted" as const }
         : null;
 
   return (
@@ -37,7 +40,7 @@ function TaskDetail() {
         to="/app/tasks"
         className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground"
       >
-        <ArrowLeft className="h-3.5 w-3.5" /> Tarefas
+        <ArrowLeft className="h-3.5 w-3.5" /> {t("tasks.back")}
       </Link>
 
       <div className="rounded-xl border border-border/70 bg-card p-4">
@@ -63,24 +66,24 @@ function TaskDetail() {
         <div className="mt-3 grid grid-cols-3 gap-2 border-t border-border pt-3 text-center">
           <div>
             <Wallet className="mx-auto h-3.5 w-3.5 text-money" />
-            <p className="mt-1 text-[10px] uppercase tracking-wide text-muted-foreground">Recompensa</p>
+            <p className="mt-1 text-[10px] uppercase tracking-wide text-muted-foreground">{t("tasks.reward")}</p>
             <p className="font-display text-sm font-bold text-money">{task.reward}</p>
           </div>
           <div>
             <Clock3 className="mx-auto h-3.5 w-3.5 text-primary" />
-            <p className="mt-1 text-[10px] uppercase tracking-wide text-muted-foreground">Tempo</p>
-            <p className="font-display text-sm font-bold">{task.minutes} min</p>
+            <p className="mt-1 text-[10px] uppercase tracking-wide text-muted-foreground">{t("tasks.time")}</p>
+            <p className="font-display text-sm font-bold">{task.minutes} {t("tasks.minutes")}</p>
           </div>
           <div>
             <CalendarClock className="mx-auto h-3.5 w-3.5 text-muted-foreground" />
-            <p className="mt-1 text-[10px] uppercase tracking-wide text-muted-foreground">Prazo</p>
-            <p className="font-display text-sm font-bold">{task.deadline ?? "Sem prazo"}</p>
+            <p className="mt-1 text-[10px] uppercase tracking-wide text-muted-foreground">{t("tasks.deadline")}</p>
+            <p className="font-display text-sm font-bold">{task.deadline ?? t("tasks.noDeadline")}</p>
           </div>
         </div>
       </div>
 
       <div className="rounded-xl border border-border/70 bg-card p-4">
-        <h2 className="font-display text-sm font-bold">Instruções</h2>
+        <h2 className="font-display text-sm font-bold">{t("tasks.instructions")}</h2>
         <ol className="mt-2 space-y-2">
           {task.steps.map((s, i) => (
             <li key={s} className="flex items-start gap-2 text-xs leading-relaxed">
@@ -95,7 +98,7 @@ function TaskDetail() {
 
       <div className="rounded-xl border border-border/70 bg-card p-4">
         <h2 className="flex items-center gap-1.5 font-display text-sm font-bold">
-          <ShieldCheck className="h-3.5 w-3.5 text-primary" /> Regras de conclusão
+          <ShieldCheck className="h-3.5 w-3.5 text-primary" /> {t("tasks.completionRules")}
         </h2>
         <ul className="mt-2 space-y-1.5">
           {(task.rules ?? taskRules).map((r) => (
@@ -110,12 +113,12 @@ function TaskDetail() {
       <div className="flex items-center justify-between gap-3 rounded-xl border border-border/70 bg-card px-4 py-3">
         <p className="text-xs text-muted-foreground">
           {state === "submitted"
-            ? "Submissão em avaliação."
+            ? t("tasks.status.underReview")
             : state === "approved"
-              ? "Tarefa aprovada e concluída."
+              ? t("tasks.status.approvedDone")
               : state === "rejected"
-                ? "Submissão rejeitada."
-                : "Segue as instruções para concluir."}
+                ? t("tasks.status.rejectedSubmission")
+                : t("tasks.status.followInstructions")}
         </p>
         {action && (
           <button

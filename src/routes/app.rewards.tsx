@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Gift } from "lucide-react";
+import { useT } from "@/i18n";
 
 export const Route = createFileRoute("/app/rewards")({
   head: () => ({
@@ -16,16 +17,17 @@ export const Route = createFileRoute("/app/rewards")({
 });
 
 function RewardsPage() {
+  const t = useT();
   return (
     <div className="space-y-6">
-      <h1 className="font-display text-2xl font-extrabold">Recompensas</h1>
+      <h1 className="font-display text-2xl font-extrabold">{t("pages.rewards.title")}</h1>
       <div className="grid place-items-center rounded-3xl border border-dashed border-border bg-card/50 px-6 py-16 text-center">
         <span className="grid h-12 w-12 place-items-center rounded-2xl bg-primary/10 text-primary">
           <Gift className="h-5 w-5" />
         </span>
-        <p className="mt-4 font-display text-base font-bold">Sem recompensas ainda</p>
+        <p className="mt-4 font-display text-base font-bold">{t("pages.rewards.emptyTitle")}</p>
         <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-          As recompensas ficarão disponíveis em breve.
+          {t("pages.rewards.emptyDesc")}
         </p>
       </div>
     </div>

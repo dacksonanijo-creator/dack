@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Activity } from "lucide-react";
+import { useT } from "@/i18n";
 
 export const Route = createFileRoute("/app/activity")({
   head: () => ({
@@ -16,16 +17,17 @@ export const Route = createFileRoute("/app/activity")({
 });
 
 function ActivityPage() {
+  const t = useT();
   return (
     <div className="space-y-6">
-      <h1 className="font-display text-2xl font-extrabold">Atividade</h1>
+      <h1 className="font-display text-2xl font-extrabold">{t("pages.activity.title")}</h1>
       <div className="grid place-items-center rounded-3xl border border-dashed border-border bg-card/50 px-6 py-16 text-center">
         <span className="grid h-12 w-12 place-items-center rounded-2xl bg-primary/10 text-primary">
           <Activity className="h-5 w-5" />
         </span>
-        <p className="mt-4 font-display text-base font-bold">Sem atividade registada</p>
+        <p className="mt-4 font-display text-base font-bold">{t("pages.activity.emptyTitle")}</p>
         <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-          A tua atividade na plataforma vai aparecer aqui.
+          {t("pages.activity.emptyDesc")}
         </p>
       </div>
     </div>

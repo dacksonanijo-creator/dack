@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { TaskoraLogo } from "@/components/taskora/logo";
+import { useT } from "@/i18n";
 
 export const Route = createFileRoute("/about")({
   head: () => ({
@@ -20,6 +21,12 @@ export const Route = createFileRoute("/about")({
 });
 
 function About() {
+  const t = useT();
+  const stats = [
+    { k: t("pages.about.statCommunity"), v: "12k+" },
+    { k: t("pages.about.statTasks"), v: "84k+" },
+    { k: t("pages.about.statCountries"), v: "7" },
+  ];
   return (
     <div className="min-h-screen bg-gradient-hero px-5 py-8 sm:px-6">
       <div className="mx-auto max-w-2xl space-y-6">
@@ -27,25 +34,18 @@ function About() {
           to="/app/settings"
           className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground"
         >
-          <ArrowLeft className="h-4 w-4" /> Voltar
+          <ArrowLeft className="h-4 w-4" /> {t("pages.about.back")}
         </Link>
         <TaskoraLogo size="lg" />
-        <h1 className="font-display text-3xl font-extrabold">Transformando tempo em oportunidades.</h1>
+        <h1 className="font-display text-3xl font-extrabold">{t("pages.about.heading")}</h1>
         <p className="text-sm leading-relaxed text-muted-foreground">
-          A Taskora nasceu com uma ideia simples: o tempo livre das pessoas pode gerar valor real. Ligamos
-          empresas que precisam de pequenas ações — testes, inquéritos, recolha de dados — a uma comunidade
-          que quer trabalhar de forma flexível, a partir do telemóvel.
+          {t("pages.about.p1")}
         </p>
         <p className="text-sm leading-relaxed text-muted-foreground">
-          Construímos uma experiência clara, rápida e transparente: sabes sempre quanto vale uma tarefa,
-          quanto tempo demora e em que estado está a tua submissão.
+          {t("pages.about.p2")}
         </p>
         <div className="grid gap-3 sm:grid-cols-3">
-          {[
-            { k: "Comunidade", v: "12k+" },
-            { k: "Tarefas concluídas", v: "84k+" },
-            { k: "Países", v: "7" },
-          ].map((s) => (
+          {stats.map((s) => (
             <div key={s.k} className="rounded-2xl border border-border/70 bg-card p-4 text-center shadow-soft">
               <p className="font-display text-xl font-extrabold text-gradient">{s.v}</p>
               <p className="mt-1 text-[11px] uppercase tracking-wide text-muted-foreground">{s.k}</p>

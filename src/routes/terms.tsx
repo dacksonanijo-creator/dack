@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
+import { useT } from "@/i18n";
 
 export const Route = createFileRoute("/terms")({
   head: () => ({
@@ -15,30 +16,15 @@ export const Route = createFileRoute("/terms")({
   component: Terms,
 });
 
-const sections = [
-  {
-    t: "1. Aceitação",
-    b: "Ao criar uma conta na Taskora concordas com estas condições de utilização e com a nossa política de privacidade.",
-  },
-  {
-    t: "2. Conta e elegibilidade",
-    b: "Deves ter pelo menos 18 anos e fornecer informação verdadeira. Cada pessoa pode manter apenas uma conta ativa.",
-  },
-  {
-    t: "3. Realização de tarefas",
-    b: "As tarefas devem ser concluídas seguindo as instruções indicadas. Submissões incompletas ou fraudulentas podem ser rejeitadas.",
-  },
-  {
-    t: "4. Recompensas",
-    b: "Os valores apresentados são indicativos da recompensa por tarefa e ficam disponíveis após revisão e aprovação.",
-  },
-  {
-    t: "5. Encerramento",
-    b: "Podes encerrar a tua conta a qualquer momento. Podemos suspender contas que violem estas regras.",
-  },
-];
-
 function Terms() {
+  const t = useT();
+  const sections = [
+    { t: t("pages.terms.t1"), b: t("pages.terms.b1") },
+    { t: t("pages.terms.t2"), b: t("pages.terms.b2") },
+    { t: t("pages.terms.t3"), b: t("pages.terms.b3") },
+    { t: t("pages.terms.t4"), b: t("pages.terms.b4") },
+    { t: t("pages.terms.t5"), b: t("pages.terms.b5") },
+  ];
   return (
     <div className="min-h-screen bg-gradient-hero px-5 py-8 sm:px-6">
       <div className="mx-auto max-w-2xl space-y-6">
@@ -46,10 +32,10 @@ function Terms() {
           to="/app/settings"
           className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground"
         >
-          <ArrowLeft className="h-4 w-4" /> Voltar
+          <ArrowLeft className="h-4 w-4" /> {t("pages.terms.back")}
         </Link>
-        <h1 className="font-display text-3xl font-extrabold">Termos de utilização</h1>
-        <p className="text-xs uppercase tracking-wide text-muted-foreground">Atualizado em julho de 2026</p>
+        <h1 className="font-display text-3xl font-extrabold">{t("pages.terms.title")}</h1>
+        <p className="text-xs uppercase tracking-wide text-muted-foreground">{t("pages.terms.updated")}</p>
         <div className="space-y-4">
           {sections.map((s) => (
             <section key={s.t} className="rounded-2xl border border-border/70 bg-card p-5 shadow-soft">
