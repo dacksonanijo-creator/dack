@@ -1,14 +1,18 @@
 import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
+import { useT } from "@/i18n";
 
 export type TaskState = "available" | "progress" | "submitted" | "approved" | "rejected";
 
-export const stateLabels: Record<TaskState, string> = {
-  available: "Disponível",
-  progress: "Em andamento",
-  submitted: "Em avaliação",
-  approved: "Aprovada",
-  rejected: "Rejeitada",
-};
+export function useStateLabels(): Record<TaskState, string> {
+  const t = useT();
+  return {
+    available: t("tasks.state.available"),
+    progress: t("tasks.state.progress"),
+    submitted: t("tasks.state.submitted"),
+    approved: t("tasks.state.approved"),
+    rejected: t("tasks.state.rejected"),
+  };
+}
 
 export const stateClasses: Record<TaskState, string> = {
   available: "bg-primary/10 text-primary",

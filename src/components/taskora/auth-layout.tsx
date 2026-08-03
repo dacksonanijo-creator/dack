@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { TaskoraLogo } from "./logo";
+import { useT } from "@/i18n";
 
 export function AuthLayout({
   title,
@@ -16,13 +17,14 @@ export function AuthLayout({
   footer?: ReactNode;
   backTo?: string;
 }) {
+  const t = useT();
   return (
     <div className="flex min-h-screen flex-col bg-gradient-hero px-4 py-6 sm:px-6">
       <div className="mx-auto flex w-full max-w-md items-center justify-between">
         <Link
           to={backTo}
           className="grid h-9 w-9 place-items-center rounded-full border border-border bg-card text-muted-foreground transition-colors hover:text-foreground"
-          aria-label="Voltar"
+          aria-label={t("auth.back")}
         >
           <ArrowLeft className="h-4 w-4" />
         </Link>

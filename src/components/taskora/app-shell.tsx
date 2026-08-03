@@ -21,42 +21,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useProfile } from "@/hooks/use-profile";
 import { useAuth } from "@/hooks/use-auth";
 import { useNavigate } from "@tanstack/react-router";
-
-const tabs = [
-  { to: "/app", label: "Início", icon: Home, exact: true },
-  { to: "/app/tasks", label: "Tarefas", icon: ListChecks, exact: false },
-  { to: "/app/wallet", label: "Carteira", icon: Wallet, exact: false },
-  { to: "/app/profile", label: "Perfil", icon: User, exact: false },
-] as const;
-
-const groups = [
-  {
-    label: "Principal",
-    items: [
-      { to: "/app", label: "Início", icon: Home, exact: true },
-      { to: "/app/tasks", label: "Tarefas", icon: ListChecks, exact: false },
-      { to: "/app/wallet", label: "Carteira", icon: Wallet, exact: false },
-    ],
-  },
-  {
-    label: "Conta",
-    items: [
-      { to: "/app/profile", label: "Perfil", icon: User, exact: false },
-      { to: "/app/withdrawals", label: "Saques", icon: Banknote, exact: false },
-      { to: "/app/activity", label: "Atividade", icon: Activity, exact: false },
-      { to: "/app/rewards", label: "Recompensas", icon: Gift, exact: false },
-    ],
-  },
-  {
-    label: "Sistema",
-    items: [
-      { to: "/app/notifications", label: "Notificações", icon: Bell, exact: false },
-      { to: "/app/settings", label: "Definições", icon: Settings, exact: false },
-      { to: "/app/help", label: "Ajuda", icon: CircleHelp, exact: false },
-      { to: "/about", label: "Sobre a Taskora", icon: Info, exact: false },
-    ],
-  },
-] as const;
+import { useT } from "@/i18n";
 
 export function Avatar({ className }: { className?: string }) {
   const { initials } = useProfile();
@@ -77,6 +42,43 @@ export function AppShell() {
   const [open, setOpen] = useState(false);
   const { signOut } = useAuth();
   const navigate = useNavigate();
+  const t = useT();
+
+  const tabs = [
+    { to: "/app", label: t("shell.nav.home"), icon: Home, exact: true },
+    { to: "/app/tasks", label: t("shell.nav.tasks"), icon: ListChecks, exact: false },
+    { to: "/app/wallet", label: t("shell.nav.wallet"), icon: Wallet, exact: false },
+    { to: "/app/profile", label: t("shell.nav.profile"), icon: User, exact: false },
+  ] as const;
+
+  const groups = [
+    {
+      label: t("shell.group.main"),
+      items: [
+        { to: "/app", label: t("shell.nav.home"), icon: Home, exact: true },
+        { to: "/app/tasks", label: t("shell.nav.tasks"), icon: ListChecks, exact: false },
+        { to: "/app/wallet", label: t("shell.nav.wallet"), icon: Wallet, exact: false },
+      ],
+    },
+    {
+      label: t("shell.group.account"),
+      items: [
+        { to: "/app/profile", label: t("shell.nav.profile"), icon: User, exact: false },
+        { to: "/app/withdrawals", label: t("shell.item.withdrawals"), icon: Banknote, exact: false },
+        { to: "/app/activity", label: t("shell.item.activity"), icon: Activity, exact: false },
+        { to: "/app/rewards", label: t("shell.item.rewards"), icon: Gift, exact: false },
+      ],
+    },
+    {
+      label: t("shell.group.system"),
+      items: [
+        { to: "/app/notifications", label: t("shell.item.notifications"), icon: Bell, exact: false },
+        { to: "/app/settings", label: t("shell.item.settings"), icon: Settings, exact: false },
+        { to: "/app/help", label: t("shell.item.help"), icon: CircleHelp, exact: false },
+        { to: "/about", label: t("shell.item.about"), icon: Info, exact: false },
+      ],
+    },
+  ] as const;
 
   const isActive = (to: string, exact: boolean) =>
     exact ? pathname === to : pathname.startsWith(to);
@@ -87,7 +89,7 @@ export function AppShell() {
         <div className="mx-auto grid max-w-5xl grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 px-3 py-2.5 sm:px-6">
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger
-              aria-label="Abrir menu"
+              aria-label={t("shell.aria.openMenu")}
               className="grid h-8 w-8 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             >
               <Menu className="h-[18px] w-[18px]" />
@@ -128,7 +130,7 @@ export function AppShell() {
                   ))}
                   <div className="mb-1">
                     <p className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70">
-                      Sessão
+                      {t("shell.group.session")}
                     </p>
                     <button
                       type="button"
@@ -140,7 +142,7 @@ export function AppShell() {
                       className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm font-medium text-destructive transition-colors hover:bg-destructive/10"
                     >
                       <LogOut className="h-4 w-4 shrink-0" />
-                      Terminar sessão
+                      {t("shell.signOut")}
                     </button>
                   </div>
                 </nav>
@@ -155,12 +157,12 @@ export function AppShell() {
           <div className="flex shrink-0 items-center gap-1.5">
             <Link
               to="/app/notifications"
-              aria-label="Notificações"
+              aria-label={t("shell.aria.notifications")}
               className="grid h-8 w-8 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             >
               <Bell className="h-[18px] w-[18px]" />
             </Link>
-            <Link to="/app/profile" aria-label="Perfil">
+            <Link to="/app/profile" aria-label={t("shell.aria.profile")}>
               <Avatar />
             </Link>
           </div>

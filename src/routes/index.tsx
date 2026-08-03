@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { TaskoraMark } from "@/components/taskora/logo";
+import { useT } from "@/i18n";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -25,6 +26,7 @@ export const Route = createFileRoute("/")({
 
 function Splash() {
   const navigate = useNavigate();
+  const t = useT();
 
   useEffect(() => {
     const timer = setTimeout(() => navigate({ to: "/welcome" }), 2200);
@@ -42,7 +44,7 @@ function Splash() {
           Taskora
         </h1>
         <p className="mt-2 animate-rise text-sm text-muted-foreground [animation-delay:260ms] sm:text-base">
-          Transformando tempo em oportunidades.
+          {t("brand.tagline")}
         </p>
         <div className="mt-10 h-1 w-40 overflow-hidden rounded-full bg-muted">
           <div className="h-full w-1/3 animate-[taskora-rise_1.6s_ease-in-out_infinite_alternate] rounded-full bg-gradient-primary" />

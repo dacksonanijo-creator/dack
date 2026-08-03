@@ -1,7 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ShieldCheck, Timer, Wallet } from "lucide-react";
 import { TaskoraLogo } from "@/components/taskora/logo";
+import { LanguageSelect } from "@/components/taskora/language-select";
 import { Button } from "@/components/ui/button";
+import { useT } from "@/i18n";
 
 export const Route = createFileRoute("/welcome")({
   head: () => ({
@@ -24,29 +26,45 @@ export const Route = createFileRoute("/welcome")({
   component: Welcome,
 });
 
-const highlights = [
-  { icon: Timer, title: "Tarefas curtas", text: "A maioria demora menos de 15 minutos." },
-  { icon: Wallet, title: "Recompensa clara", text: "Sabes o valor antes de começar." },
-  { icon: ShieldCheck, title: "Confiança total", text: "Empresas verificadas e regras transparentes." },
-];
-
 function Welcome() {
+  const t = useT();
+
+  const highlights = [
+    {
+      icon: Timer,
+      title: t("welcome.highlight.shortTasks.title"),
+      text: t("welcome.highlight.shortTasks.text"),
+    },
+    {
+      icon: Wallet,
+      title: t("welcome.highlight.clearReward.title"),
+      text: t("welcome.highlight.clearReward.text"),
+    },
+    {
+      icon: ShieldCheck,
+      title: t("welcome.highlight.trust.title"),
+      text: t("welcome.highlight.trust.text"),
+    },
+  ];
+
   return (
     <div className="flex min-h-screen flex-col bg-gradient-hero px-5 py-8 sm:px-6">
-      <header className="mx-auto w-full max-w-2xl">
+      <header className="mx-auto flex w-full max-w-2xl items-center justify-between">
         <TaskoraLogo />
+        <LanguageSelect variant="compact" />
       </header>
 
       <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center py-10">
         <span className="w-fit animate-rise rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary">
-          Nova geração de trabalho digital
+          {t("welcome.badge")}
         </span>
         <h1 className="mt-5 animate-rise font-display text-4xl font-extrabold leading-[1.08] [animation-delay:80ms] sm:text-5xl">
-          Transformando <span className="text-gradient">tempo</span> em oportunidades.
+          {t("welcome.title.prefix")}{" "}
+          <span className="text-gradient">{t("welcome.title.highlight")}</span>{" "}
+          {t("welcome.title.suffix")}
         </h1>
         <p className="mt-4 max-w-lg animate-rise text-base leading-relaxed text-muted-foreground [animation-delay:160ms]">
-          A Taskora liga pessoas a empresas através de microtarefas simples. Escolhe uma tarefa,
-          conclui em minutos e acompanha tudo num único painel elegante.
+          {t("welcome.desc")}
         </p>
 
         <div className="mt-8 grid gap-3 sm:grid-cols-3">
@@ -67,22 +85,22 @@ function Welcome() {
 
         <div className="mt-10 flex flex-col gap-3 sm:flex-row">
           <Button asChild size="lg" className="h-12 flex-1 rounded-xl text-base shadow-glow">
-            <Link to="/signup">Criar conta</Link>
+            <Link to="/signup">{t("welcome.createAccount")}</Link>
           </Button>
           <Button asChild size="lg" variant="outline" className="h-12 flex-1 rounded-xl text-base">
-            <Link to="/login">Entrar</Link>
+            <Link to="/login">{t("welcome.login")}</Link>
           </Button>
         </div>
       </main>
 
       <footer className="mx-auto w-full max-w-2xl text-center text-xs text-muted-foreground">
-        Ao continuar aceitas os{" "}
+        {t("welcome.terms.continue")}{" "}
         <Link to="/terms" className="text-primary hover:underline">
-          Termos
+          {t("welcome.terms.terms")}
         </Link>{" "}
-        e a{" "}
+        {t("welcome.terms.and")}{" "}
         <Link to="/privacy" className="text-primary hover:underline">
-          Política de Privacidade
+          {t("welcome.terms.privacy")}
         </Link>
         .
       </footer>

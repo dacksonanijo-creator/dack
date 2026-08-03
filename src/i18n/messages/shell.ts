@@ -65,17 +65,23 @@ export default defineMessages({
     en: "A new generation of digital work",
     fr: "Une nouvelle génération de travail numérique",
   },
-  "welcome.title": {
-    "pt-PT": "Transformando {highlight} em oportunidades.",
-    "pt-BR": "Transformando {highlight} em oportunidades.",
-    en: "Turning {highlight} into opportunities.",
-    fr: "Transformer le {highlight} en opportunités.",
+  "welcome.title.prefix": {
+    "pt-PT": "Transformando",
+    "pt-BR": "Transformando",
+    en: "Turning",
+    fr: "Transformer",
   },
-  "welcome.titleHighlight": {
+  "welcome.title.highlight": {
     "pt-PT": "tempo",
     "pt-BR": "tempo",
     en: "time",
-    fr: "temps",
+    fr: "le temps",
+  },
+  "welcome.title.suffix": {
+    "pt-PT": "em oportunidades.",
+    "pt-BR": "em oportunidades.",
+    en: "into opportunities.",
+    fr: "en opportunités.",
   },
   "welcome.desc": {
     "pt-PT": "A Taskora liga pessoas a empresas através de microtarefas simples. Escolhe uma tarefa, conclui em minutos e acompanha tudo num único painel elegante.",
