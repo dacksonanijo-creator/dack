@@ -1,22 +1,30 @@
-import { DEFAULT_LOCALE, type LocaleCode } from "./config";
-import type { MessageNamespace } from "./types";
+import { DEFAULT_LOCALE, LOCALES, type LocaleCode } from "./config";
+import type { Messages } from "./types";
 
 /**
- * Every file in ./messages is picked up automatically — adding a screen's
- * namespace never requires touching this file.
+ * Every locale owns an independent folder of translation files:
+ *   src/i18n/locales/<locale>/<namespace>.ts
+ *
+ * Adding a language = create the folder + files and register the code in
+ * ./config.ts. Adding a screen = drop a namespace file in each locale folder.
  */
-const modules = import.meta.glob<{ default: MessageNamespace }>("./messages/*.ts", {
+const modules = import.meta.glob<{ default: Messages }>("./locales/*/*.ts", {
   eager: true,
 });
 
-const catalog: MessageNamespace = {};
-for (const mod of Object.values(modules)) {
-  Object.assign(catalog, mod.default);
+const catalogs = Object.fromEntries(LOCALES.map((l) => [l.code, {} as Messages])) as Record<
+  LocaleCode,
+  Messages
+>;
+
+for (const [path, mod] of Object.entries(modules)) {
+  const code = path.split("/")[2] as LocaleCode;
+  if (!catalogs[code]) continue;
+  Object.assign(catalogs[code], mod.default);
 }
 
 export function translate(locale: LocaleCode, key: string, vars?: Record<string, string | number>) {
-  const entry = catalog[key];
-  let text = entry?.[locale] ?? entry?.[DEFAULT_LOCALE] ?? key;
+  let text = catalogs[locale]?.[key] ?? catalogs[DEFAULT_LOCALE]?.[key] ?? key;
   if (vars) {
     for (const [k, v] of Object.entries(vars)) {
       text = text.replaceAll(`{${k}}`, String(v));
@@ -25,6 +33,6 @@ export function translate(locale: LocaleCode, key: string, vars?: Record<string,
   return text;
 }
 
-export function hasMessage(key: string) {
-  return key in catalog;
+export function hasMessage(key: string, locale: LocaleCode = DEFAULT_LOCALE) {
+  return key in (catalogs[locale] ?? {});
 }
