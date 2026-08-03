@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { Search } from "lucide-react";
+import { useT } from "@/i18n";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/app/wallet")({
@@ -31,32 +32,13 @@ interface Movement {
   status: MovementStatus;
 }
 
-const kindLabels: Record<MovementKind, string> = {
-  earning: "Ganho de tarefa",
-  adjustment: "Ajuste administrativo",
-  credit: "Crédito",
-};
-
-const statusLabels: Record<MovementStatus, string> = {
-  done: "Concluído",
-  pending: "Pendente",
-  rejected: "Rejeitado",
-};
-
 const statusTone: Record<MovementStatus, string> = {
   done: "text-task-accent",
   pending: "text-warning",
   rejected: "text-destructive",
 };
 
-const filters = [
-  { key: "all", label: "Todos" },
-  { key: "earning", label: "Ganhos" },
-  { key: "pending", label: "Pendentes" },
-  { key: "done", label: "Concluídos" },
-] as const;
-
-type FilterKey = (typeof filters)[number]["key"];
+type FilterKey = "all" | "earning" | "pending" | "done";
 
 const movements: Movement[] = [];
 
@@ -67,8 +49,28 @@ function matches(m: Movement, filter: FilterKey) {
 }
 
 function WalletPage() {
+  const t = useT();
   const [filter, setFilter] = useState<FilterKey>("all");
   const [query, setQuery] = useState("");
+
+  const kindLabels: Record<MovementKind, string> = {
+    earning: t("wallet.kind.earning"),
+    adjustment: t("wallet.kind.adjustment"),
+    credit: t("wallet.kind.credit"),
+  };
+
+  const statusLabels: Record<MovementStatus, string> = {
+    done: t("wallet.status.done"),
+    pending: t("wallet.status.pending"),
+    rejected: t("wallet.status.rejected"),
+  };
+
+  const filters: { key: FilterKey; label: string }[] = [
+    { key: "all", label: t("wallet.filter.all") },
+    { key: "earning", label: t("wallet.filter.earning") },
+    { key: "pending", label: t("wallet.filter.pending") },
+    { key: "done", label: t("wallet.filter.done") },
+  ];
 
   const list = movements.filter(
     (m) =>
@@ -77,17 +79,17 @@ function WalletPage() {
   );
 
   const summary = [
-    { label: "Disponível", value: "—" },
-    { label: "Pendente", value: "—" },
-    { label: "Ganhos totais", value: "—" },
+    { label: t("wallet.summary.available"), value: "—" },
+    { label: t("wallet.summary.pending"), value: "—" },
+    { label: t("wallet.summary.totalEarnings"), value: "—" },
   ];
 
   return (
     <div className="-mx-4 -my-4 min-h-full bg-task-bg px-4 py-4 sm:-mx-6 sm:px-6">
       <div className="mx-auto max-w-3xl space-y-3">
         <div className="flex items-baseline justify-between">
-          <h1 className="font-display text-base font-bold text-task-title">Carteira</h1>
-          <span className="text-[11px] text-task-muted">{list.length} movimentos</span>
+          <h1 className="font-display text-base font-bold text-task-title">{t("wallet.title")}</h1>
+          <span className="text-[11px] text-task-muted">{t("wallet.movementsCount", { n: list.length })}</span>
         </div>
 
         <div className="grid grid-cols-3 gap-2">
@@ -105,7 +107,7 @@ function WalletPage() {
         </div>
 
         {movements.length === 0 && (
-          <p className="text-[11px] text-task-muted">Nenhum ganho disponível ainda.</p>
+          <p className="text-[11px] text-task-muted">{t("wallet.noEarningsYet")}</p>
         )}
 
         <div className="relative">
@@ -113,7 +115,7 @@ function WalletPage() {
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Procurar movimento..."
+            placeholder={t("wallet.search.placeholder")}
             className="w-full rounded-md border border-task-border bg-task-card py-1.5 pl-8 pr-3 text-[13px] text-task-title outline-none transition-colors placeholder:text-task-muted focus:border-task-accent/60"
           />
         </div>
@@ -140,10 +142,8 @@ function WalletPage() {
 
         {list.length === 0 ? (
           <div className="rounded-lg border border-dashed border-task-border px-4 py-8 text-center">
-            <p className="text-[13px] font-medium text-task-title">Sem movimentos</p>
-            <p className="mt-1 text-[11px] text-task-muted">
-              Os teus ganhos e créditos aparecerão aqui assim que existirem.
-            </p>
+            <p className="text-[13px] font-medium text-task-title">{t("wallet.empty.title")}</p>
+            <p className="mt-1 text-[11px] text-task-muted">{t("wallet.empty.desc")}</p>
           </div>
         ) : (
           <div className="grid gap-2 sm:grid-cols-2">

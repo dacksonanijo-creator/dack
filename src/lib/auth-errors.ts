@@ -1,20 +1,20 @@
-/** Traduz erros do serviço de autenticação para mensagens claras em português. */
+/** Traduz erros do serviço de autenticação em chaves de mensagem i18n. */
 export function authErrorMessage(raw: string): string {
   const m = raw.toLowerCase();
-  if (m.includes("invalid login credentials")) return "Email ou palavra-passe incorretos.";
-  if (m.includes("email not confirmed")) return "Confirma o teu email antes de entrar.";
+  if (m.includes("invalid login credentials")) return "auth.err.invalidCredentials";
+  if (m.includes("email not confirmed")) return "auth.err.emailNotConfirmed";
   if (m.includes("user already registered") || m.includes("already been registered"))
-    return "Já existe uma conta com este email. Entra em vez de criar conta.";
+    return "auth.err.userAlreadyRegistered";
   if (m.includes("password should be at least"))
-    return "A palavra-passe deve ter pelo menos 6 caracteres.";
+    return "auth.err.passwordMinLength";
   if (m.includes("unable to validate email") || m.includes("invalid email"))
-    return "O email indicado não é válido.";
+    return "auth.err.invalidEmail";
   if (m.includes("rate limit") || m.includes("too many"))
-    return "Demasiadas tentativas. Aguarda alguns minutos e tenta novamente.";
-  if (m.includes("weak password")) return "Palavra-passe demasiado fraca. Escolhe outra.";
+    return "auth.err.rateLimit";
+  if (m.includes("weak password")) return "auth.err.weakPassword";
   if (m.includes("failed to fetch") || m.includes("network"))
-    return "Sem ligação ao servidor. Verifica a tua internet e tenta novamente.";
-  return raw || "Ocorreu um erro inesperado. Tenta novamente.";
+    return "auth.err.network";
+  return "auth.err.unexpected";
 }
 
 export const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;

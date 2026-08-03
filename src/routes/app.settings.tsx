@@ -1,6 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useTheme } from "@/hooks/use-theme";
+import { useLocale, useT } from "@/i18n";
+import { LanguageSelect } from "@/components/taskora/language-select";
 
 import {
   Bell,
@@ -139,8 +141,10 @@ function SegBar<T extends string>({
 }
 
 function SettingsPage() {
+  const t = useT();
   const { theme, setTheme } = useTheme();
-  const [lang, setLang] = useState<"pt" | "en">("pt");
+  const { locale, locales } = useLocale();
+  const currentLanguageLabel = locales.find((l) => l.code === locale)?.label ?? locale;
   const [density, setDensity] = useState<"cozy" | "compact">("cozy");
   const [notifications, setNotifications] = useState(true);
   const [taskAlerts, setTaskAlerts] = useState(true);
@@ -150,110 +154,101 @@ function SettingsPage() {
   return (
     <div className="space-y-6 bg-background">
       <div>
-        <h1 className="font-display text-2xl font-extrabold">Definições</h1>
-        <p className="mt-0.5 text-sm text-muted-foreground">Gere a tua conta e as preferências da aplicação.</p>
+        <h1 className="font-display text-2xl font-extrabold">{t("settings.title")}</h1>
+        <p className="mt-0.5 text-sm text-muted-foreground">{t("settings.subtitle")}</p>
       </div>
 
-      <Section title="Conta">
-        <Row icon={KeyRound} label="Alterar palavra-passe" desc="Atualiza as tuas credenciais de acesso" />
-        <Row icon={ShieldCheck} label="Gestão de segurança" desc="Verificação e proteção da conta" />
+      <Section title={t("settings.account")}>
+        <Row icon={KeyRound} label={t("settings.changePassword")} desc={t("settings.changePasswordDesc")} />
+        <Row icon={ShieldCheck} label={t("settings.security")} desc={t("settings.securityDesc")} />
         <Row
           icon={Laptop}
-          label="Sessões ativas"
-          desc="Dispositivos com sessão iniciada"
+          label={t("settings.activeSessions")}
+          desc={t("settings.activeSessionsDesc")}
           right={
             <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
-              Em breve
+              {t("common.soon")}
             </span>
           }
         />
       </Section>
 
-      <Section title="Notificações">
+      <Section title={t("settings.notifications")}>
         <Row
           icon={Bell}
-          label="Notificações da aplicação"
-          desc="Receber avisos dentro da Taskora"
-          right={<Toggle on={notifications} onChange={setNotifications} label="Notificações da aplicação" />}
+          label={t("settings.appNotifications")}
+          desc={t("settings.appNotificationsDesc")}
+          right={<Toggle on={notifications} onChange={setNotifications} label={t("settings.appNotifications")} />}
         />
         <Row
           icon={BellRing}
-          label="Alertas de tarefas"
-          desc="Novas tarefas e resultados de submissões"
+          label={t("settings.taskAlerts")}
+          desc={t("settings.taskAlertsDesc")}
           right={
             <Toggle
               on={notifications && taskAlerts}
               onChange={(v) => setTaskAlerts(v)}
-              label="Alertas de tarefas"
+              label={t("settings.taskAlerts")}
             />
           }
         />
         <Row
           icon={FileText}
-          label="Resumo por email"
-          desc="Um resumo semanal da tua atividade"
-          right={<Toggle on={emailAlerts} onChange={setEmailAlerts} label="Resumo por email" />}
+          label={t("settings.emailDigest")}
+          desc={t("settings.emailDigestDesc")}
+          right={<Toggle on={emailAlerts} onChange={setEmailAlerts} label={t("settings.emailDigest")} />}
         />
       </Section>
 
-      <Section title="Aparência">
+      <Section title={t("settings.appearance")}>
         <Row
           icon={theme === "dark" ? Moon : Sun}
-          label="Tema"
-          desc="Claro ou escuro"
+          label={t("settings.theme")}
+          desc={t("settings.themeDesc")}
           right={
             <SegBar
               value={theme}
               onChange={setTheme}
               options={[
-                { id: "light", label: "Claro" },
-                { id: "dark", label: "Escuro" },
+                { id: "light", label: t("settings.themeLight") },
+                { id: "dark", label: t("settings.themeDark") },
               ]}
             />
           }
         />
         <Row
           icon={Type}
-          label="Densidade"
-          desc="Espaçamento dos conteúdos"
+          label={t("settings.density")}
+          desc={t("settings.densityDesc")}
           right={
             <SegBar
               value={density}
               onChange={setDensity}
               options={[
-                { id: "cozy", label: "Normal" },
-                { id: "compact", label: "Compacto" },
+                { id: "cozy", label: t("settings.densityCozy") },
+                { id: "compact", label: t("settings.densityCompact") },
               ]}
             />
           }
         />
       </Section>
 
-      <Section title="Idioma">
+      <Section title={t("settings.language")}>
         <Row
           icon={Globe2}
-          label="Idioma da aplicação"
-          desc={lang === "pt" ? "Português" : "English"}
-          right={
-            <SegBar
-              value={lang}
-              onChange={setLang}
-              options={[
-                { id: "pt", label: "PT" },
-                { id: "en", label: "EN" },
-              ]}
-            />
-          }
+          label={t("language.title")}
+          desc={currentLanguageLabel}
+          right={<LanguageSelect variant="compact" />}
         />
       </Section>
 
-      <Section title="Privacidade">
-        <Row icon={ShieldCheck} label="Política de privacidade" desc="Como tratamos os teus dados" to="/privacy" />
-        <Row icon={FileText} label="Termos de utilização" desc="Regras da plataforma" to="/terms" />
-        <Row icon={Database} label="Controlo de dados" desc="Exportar ou eliminar a tua informação" />
+      <Section title={t("settings.privacy")}>
+        <Row icon={ShieldCheck} label={t("settings.privacyPolicy")} desc={t("settings.privacyPolicyDesc")} to="/privacy" />
+        <Row icon={FileText} label={t("settings.terms")} desc={t("settings.termsDesc")} to="/terms" />
+        <Row icon={Database} label={t("settings.dataControl")} desc={t("settings.dataControlDesc")} />
       </Section>
 
-      <p className="pb-2 text-center text-xs text-muted-foreground">Taskora · versão 1.0.0</p>
+      <p className="pb-2 text-center text-xs text-muted-foreground">{t("settings.version")}</p>
     </div>
   );
 }

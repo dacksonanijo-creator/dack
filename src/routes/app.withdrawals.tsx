@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Check, Lock, Smartphone, Wallet, CreditCard } from "lucide-react";
+import { useLocale, useT } from "@/i18n";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/app/withdrawals")({
@@ -47,13 +48,6 @@ const toLocal = (v: number) =>
 
 type MethodId = "mpesa" | "emola" | "paypal" | "card";
 
-const methods: { id: MethodId; name: string; hint: string; icon: typeof Smartphone }[] = [
-  { id: "mpesa", name: "M-Pesa", hint: "Carteira móvel", icon: Smartphone },
-  { id: "emola", name: "e-Mola", hint: "Carteira móvel", icon: Smartphone },
-  { id: "paypal", name: "PayPal", hint: "Conta internacional", icon: Wallet },
-  { id: "card", name: "Cartão", hint: "Visa / Mastercard", icon: CreditCard },
-];
-
 type RequestStatus = "review" | "approved" | "rejected" | "paid";
 
 interface WithdrawalRequest {
@@ -64,13 +58,6 @@ interface WithdrawalRequest {
   status: RequestStatus;
 }
 
-const statusLabels: Record<RequestStatus, string> = {
-  review: "Em análise",
-  approved: "Aprovado",
-  rejected: "Rejeitado",
-  paid: "Pago",
-};
-
 const statusTone: Record<RequestStatus, string> = {
   review: "text-warning",
   approved: "text-task-accent",
@@ -79,6 +66,8 @@ const statusTone: Record<RequestStatus, string> = {
 };
 
 function WithdrawalsPage() {
+  const t = useT();
+  const { locale } = useLocale();
   const [requests, setRequests] = useState<WithdrawalRequest[]>([]);
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState<1 | 2>(1);
@@ -87,6 +76,20 @@ function WithdrawalsPage() {
   const [destination, setDestination] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+
+  const methods: { id: MethodId; name: string; hint: string; icon: typeof Smartphone }[] = [
+    { id: "mpesa", name: t("withdraw.method.mpesa"), hint: t("withdraw.hint.mobileWallet"), icon: Smartphone },
+    { id: "emola", name: t("withdraw.method.emola"), hint: t("withdraw.hint.mobileWallet"), icon: Smartphone },
+    { id: "paypal", name: t("withdraw.method.paypal"), hint: t("withdraw.hint.internationalAccount"), icon: Wallet },
+    { id: "card", name: t("withdraw.method.card"), hint: t("withdraw.hint.visaMastercard"), icon: CreditCard },
+  ];
+
+  const statusLabels: Record<RequestStatus, string> = {
+    review: t("withdraw.status.review"),
+    approved: t("withdraw.status.approved"),
+    rejected: t("withdraw.status.rejected"),
+    paid: t("withdraw.status.paid"),
+  };
 
   const canRequest = availableUsd >= MIN_WITHDRAWAL;
   const amountNumber = Number(amount.replace(",", ".")) || 0;
@@ -107,7 +110,7 @@ function WithdrawalsPage() {
 
   const submit = () => {
     if (password.trim().length < 6) {
-      setError("Introduz a palavra-passe da tua conta para confirmar.");
+      setError(t("withdraw.error.password"));
       return;
     }
     setRequests((prev) => [
@@ -115,7 +118,7 @@ function WithdrawalsPage() {
         id: `w${Date.now()}`,
         amount: amountNumber,
         method,
-        date: new Date().toLocaleDateString("pt-PT", { day: "2-digit", month: "short", year: "numeric" }),
+        date: new Date().toLocaleDateString(locale, { day: "2-digit", month: "short", year: "numeric" }),
         status: "review",
       },
       ...prev,
@@ -127,19 +130,19 @@ function WithdrawalsPage() {
     <div className="-mx-4 -my-4 min-h-full bg-task-bg px-4 py-4 sm:-mx-6 sm:px-6">
       <div className="mx-auto max-w-3xl space-y-3">
         <div className="flex items-baseline justify-between">
-          <h1 className="font-display text-base font-bold text-task-title">Saques</h1>
-          <span className="text-[11px] text-task-muted">{requests.length} pedidos</span>
+          <h1 className="font-display text-base font-bold text-task-title">{t("withdraw.title")}</h1>
+          <span className="text-[11px] text-task-muted">{t("withdraw.requestsCount", { n: requests.length })}</span>
         </div>
 
         {/* Saldo disponível */}
         <div className="rounded-lg border border-task-border bg-task-card px-3 py-3">
-          <p className="text-[10px] uppercase tracking-wide text-task-muted">Disponível para saque</p>
+          <p className="text-[10px] uppercase tracking-wide text-task-muted">{t("withdraw.availableFor")}</p>
           <p className="mt-0.5 font-display text-[22px] font-bold leading-none text-task-title">
             {usd(availableUsd)}
           </p>
           <p className="mt-1 text-[11px] text-task-muted">({toLocal(availableUsd)})</p>
           <div className="mt-2 flex items-center justify-between gap-2 border-t border-task-border pt-2">
-            <p className="text-[11px] text-task-muted">Valor mínimo para saque: {usd(MIN_WITHDRAWAL)}</p>
+            <p className="text-[11px] text-task-muted">{t("withdraw.minAmount", { amount: usd(MIN_WITHDRAWAL) })}</p>
             <button
               disabled={!canRequest}
               onClick={() => setOpen(true)}
@@ -150,19 +153,19 @@ function WithdrawalsPage() {
                   : "cursor-not-allowed border border-task-border text-task-muted",
               )}
             >
-              Solicitar saque
+              {t("withdraw.request")}
             </button>
           </div>
           {!canRequest && (
             <p className="mt-2 text-[11px] text-warning">
-              Precisas de atingir o mínimo de {usd(MIN_WITHDRAWAL)} para solicitar um saque.
+              {t("withdraw.needMinimum", { amount: usd(MIN_WITHDRAWAL) })}
             </p>
           )}
         </div>
 
         {/* Métodos disponíveis */}
         <div>
-          <p className="mb-1.5 text-[10px] uppercase tracking-wide text-task-muted">Métodos de pagamento</p>
+          <p className="mb-1.5 text-[10px] uppercase tracking-wide text-task-muted">{t("withdraw.paymentMethods")}</p>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
             {methods.map((m) => (
               <div
@@ -181,13 +184,11 @@ function WithdrawalsPage() {
 
         {/* Histórico */}
         <div>
-          <p className="mb-1.5 text-[10px] uppercase tracking-wide text-task-muted">Histórico de saques</p>
+          <p className="mb-1.5 text-[10px] uppercase tracking-wide text-task-muted">{t("withdraw.history")}</p>
           {requests.length === 0 ? (
             <div className="rounded-lg border border-dashed border-task-border px-4 py-8 text-center">
-              <p className="text-[13px] font-medium text-task-title">Sem pedidos de saque</p>
-              <p className="mt-1 text-[11px] text-task-muted">
-                Os teus pedidos e o respetivo estado aparecerão aqui.
-              </p>
+              <p className="text-[13px] font-medium text-task-title">{t("withdraw.empty.title")}</p>
+              <p className="mt-1 text-[11px] text-task-muted">{t("withdraw.empty.desc")}</p>
             </div>
           ) : (
             <div className="grid gap-2 sm:grid-cols-2">
@@ -220,17 +221,17 @@ function WithdrawalsPage() {
           <div className="w-full max-w-md rounded-t-xl border border-task-border bg-task-card p-4 sm:rounded-xl">
             <div className="flex items-center justify-between">
               <h2 className="font-display text-[14px] font-bold text-task-title">
-                {step === 1 ? "Solicitar saque" : "Confirmar pedido"}
+                {step === 1 ? t("withdraw.modal.request") : t("withdraw.modal.confirm")}
               </h2>
               <button onClick={reset} className="text-[11px] text-task-muted hover:text-task-title">
-                Cancelar
+                {t("withdraw.cancel")}
               </button>
             </div>
 
             {step === 1 ? (
               <div className="mt-3 space-y-3">
                 <div>
-                  <label className="text-[11px] text-task-muted">Valor (USD)</label>
+                  <label className="text-[11px] text-task-muted">{t("withdraw.amountUsd")}</label>
                   <input
                     inputMode="decimal"
                     value={amount}
@@ -239,12 +240,14 @@ function WithdrawalsPage() {
                     className="mt-1 w-full rounded-md border border-task-border bg-task-bg px-2.5 py-1.5 text-[13px] text-task-title outline-none placeholder:text-task-muted focus:border-task-accent/60"
                   />
                   <p className="mt-1 text-[10px] text-task-muted">
-                    {amountNumber > 0 ? `≈ ${toLocal(amountNumber)}` : `Mínimo ${usd(MIN_WITHDRAWAL)}`}
+                    {amountNumber > 0
+                      ? t("withdraw.approxLocal", { value: toLocal(amountNumber) })
+                      : t("withdraw.minLabel", { amount: usd(MIN_WITHDRAWAL) })}
                   </p>
                 </div>
 
                 <div>
-                  <label className="text-[11px] text-task-muted">Método</label>
+                  <label className="text-[11px] text-task-muted">{t("withdraw.method")}</label>
                   <div className="mt-1 grid grid-cols-2 gap-2">
                     {methods.map((m) => (
                       <button
@@ -268,10 +271,10 @@ function WithdrawalsPage() {
                 <div>
                   <label className="text-[11px] text-task-muted">
                     {method === "paypal"
-                      ? "Email PayPal"
+                      ? t("withdraw.destination.paypal")
                       : method === "card"
-                        ? "Número do cartão"
-                        : "Número de telemóvel"}
+                        ? t("withdraw.destination.card")
+                        : t("withdraw.destination.phone")}
                   </label>
                   <input
                     value={destination}
@@ -291,20 +294,20 @@ function WithdrawalsPage() {
                       : "cursor-not-allowed border border-task-border text-task-muted",
                   )}
                 >
-                  Continuar
+                  {t("withdraw.continue")}
                 </button>
               </div>
             ) : (
               <div className="mt-3 space-y-3">
                 <div className="rounded-md border border-task-border bg-task-bg px-3 py-2 text-[12px]">
-                  <Row label="Valor" value={`${usd(amountNumber)} (${toLocal(amountNumber)})`} />
-                  <Row label="Método" value={methods.find((m) => m.id === method)!.name} />
-                  <Row label="Destino" value={destination} />
+                  <Row label={t("withdraw.summary.amount")} value={`${usd(amountNumber)} (${toLocal(amountNumber)})`} />
+                  <Row label={t("withdraw.summary.method")} value={methods.find((m) => m.id === method)!.name} />
+                  <Row label={t("withdraw.summary.destination")} value={destination} />
                 </div>
 
                 <div>
                   <label className="flex items-center gap-1.5 text-[11px] text-task-muted">
-                    <Lock className="h-3 w-3" /> Digita a tua palavra-passe para confirmar o saque
+                    <Lock className="h-3 w-3" /> {t("withdraw.passwordPrompt")}
                   </label>
                   <input
                     type="password"
@@ -324,17 +327,17 @@ function WithdrawalsPage() {
                     onClick={() => setStep(1)}
                     className="flex-1 rounded-md border border-task-border py-2 text-[12px] text-task-muted hover:text-task-title"
                   >
-                    Voltar
+                    {t("withdraw.back")}
                   </button>
                   <button
                     onClick={submit}
                     className="flex-1 rounded-md bg-task-accent py-2 text-[12px] font-medium text-task-bg hover:opacity-90"
                   >
-                    Enviar pedido
+                    {t("withdraw.sendRequest")}
                   </button>
                 </div>
                 <p className="text-[10px] text-task-muted">
-                  O pedido fica em análise até aprovação administrativa.
+                  {t("withdraw.pendingApprovalNote")}
                 </p>
               </div>
             )}

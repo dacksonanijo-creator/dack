@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { useProfile } from "@/hooks/use-profile";
+import { useT } from "@/i18n";
 
 export const Route = createFileRoute("/app/")({
   head: () => ({
@@ -20,22 +21,26 @@ export const Route = createFileRoute("/app/")({
   component: Dashboard,
 });
 
-function greetingFor(hour: number) {
-  if (hour >= 5 && hour < 12) return "Bom dia";
-  if (hour >= 12 && hour < 18) return "Boa tarde";
-  return "Boa noite";
-}
-
 function Dashboard() {
-  const [greeting, setGreeting] = useState("");
+  const [hour, setHour] = useState<number | null>(null);
   const { firstName, loading } = useProfile();
+  const t = useT();
 
   useEffect(() => {
-    const update = () => setGreeting(greetingFor(new Date().getHours()));
+    const update = () => setHour(new Date().getHours());
     update();
     const id = window.setInterval(update, 60_000);
     return () => window.clearInterval(id);
   }, []);
+
+  const greeting =
+    hour === null
+      ? ""
+      : hour >= 5 && hour < 12
+        ? t("home.greeting.morning")
+        : hour >= 12 && hour < 18
+          ? t("home.greeting.afternoon")
+          : t("home.greeting.evening");
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-5">
@@ -50,9 +55,7 @@ function Dashboard() {
             </>
           )}
         </h1>
-        <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-          Bem-vindo à Taskora. Estamos felizes por ter você connosco.
-        </p>
+        <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{t("home.welcome")}</p>
       </section>
 
       <section className="animate-rise relative overflow-hidden rounded-3xl border border-border/70 bg-card px-6 py-10 shadow-soft [animation-delay:80ms] sm:px-10 sm:py-12">
@@ -66,23 +69,22 @@ function Dashboard() {
             <Sparkles className="relative h-6 w-6" />
           </span>
           <h2 className="mt-5 font-display text-xl font-extrabold sm:text-2xl">
-            A tua conta está pronta
+            {t("home.accountReady")}
           </h2>
           <p className="mt-2 max-w-sm text-sm leading-relaxed text-muted-foreground">
-            Transformamos tempo em oportunidades. Explora a Taskora e prepara-te para começar assim
-            que as tarefas estiverem disponíveis.
+            {t("home.accountReadyDesc")}
           </p>
           <Link
             to="/app/tasks"
             className="mt-6 inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-glow transition-transform hover:-translate-y-0.5"
           >
-            Explorar a plataforma <ArrowRight className="h-4 w-4" />
+            {t("home.explore")} <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
       </section>
 
       <p className="animate-rise text-center text-xs text-muted-foreground/80 [animation-delay:140ms]">
-        Novas funcionalidades serão ativadas em breve na tua conta.
+        {t("home.comingSoon")}
       </p>
     </div>
   );

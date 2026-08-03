@@ -6,6 +6,7 @@ import { AuthLayout, Field } from "@/components/taskora/auth-layout";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { authErrorMessage, emailRe } from "@/lib/auth-errors";
+import { useT } from "@/i18n";
 
 export const Route = createFileRoute("/forgot-password")({
   head: () => ({
@@ -25,6 +26,7 @@ const input =
   "w-full rounded-xl border border-input bg-background px-4 py-3 text-sm outline-none transition-shadow placeholder:text-muted-foreground focus:border-primary focus:ring-4 focus:ring-primary/10";
 
 function Forgot() {
+  const t = useT();
   const [sent, setSent] = useState(false);
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
@@ -34,7 +36,7 @@ function Forgot() {
     e.preventDefault();
     if (loading) return;
     if (!emailRe.test(email.trim())) {
-      setError("Introduz um email válido.");
+      setError(t("auth.forgot.emailInvalid"));
       return;
     }
     setError(null);
@@ -44,7 +46,7 @@ function Forgot() {
     });
     setLoading(false);
     if (err) {
-      const msg = authErrorMessage(err.message);
+      const msg = t(authErrorMessage(err.message));
       setError(msg);
       toast.error(msg);
       return;
@@ -54,30 +56,30 @@ function Forgot() {
 
   return (
     <AuthLayout
-      title="Recuperar palavra-passe"
-      subtitle="Enviamos-te um link seguro para redefinires o acesso."
+      title={t("auth.forgot.title")}
+      subtitle={t("auth.forgot.subtitle")}
       backTo="/login"
       footer={
         <Link to="/login" className="font-semibold text-primary hover:underline">
-          Voltar ao login
+          {t("auth.forgot.backToLogin")}
         </Link>
       }
     >
       {sent ? (
         <div className="flex flex-col items-center rounded-2xl bg-accent/60 p-6 text-center">
           <CheckCircle2 className="h-9 w-9 text-money" />
-          <p className="mt-3 font-display text-sm font-bold">Link enviado</p>
+          <p className="mt-3 font-display text-sm font-bold">{t("auth.forgot.sentTitle")}</p>
           <p className="mt-1 text-xs text-muted-foreground">
-            Verifica a tua caixa de entrada e segue as instruções.
+            {t("auth.forgot.sentSubtitle")}
           </p>
         </div>
       ) : (
         <form className="space-y-4" onSubmit={onSubmit} noValidate>
-          <Field label="Email">
+          <Field label={t("auth.forgot.emailLabel")}>
             <input
               type="email"
               className={input}
-              placeholder="nome@email.com"
+              placeholder={t("auth.forgot.emailPlaceholder")}
               value={email}
               onChange={(e) => {
                 setEmail(e.target.value);
@@ -96,7 +98,7 @@ function Forgot() {
             disabled={loading}
             className="h-12 w-full rounded-xl text-base shadow-glow"
           >
-            {loading ? "A enviar…" : "Enviar"}
+            {loading ? t("auth.forgot.submitLoading") : t("auth.forgot.submit")}
           </Button>
         </form>
       )}

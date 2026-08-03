@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { Avatar } from "@/components/taskora/app-shell";
 import { Button } from "@/components/ui/button";
 import { useProfile } from "@/hooks/use-profile";
+import { useT } from "@/i18n";
 
 export const Route = createFileRoute("/app/profile")({
   head: () => ({
@@ -30,15 +31,11 @@ export const Route = createFileRoute("/app/profile")({
   component: Profile,
 });
 
-const security = [
-  { icon: KeyRound, label: "Palavra-passe", hint: "Alterar palavra-passe" },
-  { icon: Smartphone, label: "Sessões e dispositivos", hint: "Gerir acesso à conta" },
-];
-
 const input =
   "w-full rounded-xl border border-input bg-background px-3 py-2 text-sm outline-none transition-shadow focus:border-primary focus:ring-4 focus:ring-primary/10";
 
 function Profile() {
+  const t = useT();
   const { profile, displayName, email, loading, updateProfile } = useProfile();
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -60,12 +57,17 @@ function Profile() {
       })
     : "—";
 
+  const security = [
+    { icon: KeyRound, label: t("profile.passwordLabel"), hint: t("profile.passwordHint") },
+    { icon: Smartphone, label: t("profile.sessionsLabel"), hint: t("profile.sessionsHint") },
+  ];
+
   const personal = [
-    { icon: UserIcon, label: "Nome completo", value: profile?.full_name || "—" },
-    { icon: Mail, label: "Email", value: email || "—" },
-    { icon: Phone, label: "Número de telefone", value: profile?.phone || "—" },
-    { icon: Globe, label: "País", value: profile?.country || "—" },
-    { icon: CalendarDays, label: "Data de registo", value: joined },
+    { icon: UserIcon, label: t("profile.fullName"), value: profile?.full_name || "—" },
+    { icon: Mail, label: t("profile.email"), value: email || "—" },
+    { icon: Phone, label: t("profile.phone"), value: profile?.phone || "—" },
+    { icon: Globe, label: t("profile.country"), value: profile?.country || "—" },
+    { icon: CalendarDays, label: t("profile.joinDate"), value: joined },
   ];
 
   const save = async () => {
@@ -77,10 +79,10 @@ function Profile() {
     });
     setSaving(false);
     if (error) {
-      toast.error("Não foi possível guardar as alterações.");
+      toast.error(t("profile.saveError"));
       return;
     }
-    toast.success("Perfil atualizado.");
+    toast.success(t("profile.saveSuccess"));
     setEditing(false);
   };
 
@@ -90,11 +92,11 @@ function Profile() {
         <Avatar className="h-14 w-14 text-lg" />
         <div className="min-w-0 flex-1">
           <h1 className="truncate font-display text-base font-bold leading-tight">
-            {loading ? "…" : displayName || "Sem nome definido"}
+            {loading ? "…" : displayName || t("profile.noName")}
           </h1>
           <p className="truncate text-xs text-muted-foreground">{email ?? ""}</p>
           <span className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-accent px-2 py-0.5 text-[11px] font-semibold text-money">
-            <ShieldCheck className="h-3 w-3" /> Conta ativa
+            <ShieldCheck className="h-3 w-3" /> {t("profile.activeAccount")}
           </span>
         </div>
         <Button
@@ -103,19 +105,19 @@ function Profile() {
           className="h-8 shrink-0 rounded-lg px-3 text-xs"
           onClick={() => setEditing((v) => !v)}
         >
-          <Pencil className="mr-1.5 h-3.5 w-3.5" /> {editing ? "Cancelar" : "Editar"}
+          <Pencil className="mr-1.5 h-3.5 w-3.5" /> {editing ? t("profile.cancel") : t("profile.edit")}
         </Button>
       </section>
 
       <section>
         <h2 className="px-1 pb-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-          Informações pessoais
+          {t("profile.personalInfo")}
         </h2>
 
         {editing ? (
           <div className="space-y-3 rounded-2xl border border-border/70 bg-card p-4 shadow-soft">
             <label className="block text-xs font-medium text-muted-foreground">
-              Nome completo
+              {t("profile.fullName")}
               <input
                 className={`${input} mt-1`}
                 value={form.full_name}
@@ -123,7 +125,7 @@ function Profile() {
               />
             </label>
             <label className="block text-xs font-medium text-muted-foreground">
-              Número de telefone
+              {t("profile.phone")}
               <input
                 className={`${input} mt-1`}
                 value={form.phone}
@@ -131,7 +133,7 @@ function Profile() {
               />
             </label>
             <label className="block text-xs font-medium text-muted-foreground">
-              País
+              {t("profile.country")}
               <input
                 className={`${input} mt-1`}
                 value={form.country}
@@ -139,7 +141,7 @@ function Profile() {
               />
             </label>
             <Button size="sm" className="h-9 w-full rounded-xl" onClick={save} disabled={saving}>
-              {saving ? "A guardar…" : "Guardar alterações"}
+              {saving ? t("profile.saving") : t("profile.saveChanges")}
             </Button>
           </div>
         ) : (
@@ -157,7 +159,7 @@ function Profile() {
 
       <section>
         <h2 className="px-1 pb-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-          Segurança
+          {t("profile.security")}
         </h2>
         <div className="divide-y divide-border/70 overflow-hidden rounded-2xl border border-border/70 bg-card shadow-soft">
           {security.map((s) => (

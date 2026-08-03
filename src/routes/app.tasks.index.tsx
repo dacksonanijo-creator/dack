@@ -2,7 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { Clock3, Search, Users } from "lucide-react";
 import { tasks } from "@/components/taskora/mock-data";
-import { stateLabels, useTaskStates, type TaskState } from "@/components/taskora/task-state";
+import { useStateLabels, useTaskStates, type TaskState } from "@/components/taskora/task-state";
+import { useT } from "@/i18n";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/app/tasks/")({
@@ -19,14 +20,7 @@ export const Route = createFileRoute("/app/tasks/")({
   component: TaskList,
 });
 
-const filters = [
-  { key: "available", label: "Disponíveis" },
-  { key: "progress", label: "Em andamento" },
-  { key: "submitted", label: "Enviadas" },
-  { key: "done", label: "Concluídas" },
-] as const;
-
-type FilterKey = (typeof filters)[number]["key"];
+type FilterKey = "available" | "progress" | "submitted" | "done";
 
 function matches(state: TaskState, filter: FilterKey) {
   if (filter === "done") return state === "approved" || state === "rejected";
@@ -42,9 +36,18 @@ const stateTone: Record<TaskState, string> = {
 };
 
 function TaskList() {
+  const t = useT();
+  const stateLabels = useStateLabels();
   const { getState } = useTaskStates();
   const [filter, setFilter] = useState<FilterKey>("available");
   const [query, setQuery] = useState("");
+
+  const filters: { key: FilterKey; label: string }[] = [
+    { key: "available", label: t("tasks.filter.available") },
+    { key: "progress", label: t("tasks.filter.progress") },
+    { key: "submitted", label: t("tasks.filter.submitted") },
+    { key: "done", label: t("tasks.filter.done") },
+  ];
 
   const list = tasks.filter(
     (t) =>
@@ -58,8 +61,8 @@ function TaskList() {
     <div className="-mx-4 -my-4 min-h-full bg-task-bg px-4 py-4 sm:-mx-6 sm:px-6">
       <div className="mx-auto max-w-3xl space-y-3">
         <div className="flex items-baseline justify-between">
-          <h1 className="font-display text-base font-bold text-task-title">Tarefas</h1>
-          <span className="text-[11px] text-task-muted">{list.length} resultados</span>
+          <h1 className="font-display text-base font-bold text-task-title">{t("tasks.title")}</h1>
+          <span className="text-[11px] text-task-muted">{t("tasks.resultsCount", { n: list.length })}</span>
         </div>
 
         <div className="relative">
@@ -67,7 +70,7 @@ function TaskList() {
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Procurar tarefa..."
+            placeholder={t("tasks.search.placeholder")}
             className="w-full rounded-md border border-task-border bg-task-card py-1.5 pl-8 pr-3 text-[13px] text-task-title outline-none transition-colors placeholder:text-task-muted focus:border-task-accent/60"
           />
         </div>
@@ -92,23 +95,21 @@ function TaskList() {
 
         {list.length === 0 ? (
           <div className="rounded-lg border border-dashed border-task-border px-4 py-8 text-center">
-            <p className="text-[13px] font-medium text-task-title">Nada por aqui</p>
-            <p className="mt-1 text-[11px] text-task-muted">
-              Não existem tarefas neste estado de momento.
-            </p>
+            <p className="text-[13px] font-medium text-task-title">{t("tasks.empty.title")}</p>
+            <p className="mt-1 text-[11px] text-task-muted">{t("tasks.empty.desc")}</p>
           </div>
         ) : (
           <div className="grid gap-2 sm:grid-cols-2">
-            {list.map((t) => {
-              const state = getState(t.id);
+            {list.map((task) => {
+              const state = getState(task.id);
               return (
                 <article
-                  key={t.id}
+                  key={task.id}
                   className="rounded-lg border border-task-border bg-task-card px-3 py-2.5 transition-colors hover:border-task-accent/40"
                 >
                   <div className="flex items-center justify-between gap-2">
                     <span className="truncate text-[10px] uppercase tracking-wide text-task-muted">
-                      {t.category}
+                      {task.category}
                     </span>
                     <span className={cn("shrink-0 text-[10px] font-semibold", stateTone[state])}>
                       {stateLabels[state]}
@@ -116,30 +117,30 @@ function TaskList() {
                   </div>
 
                   <h2 className="mt-1 truncate font-display text-[13px] font-semibold text-task-title">
-                    {t.title}
+                    {task.title}
                   </h2>
 
                   <p className="mt-0.5 line-clamp-2 text-[11px] leading-snug text-task-muted">
-                    {t.description}
+                    {task.description}
                   </p>
 
                   <div className="mt-2 flex items-center gap-3 text-[11px] text-task-muted">
-                    <span className="font-semibold text-task-accent">{t.reward}</span>
+                    <span className="font-semibold text-task-accent">{task.reward}</span>
                     <span className="flex items-center gap-1">
-                      <Clock3 className="h-3 w-3" /> {t.minutes} min
+                      <Clock3 className="h-3 w-3" /> {task.minutes} {t("tasks.minutes")}
                     </span>
                     <span className="ml-auto flex items-center gap-1">
-                      <Users className="h-3 w-3" /> {t.slots ?? 0} vagas
+                      <Users className="h-3 w-3" /> {task.slots ?? 0} {t("tasks.slots")}
                     </span>
                   </div>
 
                   <div className="mt-2 flex justify-end">
                     <Link
                       to="/app/tasks/$taskId"
-                      params={{ taskId: t.id }}
+                      params={{ taskId: task.id }}
                       className="rounded-md border border-task-accent/70 px-2.5 py-1 text-[11px] font-medium text-task-accent transition-colors hover:bg-task-accent/10"
                     >
-                      Ver tarefa
+                      {t("tasks.viewTask")}
                     </Link>
                   </div>
                 </article>

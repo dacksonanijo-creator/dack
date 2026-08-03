@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { countries } from "@/components/taskora/mock-data";
 import { supabase } from "@/integrations/supabase/client";
 import { authErrorMessage, emailRe } from "@/lib/auth-errors";
+import { useT } from "@/i18n";
 
 export const Route = createFileRoute("/signup")({
   head: () => ({
@@ -27,6 +28,7 @@ const input =
 type Errors = Partial<Record<"fullName" | "email" | "password" | "confirm" | "terms", string>>;
 
 function Signup() {
+  const t = useT();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Errors>({});
@@ -46,11 +48,11 @@ function Signup() {
 
   const validate = () => {
     const next: Errors = {};
-    if (form.fullName.trim().length < 3) next.fullName = "Indica o teu nome completo.";
-    if (!emailRe.test(form.email.trim())) next.email = "Introduz um email válido.";
-    if (form.password.length < 6) next.password = "Mínimo de 6 caracteres.";
-    if (form.confirm !== form.password) next.confirm = "As palavras-passe não coincidem.";
-    if (!accepted) next.terms = "Tens de aceitar os Termos e a Política de Privacidade.";
+    if (form.fullName.trim().length < 3) next.fullName = t("auth.signup.fullNameInvalid");
+    if (!emailRe.test(form.email.trim())) next.email = t("auth.signup.emailInvalid");
+    if (form.password.length < 6) next.password = t("auth.signup.passwordMinLength");
+    if (form.confirm !== form.password) next.confirm = t("auth.signup.passwordsMismatch");
+    if (!accepted) next.terms = t("auth.signup.termsRequired");
     setErrors(next);
     return Object.keys(next).length === 0;
   };
@@ -59,7 +61,7 @@ function Signup() {
     e.preventDefault();
     if (loading) return;
     if (!validate()) {
-      toast.error("Corrige os campos assinalados.");
+      toast.error(t("auth.signup.fixFields"));
       return;
     }
 
@@ -76,7 +78,7 @@ function Signup() {
       });
 
       if (error) {
-        const msg = authErrorMessage(error.message);
+        const msg = t(authErrorMessage(error.message));
         setErrors({ email: msg });
         toast.error(msg);
         return;
@@ -84,7 +86,7 @@ function Signup() {
 
       // Conta já existente devolve user sem identidades associadas.
       if (data.user && (data.user.identities?.length ?? 0) === 0) {
-        const msg = "Já existe uma conta com este email. Entra em vez de criar conta.";
+        const msg = t("auth.signup.alreadyRegistered");
         setErrors({ email: msg });
         toast.error(msg);
         return;
@@ -94,7 +96,7 @@ function Signup() {
       if (!session) {
         const signIn = await supabase.auth.signInWithPassword({ email, password: form.password });
         if (signIn.error) {
-          toast.success("Conta criada. Confirma o teu email para entrares.");
+          toast.success(t("auth.signup.confirmEmailToast"));
           navigate({ to: "/login" });
           return;
         }
@@ -111,10 +113,10 @@ function Signup() {
         if (profileError) console.error("[signup] perfil:", profileError.message);
       }
 
-      toast.success("Conta criada com sucesso.");
+      toast.success(t("auth.signup.createdSuccess"));
       navigate({ to: "/app" });
     } catch (err) {
-      toast.error(authErrorMessage(err instanceof Error ? err.message : String(err)));
+      toast.error(t(authErrorMessage(err instanceof Error ? err.message : String(err))));
     } finally {
       setLoading(false);
     }
@@ -125,38 +127,38 @@ function Signup() {
 
   return (
     <AuthLayout
-      title="Criar conta"
-      subtitle="Preenche os teus dados e começa hoje mesmo."
+      title={t("auth.signup.title")}
+      subtitle={t("auth.signup.subtitle")}
       footer={
         <>
-          Já tens conta?{" "}
+          {t("auth.signup.haveAccount")}{" "}
           <Link to="/login" className="font-semibold text-primary hover:underline">
-            Entrar
+            {t("auth.signup.login")}
           </Link>
         </>
       }
     >
       <form className="space-y-4" onSubmit={onSubmit} noValidate>
-        <Field label="Nome completo">
+        <Field label={t("auth.signup.fullNameLabel")}>
           <input
             className={input}
-            placeholder="O teu nome completo"
+            placeholder={t("auth.signup.fullNamePlaceholder")}
             value={form.fullName}
             onChange={set("fullName")}
           />
           {errText("fullName")}
         </Field>
-        <Field label="Email">
+        <Field label={t("auth.signup.emailLabel")}>
           <input
             type="email"
             className={input}
-            placeholder="nome@email.com"
+            placeholder={t("auth.signup.emailPlaceholder")}
             value={form.email}
             onChange={set("email")}
           />
           {errText("email")}
         </Field>
-        <Field label="País">
+        <Field label={t("auth.signup.countryLabel")}>
           <select className={input} value={form.country} onChange={set("country")}>
             {countries.map((c) => (
               <option key={c}>{c}</option>
@@ -164,7 +166,7 @@ function Signup() {
           </select>
         </Field>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Palavra-passe">
+          <Field label={t("auth.signup.passwordLabel")}>
             <input
               type="password"
               className={input}
@@ -174,7 +176,7 @@ function Signup() {
             />
             {errText("password")}
           </Field>
-          <Field label="Confirmar">
+          <Field label={t("auth.signup.confirmLabel")}>
             <input
               type="password"
               className={input}
@@ -197,13 +199,13 @@ function Signup() {
               className="mt-0.5 h-4 w-4 rounded border-input accent-[var(--primary)]"
             />
             <span>
-              Aceito os{" "}
+              {t("auth.signup.acceptTerms")}{" "}
               <Link to="/terms" className="text-primary hover:underline">
-                Termos
+                {t("auth.signup.terms")}
               </Link>{" "}
-              e a{" "}
+              {t("auth.signup.and")}{" "}
               <Link to="/privacy" className="text-primary hover:underline">
-                Política de Privacidade
+                {t("auth.signup.privacyPolicy")}
               </Link>
               .
             </span>
@@ -216,7 +218,7 @@ function Signup() {
           disabled={loading}
           className="h-12 w-full rounded-xl text-base shadow-glow"
         >
-          {loading ? "A criar conta…" : "Criar conta"}
+          {loading ? t("auth.signup.submitLoading") : t("auth.signup.submit")}
         </Button>
       </form>
     </AuthLayout>
