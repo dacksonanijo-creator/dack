@@ -21,6 +21,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AppWithdrawalsRouteImport } from './routes/app.withdrawals'
 import { Route as AppWalletRouteImport } from './routes/app.wallet'
 import { Route as AppSettingsRouteImport } from './routes/app.settings'
@@ -94,6 +95,11 @@ const AppIndexRoute = AppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppRoute,
 } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AppWithdrawalsRoute = AppWithdrawalsRouteImport.update({
   id: '/withdrawals',
   path: '/withdrawals',
@@ -158,7 +164,7 @@ const AppTasksTaskIdRoute = AppTasksTaskIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
   '/app': typeof AppRouteWithChildren
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
@@ -177,6 +183,7 @@ export interface FileRoutesByFullPath {
   '/app/settings': typeof AppSettingsRoute
   '/app/wallet': typeof AppWalletRoute
   '/app/withdrawals': typeof AppWithdrawalsRoute
+  '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/app/tasks/$taskId': typeof AppTasksTaskIdRoute
   '/app/tasks/': typeof AppTasksIndexRoute
@@ -184,7 +191,6 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/admin': typeof AdminRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/privacy': typeof PrivacyRoute
@@ -202,6 +208,7 @@ export interface FileRoutesByTo {
   '/app/settings': typeof AppSettingsRoute
   '/app/wallet': typeof AppWalletRoute
   '/app/withdrawals': typeof AppWithdrawalsRoute
+  '/admin': typeof AdminIndexRoute
   '/app': typeof AppIndexRoute
   '/app/tasks/$taskId': typeof AppTasksTaskIdRoute
   '/app/tasks': typeof AppTasksIndexRoute
@@ -210,7 +217,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
   '/app': typeof AppRouteWithChildren
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
@@ -229,6 +236,7 @@ export interface FileRoutesById {
   '/app/settings': typeof AppSettingsRoute
   '/app/wallet': typeof AppWalletRoute
   '/app/withdrawals': typeof AppWithdrawalsRoute
+  '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/app/tasks/$taskId': typeof AppTasksTaskIdRoute
   '/app/tasks/': typeof AppTasksIndexRoute
@@ -257,6 +265,7 @@ export interface FileRouteTypes {
     | '/app/settings'
     | '/app/wallet'
     | '/app/withdrawals'
+    | '/admin/'
     | '/app/'
     | '/app/tasks/$taskId'
     | '/app/tasks/'
@@ -264,7 +273,6 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/about'
-    | '/admin'
     | '/forgot-password'
     | '/login'
     | '/privacy'
@@ -282,6 +290,7 @@ export interface FileRouteTypes {
     | '/app/settings'
     | '/app/wallet'
     | '/app/withdrawals'
+    | '/admin'
     | '/app'
     | '/app/tasks/$taskId'
     | '/app/tasks'
@@ -308,6 +317,7 @@ export interface FileRouteTypes {
     | '/app/settings'
     | '/app/wallet'
     | '/app/withdrawals'
+    | '/admin/'
     | '/app/'
     | '/app/tasks/$taskId'
     | '/app/tasks/'
@@ -316,7 +326,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
-  AdminRoute: typeof AdminRoute
+  AdminRoute: typeof AdminRouteWithChildren
   AppRoute: typeof AppRouteWithChildren
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
@@ -413,6 +423,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/app/withdrawals': {
       id: '/app/withdrawals'
       path: '/withdrawals'
@@ -500,6 +517,16 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AdminRouteChildren {
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 interface AppRouteChildren {
   AppActivityRoute: typeof AppActivityRoute
   AppHelpRoute: typeof AppHelpRoute
@@ -537,7 +564,7 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
-  AdminRoute: AdminRoute,
+  AdminRoute: AdminRouteWithChildren,
   AppRoute: AppRouteWithChildren,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
@@ -550,13 +577,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
