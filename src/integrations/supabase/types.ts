@@ -164,6 +164,30 @@ export type Database = {
         }
         Relationships: []
       }
+      platform_branding: {
+        Row: {
+          id: boolean
+          logo_dark_url: string | null
+          logo_light_url: string | null
+          show_wordmark: boolean
+          updated_at: string
+        }
+        Insert: {
+          id?: boolean
+          logo_dark_url?: string | null
+          logo_light_url?: string | null
+          show_wordmark?: boolean
+          updated_at?: string
+        }
+        Update: {
+          id?: boolean
+          logo_dark_url?: string | null
+          logo_light_url?: string | null
+          show_wordmark?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -471,6 +495,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_platform_admin: { Args: never; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "user" | "company"

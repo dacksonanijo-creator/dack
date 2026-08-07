@@ -14,6 +14,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { LocaleProvider, useT } from "@/i18n";
 import { AuthProvider } from "@/hooks/use-auth";
 import { ThemeProvider } from "@/hooks/use-theme";
+import { BrandingProvider } from "@/hooks/use-branding";
 import { Toaster } from "@/components/ui/sonner";
 
 
@@ -126,8 +127,10 @@ function RootComponent() {
       <ThemeProvider>
         <LocaleProvider>
           <AuthProvider>
-            <Outlet />
-            <Toaster richColors position="top-right" />
+            <BrandingProvider>
+              <Outlet />
+              <Toaster richColors position="top-right" />
+            </BrandingProvider>
           </AuthProvider>
         </LocaleProvider>
       </ThemeProvider>
