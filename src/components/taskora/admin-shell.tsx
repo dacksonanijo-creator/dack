@@ -1,10 +1,12 @@
 import { useState, type ReactNode } from "react";
 import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
-import { ArrowLeft, LogOut, Menu, ShieldCheck } from "lucide-react";
+import { ArrowLeft, LogOut, Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { adminSections } from "@/lib/admin";
+import { TaskoraMark } from "./logo";
 import { useAuth } from "@/hooks/use-auth";
+
 
 function NavList({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -35,12 +37,10 @@ function NavList({ onNavigate }: { onNavigate?: () => void }) {
 
 function Brand() {
   return (
-    <div className="flex items-center gap-2">
-      <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary/10 text-primary">
-        <ShieldCheck className="h-4 w-4" />
-      </span>
-      <div className="leading-tight">
-        <p className="text-sm font-bold tracking-tight text-foreground">Taskora Admin</p>
+    <div className="flex min-w-0 items-center gap-2">
+      <TaskoraMark className="h-8 w-8" />
+      <div className="min-w-0 leading-tight">
+        <p className="truncate text-sm font-bold tracking-tight text-foreground">Taskora Admin</p>
         <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
           Área restrita
         </p>
@@ -48,6 +48,7 @@ function Brand() {
     </div>
   );
 }
+
 
 export function AdminShell() {
   const [open, setOpen] = useState(false);
