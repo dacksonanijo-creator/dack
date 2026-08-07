@@ -1,14 +1,18 @@
 import { cn } from "@/lib/utils";
 import { brandLogo, brandName } from "@/lib/brand";
+import { useBranding } from "@/hooks/use-branding";
 
 /**
  * Marca (símbolo) da Taskora.
- * Mostra a imagem definida em `src/lib/brand.ts`. Enquanto não existir
- * logótipo oficial, mostra um espaço reservado (placeholder).
+ * Mostra o logótipo publicado pelo administrador (Painel Admin › Logótipo)
+ * ou, na sua ausência, o definido em `src/lib/brand.ts`.
  * A imagem nunca é distorcida: usa `object-contain` e mantém proporções.
  */
 export function TaskoraMark({ className }: { className?: string }) {
-  const { light, dark, alt } = brandLogo;
+  const branding = useBranding();
+  const alt = brandLogo.alt;
+  const light = branding.logoLight ?? brandLogo.light;
+  const dark = branding.logoDark ?? brandLogo.dark;
 
   if (light || dark) {
     const primary = light ?? dark!;
