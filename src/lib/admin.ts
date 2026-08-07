@@ -17,11 +17,18 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
-/** Único email com acesso ao painel administrativo. */
-export const ADMIN_EMAIL = "dackson144@gmail.com";
+/** Emails com acesso ao painel administrativo. */
+export const ADMIN_EMAILS = [
+  "dackson144@gmail.com",
+  "dacksonanijo@gmail.com",
+] as const;
+
+/** @deprecated usar ADMIN_EMAILS */
+export const ADMIN_EMAIL = ADMIN_EMAILS[0];
 
 export function isAdminEmail(email?: string | null) {
-  return (email ?? "").trim().toLowerCase() === ADMIN_EMAIL;
+  const normalized = (email ?? "").trim().toLowerCase();
+  return ADMIN_EMAILS.includes(normalized as (typeof ADMIN_EMAILS)[number]);
 }
 
 export interface AdminSection {
