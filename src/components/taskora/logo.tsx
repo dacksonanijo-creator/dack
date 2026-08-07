@@ -60,18 +60,20 @@ export function TaskoraMark({ className }: { className?: string }) {
 export function TaskoraLogo({
   size = "md",
   className,
-  showWordmark = brandLogo.showWordmark,
+  showWordmark,
 }: {
   size?: "sm" | "md" | "lg";
   className?: string;
   showWordmark?: boolean;
 }) {
+  const branding = useBranding();
+  const wordmark = showWordmark ?? branding.showWordmark;
   const mark = size === "lg" ? "h-14 w-14" : size === "sm" ? "h-8 w-8" : "h-9 w-9";
   const text = size === "lg" ? "text-3xl" : size === "sm" ? "text-base" : "text-lg";
   return (
     <span className={cn("flex min-w-0 items-center gap-2.5", className)}>
       <TaskoraMark className={mark} />
-      {showWordmark && (
+      {wordmark && (
         <span className={cn("truncate font-display font-extrabold tracking-tight", text)}>
           {brandName}
         </span>
