@@ -6,6 +6,8 @@ import {
   CreditCard,
   FileBarChart,
   FolderTree,
+  ImageUp,
+
   LayoutDashboard,
   ListChecks,
   Plug,
@@ -118,6 +120,12 @@ export const adminSections: AdminSection[] = [
     label: "Segurança",
     description: "Anti-fraude, permissões e alertas de risco.",
     icon: Shield,
+  },
+  {
+    to: "/admin/branding",
+    label: "Logótipo oficial",
+    description: "Publicar e gerir a identidade visual da marca.",
+    icon: ImageUp,
   },
   {
     to: "/admin/settings",
