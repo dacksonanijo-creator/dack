@@ -1,7 +1,10 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { useMemo, useState } from "react";
 import { ArrowLeft, Clock3, RefreshCw, Search, SearchX, WifiOff } from "lucide-react";
-import { tasks } from "@/components/taskora/mock-data";
+import { listExternalTasks } from "@/lib/tasks/tasks.functions";
+import type { UnifiedTask } from "@/lib/tasks/types";
 import { useStateLabels, useTaskStates, type TaskState } from "@/components/taskora/task-state";
 import { useT } from "@/i18n";
 import { cn } from "@/lib/utils";
@@ -21,7 +24,6 @@ export const Route = createFileRoute("/app/tasks/")({
 });
 
 type FilterKey = "all" | "available" | "progress" | "done";
-type ScreenState = "normal" | "loading" | "empty" | "error";
 
 function matches(state: TaskState, filter: FilterKey) {
   if (filter === "all") return true;
@@ -37,6 +39,11 @@ const stateTone: Record<TaskState, string> = {
   rejected: "text-destructive",
 };
 
+function formatReward(task: UnifiedTask) {
+  if (typeof task.reward !== "number") return null;
+  return `${task.reward.toFixed(2)} ${task.currency ?? ""}`.trim();
+}
+
 function TaskList() {
   const t = useT();
   const router = useRouter();
@@ -47,21 +54,20 @@ function TaskList() {
   const [category, setCategory] = useState("all");
   const [query, setQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
-  const [screen, setScreen] = useState<ScreenState>("loading");
 
-  useEffect(() => {
-    const id = window.setTimeout(() => setScreen("normal"), 700);
-    return () => window.clearTimeout(id);
-  }, []);
+  const fetchTasks = useServerFn(listExternalTasks);
+  const { data, isPending, isError, isFetching, refetch } = useQuery({
+    queryKey: ["external-tasks"],
+    queryFn: () => fetchTasks({ data: {} }),
+    staleTime: 60_000,
+    retry: 1,
+  });
 
-  const reload = () => {
-    setScreen("loading");
-    window.setTimeout(() => setScreen("normal"), 700);
-  };
+  const feedTasks = useMemo(() => data?.tasks ?? [], [data]);
 
   const categories = useMemo(
-    () => ["all", ...Array.from(new Set(tasks.map((task) => task.categoryKey)))],
-    [],
+    () => ["all", ...Array.from(new Set(feedTasks.map((task) => task.category).filter(Boolean) as string[]))],
+    [feedTasks],
   );
 
   const filters: { key: FilterKey; label: string }[] = [
@@ -71,14 +77,15 @@ function TaskList() {
     { key: "done", label: t("tasks.filter.done") },
   ];
 
-  const list = tasks.filter(
+  const list = feedTasks.filter(
     (task) =>
       matches(getState(task.id), filter) &&
-      (category === "all" || task.categoryKey === category) &&
-      t(task.titleKey).toLowerCase().includes(query.trim().toLowerCase()),
+      (category === "all" || task.category === category) &&
+      task.title.toLowerCase().includes(query.trim().toLowerCase()),
   );
 
-  const showEmpty = screen === "empty" || (screen === "normal" && list.length === 0);
+  const loading = isPending || (isFetching && feedTasks.length === 0);
+  const showEmpty = !loading && !isError && list.length === 0;
 
   return (
     <div className="-mx-4 -my-4 min-h-full bg-task-bg px-4 py-4 sm:-mx-6 sm:px-6">
@@ -160,13 +167,13 @@ function TaskList() {
                   : "border-transparent text-task-muted hover:text-task-title",
               )}
             >
-              {c === "all" ? t("tasks.category.all") : t(c)}
+              {c === "all" ? t("tasks.category.all") : c}
             </button>
           ))}
         </div>
 
         {/* Content states */}
-        {screen === "loading" ? (
+        {loading ? (
           <div className="grid gap-2 sm:grid-cols-2">
             {Array.from({ length: 4 }).map((_, i) => (
               <div key={i} className="rounded-xl border border-task-border bg-task-card p-3">
@@ -186,14 +193,14 @@ function TaskList() {
               </div>
             ))}
           </div>
-        ) : screen === "error" ? (
+        ) : isError ? (
           <div className="flex flex-col items-center rounded-xl border border-dashed border-task-border px-6 py-10 text-center">
             <div className="grid h-14 w-14 place-items-center rounded-full bg-destructive/10 text-destructive">
               <WifiOff className="h-6 w-6" />
             </div>
             <p className="mt-3 max-w-xs text-[13px] leading-snug text-task-title">{t("tasks.error.title")}</p>
             <button
-              onClick={reload}
+              onClick={() => void refetch()}
               className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-1.5 text-[12px] font-semibold text-primary-foreground transition-opacity hover:opacity-90"
             >
               <RefreshCw className="h-3.5 w-3.5" /> {t("tasks.retry")}
@@ -206,7 +213,7 @@ function TaskList() {
             </div>
             <p className="mt-3 text-[13px] font-medium text-task-title">{t("tasks.emptyState.title")}</p>
             <button
-              onClick={reload}
+              onClick={() => void refetch()}
               className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-1.5 text-[12px] font-semibold text-primary-foreground transition-opacity hover:opacity-90"
             >
               <RefreshCw className="h-3.5 w-3.5" /> {t("tasks.refresh")}
@@ -216,38 +223,49 @@ function TaskList() {
           <div className="grid gap-2 sm:grid-cols-2">
             {list.map((task) => {
               const state = getState(task.id);
+              const reward = formatReward(task);
               return (
                 <article
                   key={task.id}
                   className="rounded-xl border border-task-border bg-task-card p-3 transition-colors hover:border-primary/40"
                 >
                   <div className="flex gap-3">
-                    <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-primary/10 text-lg">
-                      {task.emoji}
+                    <div className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-lg bg-primary/10 text-lg">
+                      {task.imageUrl ? (
+                        <img src={task.imageUrl} alt="" className="h-full w-full object-cover" loading="lazy" />
+                      ) : (
+                        <span className="text-[11px] font-bold text-primary">
+                          {task.title.slice(0, 2).toUpperCase()}
+                        </span>
+                      )}
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-2">
                         <span className="truncate text-[10px] uppercase tracking-wide text-task-muted">
-                          {t(task.categoryKey)}
+                          {task.category ?? task.providerLabel}
                         </span>
                         <span className={cn("shrink-0 text-[10px] font-semibold", stateTone[state])}>
                           {stateLabels[state]}
                         </span>
                       </div>
                       <h2 className="mt-0.5 truncate font-display text-[13px] font-semibold text-task-title">
-                        {t(task.titleKey)}
+                        {task.title}
                       </h2>
-                      <p className="mt-0.5 line-clamp-2 text-[11px] leading-snug text-task-muted">
-                        {t(task.descriptionKey)}
-                      </p>
+                      {task.description && (
+                        <p className="mt-0.5 line-clamp-2 text-[11px] leading-snug text-task-muted">
+                          {task.description}
+                        </p>
+                      )}
                     </div>
                   </div>
 
                   <div className="mt-2.5 flex items-center gap-3 text-[11px] text-task-muted">
-                    <span className="font-semibold text-task-accent">{task.reward}</span>
-                    <span className="flex items-center gap-1">
-                      <Clock3 className="h-3 w-3" /> {task.minutes} {t("tasks.minutes")}
-                    </span>
+                    {reward && <span className="font-semibold text-task-accent">{reward}</span>}
+                    {typeof task.estimatedMinutes === "number" && (
+                      <span className="flex items-center gap-1">
+                        <Clock3 className="h-3 w-3" /> {task.estimatedMinutes} {t("tasks.minutes")}
+                      </span>
+                    )}
                     <Link
                       to="/app/tasks/$taskId"
                       params={{ taskId: task.id }}
@@ -261,32 +279,6 @@ function TaskList() {
             })}
           </div>
         )}
-
-        {/* State preview (UI phase only) */}
-        <div className="flex flex-wrap items-center gap-1.5 pt-2 text-[10px] text-task-muted">
-          <span className="uppercase tracking-wide">{t("tasks.preview.states")}</span>
-          {(
-            [
-              ["normal", t("tasks.preview.normal")],
-              ["loading", t("tasks.preview.loading")],
-              ["empty", t("tasks.preview.empty")],
-              ["error", t("tasks.preview.error")],
-            ] as [ScreenState, string][]
-          ).map(([key, label]) => (
-            <button
-              key={key}
-              onClick={() => setScreen(key)}
-              className={cn(
-                "rounded-full border px-2 py-0.5 transition-colors",
-                screen === key
-                  ? "border-primary text-primary"
-                  : "border-task-border hover:text-task-title",
-              )}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
       </div>
     </div>
   );
