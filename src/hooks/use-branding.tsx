@@ -48,6 +48,20 @@ export function BrandingProvider({ children }: { children: ReactNode }) {
     void refresh();
   }, [refresh]);
 
+  // Aplica o logótipo publicado como ícone da aplicação (favicon).
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const icon = branding.logoLight ?? branding.logoDark;
+    if (!icon) return;
+    let link = document.querySelector<HTMLLinkElement>("link[rel='icon']");
+    if (!link) {
+      link = document.createElement("link");
+      link.rel = "icon";
+      document.head.appendChild(link);
+    }
+    link.href = icon;
+  }, [branding.logoLight, branding.logoDark]);
+
   return (
     <BrandingContext.Provider value={{ ...branding, loading, refresh }}>
       {children}
