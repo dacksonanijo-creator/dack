@@ -104,6 +104,9 @@ const messages: Messages = {
   "withdraw.sendRequest": "Send request",
   "withdraw.pendingApprovalNote": "The request remains under review until administrative approval.",
   "withdraw.error.password": "Enter your account password to confirm.",
+  "tasks.provider": "Provider",
+  "tasks.countries": "Countries",
+  "tasks.openTask": "Open task",
 };
 
 export default messages;

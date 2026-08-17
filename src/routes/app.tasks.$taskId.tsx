@@ -36,6 +36,7 @@ function BackLink() {
 }
 
 function TaskDetailRoute() {
+  const t = useT();
   const { taskId } = useParams({ from: "/app/tasks/$taskId" });
   const fetchTasks = useServerFn(listExternalTasks);
   const { data, isPending } = useQuery({
@@ -64,7 +65,7 @@ function TaskDetailRoute() {
     <div className="space-y-4">
       <BackLink />
       <div className="rounded-xl border border-dashed border-border/70 bg-card p-6 text-center text-xs text-muted-foreground">
-        {useT()("tasks.emptyState.title")}
+        {t("tasks.emptyState.title")}
       </div>
     </div>
   );

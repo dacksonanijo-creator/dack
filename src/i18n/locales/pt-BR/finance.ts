@@ -104,6 +104,9 @@ const messages: Messages = {
   "withdraw.sendRequest": "Enviar pedido",
   "withdraw.pendingApprovalNote": "O pedido fica em análise até aprovação administrativa.",
   "withdraw.error.password": "Digite a senha da sua conta para confirmar.",
+  "tasks.provider": "Fornecedor",
+  "tasks.countries": "Países",
+  "tasks.openTask": "Abrir tarefa",
 };
 
 export default messages;
