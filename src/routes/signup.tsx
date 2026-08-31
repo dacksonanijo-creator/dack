@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { AuthLayout, Field } from "@/components/taskora/auth-layout";
@@ -7,6 +7,7 @@ import { countries } from "@/components/taskora/mock-data";
 import { supabase } from "@/integrations/supabase/client";
 import { authErrorMessage, emailRe } from "@/lib/auth-errors";
 import { useT } from "@/i18n";
+import { useAdoptDomFormValues } from "@/hooks/use-form-hydration";
 
 export const Route = createFileRoute("/signup")({
   head: () => ({
@@ -39,6 +40,18 @@ function Signup() {
     country: countries[0],
     password: "",
     confirm: "",
+  });
+
+  const formRef = useRef<HTMLFormElement>(null);
+  useAdoptDomFormValues(formRef, (values, checks) => {
+    setForm((f) => ({
+      fullName: values.fullName ?? f.fullName,
+      email: values.email ?? f.email,
+      country: values.country ?? f.country,
+      password: values.password ?? f.password,
+      confirm: values.confirm ?? f.confirm,
+    }));
+    if (checks.terms) setAccepted(true);
   });
 
   const set = (k: keyof typeof form) => (e: { target: { value: string } }) => {
@@ -138,10 +151,12 @@ function Signup() {
         </>
       }
     >
-      <form className="space-y-4" onSubmit={onSubmit} noValidate>
+      <form ref={formRef} className="space-y-4" onSubmit={onSubmit} noValidate>
         <Field label={t("auth.signup.fullNameLabel")}>
           <input
             className={input}
+            name="fullName"
+            autoComplete="name"
             placeholder={t("auth.signup.fullNamePlaceholder")}
             value={form.fullName}
             onChange={set("fullName")}
@@ -152,6 +167,8 @@ function Signup() {
           <input
             type="email"
             className={input}
+            name="email"
+            autoComplete="email"
             placeholder={t("auth.signup.emailPlaceholder")}
             value={form.email}
             onChange={set("email")}
@@ -159,7 +176,7 @@ function Signup() {
           {errText("email")}
         </Field>
         <Field label={t("auth.signup.countryLabel")}>
-          <select className={input} value={form.country} onChange={set("country")}>
+          <select className={input} name="country" value={form.country} onChange={set("country")}>
             {countries.map((c) => (
               <option key={c} value={c}>
                 {t(c)}
@@ -172,6 +189,8 @@ function Signup() {
             <input
               type="password"
               className={input}
+              name="password"
+              autoComplete="new-password"
               placeholder="••••••••"
               value={form.password}
               onChange={set("password")}
@@ -182,6 +201,8 @@ function Signup() {
             <input
               type="password"
               className={input}
+              name="confirm"
+              autoComplete="new-password"
               placeholder="••••••••"
               value={form.confirm}
               onChange={set("confirm")}
@@ -193,6 +214,7 @@ function Signup() {
           <label className="flex items-start gap-2.5 text-xs text-muted-foreground">
             <input
               type="checkbox"
+              name="terms"
               checked={accepted}
               onChange={(e) => {
                 setAccepted(e.target.checked);

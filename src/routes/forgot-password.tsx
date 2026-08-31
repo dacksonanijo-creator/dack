@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { AuthLayout, Field } from "@/components/taskora/auth-layout";
@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { authErrorMessage, emailRe } from "@/lib/auth-errors";
 import { useT } from "@/i18n";
+import { useAdoptDomFormValues } from "@/hooks/use-form-hydration";
 
 export const Route = createFileRoute("/forgot-password")({
   head: () => ({
@@ -31,6 +32,11 @@ function Forgot() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const formRef = useRef<HTMLFormElement>(null);
+  useAdoptDomFormValues(formRef, (values) => {
+    if (values.email) setEmail(values.email);
+  });
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,11 +80,13 @@ function Forgot() {
           </p>
         </div>
       ) : (
-        <form className="space-y-4" onSubmit={onSubmit} noValidate>
+        <form ref={formRef} className="space-y-4" onSubmit={onSubmit} noValidate>
           <Field label={t("auth.forgot.emailLabel")}>
             <input
               type="email"
               className={input}
+              name="email"
+              autoComplete="email"
               placeholder={t("auth.forgot.emailPlaceholder")}
               value={email}
               onChange={(e) => {
