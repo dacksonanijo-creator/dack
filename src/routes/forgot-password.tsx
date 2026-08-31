@@ -10,6 +10,7 @@ import { useT } from "@/i18n";
 import { useAdoptDomFormValues } from "@/hooks/use-form-hydration";
 
 export const Route = createFileRoute("/forgot-password")({
+  ssr: false,
   head: () => ({
     meta: [
       { title: "Recuperar palavra-passe — Taskora" },

@@ -10,6 +10,7 @@ import { useT } from "@/i18n";
 import { useAdoptDomFormValues } from "@/hooks/use-form-hydration";
 
 export const Route = createFileRoute("/signup")({
+  ssr: false,
   head: () => ({
     meta: [
       { title: "Criar conta — Taskora" },
