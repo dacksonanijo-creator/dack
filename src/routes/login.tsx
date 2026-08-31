@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { AuthLayout, Field } from "@/components/taskora/auth-layout";
@@ -6,8 +6,10 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { authErrorMessage, emailRe } from "@/lib/auth-errors";
 import { useT } from "@/i18n";
+import { useAdoptDomFormValues } from "@/hooks/use-form-hydration";
 
 export const Route = createFileRoute("/login")({
+  ssr: false,
   head: () => ({
     meta: [
       { title: "Entrar — Taskora" },
@@ -31,6 +33,12 @@ function Login() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const formRef = useRef<HTMLFormElement>(null);
+  useAdoptDomFormValues(formRef, (values) => {
+    if (values.email) setEmail(values.email);
+    if (values.password) setPassword(values.password);
+  });
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,11 +82,13 @@ function Login() {
 
   return (
     <AuthLayout title={t("auth.login.title")} subtitle={t("auth.login.subtitle")}>
-      <form className="space-y-4" onSubmit={onSubmit} noValidate>
+      <form ref={formRef} className="space-y-4" onSubmit={onSubmit} noValidate>
         <Field label={t("auth.login.emailLabel")}>
           <input
             type="email"
             className={input}
+            name="email"
+            autoComplete="email"
             placeholder={t("auth.login.emailPlaceholder")}
             value={email}
             onChange={(e) => {
@@ -91,6 +101,8 @@ function Login() {
           <input
             type="password"
             className={input}
+            name="password"
+            autoComplete="current-password"
             placeholder="••••••••"
             value={password}
             onChange={(e) => {
