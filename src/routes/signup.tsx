@@ -25,7 +25,7 @@ export const Route = createFileRoute("/signup")({
 });
 
 const input =
-  "w-full rounded-xl border border-input bg-background px-4 py-3 text-sm outline-none transition-shadow placeholder:text-muted-foreground focus:border-primary focus:ring-4 focus:ring-primary/10";
+  "w-full rounded-xl border border-border bg-muted/40 px-4 py-3.5 text-sm outline-none transition-all placeholder:text-muted-foreground focus:border-primary focus:ring-4 focus:ring-primary/15";
 
 type Errors = Partial<Record<"fullName" | "email" | "password" | "confirm" | "terms", string>>;
 
