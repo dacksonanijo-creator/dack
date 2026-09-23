@@ -164,6 +164,50 @@ export type Database = {
         }
         Relationships: []
       }
+      payout_logs: {
+        Row: {
+          action: string
+          created_at: string
+          environment: string
+          http_status: number | null
+          id: string
+          provider: string
+          request: Json | null
+          response: Json | null
+          withdrawal_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          environment: string
+          http_status?: number | null
+          id?: string
+          provider: string
+          request?: Json | null
+          response?: Json | null
+          withdrawal_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          environment?: string
+          http_status?: number | null
+          id?: string
+          provider?: string
+          request?: Json | null
+          response?: Json | null
+          withdrawal_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payout_logs_withdrawal_id_fkey"
+            columns: ["withdrawal_id"]
+            isOneToOne: false
+            referencedRelation: "withdrawals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       platform_branding: {
         Row: {
           id: boolean
@@ -429,13 +473,21 @@ export type Database = {
           account_holder: string
           account_number: string
           amount: number
+          attempts: number
           created_at: string
           currency: string
+          environment: string | null
+          failure_reason: string | null
           id: string
+          idempotency_key: string | null
           method: string
           notes: string | null
           processed_at: string | null
+          provider: string | null
+          provider_conversation_id: string | null
           provider_id: string | null
+          provider_response_code: string | null
+          reference: string | null
           status: Database["public"]["Enums"]["withdrawal_status"]
           transaction_id: string | null
           updated_at: string
@@ -445,13 +497,21 @@ export type Database = {
           account_holder: string
           account_number: string
           amount: number
+          attempts?: number
           created_at?: string
           currency?: string
+          environment?: string | null
+          failure_reason?: string | null
           id?: string
+          idempotency_key?: string | null
           method: string
           notes?: string | null
           processed_at?: string | null
+          provider?: string | null
+          provider_conversation_id?: string | null
           provider_id?: string | null
+          provider_response_code?: string | null
+          reference?: string | null
           status?: Database["public"]["Enums"]["withdrawal_status"]
           transaction_id?: string | null
           updated_at?: string
@@ -461,13 +521,21 @@ export type Database = {
           account_holder?: string
           account_number?: string
           amount?: number
+          attempts?: number
           created_at?: string
           currency?: string
+          environment?: string | null
+          failure_reason?: string | null
           id?: string
+          idempotency_key?: string | null
           method?: string
           notes?: string | null
           processed_at?: string | null
+          provider?: string | null
+          provider_conversation_id?: string | null
           provider_id?: string | null
+          provider_response_code?: string | null
+          reference?: string | null
           status?: Database["public"]["Enums"]["withdrawal_status"]
           transaction_id?: string | null
           updated_at?: string
@@ -488,6 +556,46 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      finalize_withdrawal: {
+        Args: {
+          _conversation_id: string
+          _id: string
+          _reason: string
+          _response_code: string
+          _success: boolean
+          _transaction_id: string
+        }
+        Returns: {
+          account_holder: string
+          account_number: string
+          amount: number
+          attempts: number
+          created_at: string
+          currency: string
+          environment: string | null
+          failure_reason: string | null
+          id: string
+          idempotency_key: string | null
+          method: string
+          notes: string | null
+          processed_at: string | null
+          provider: string | null
+          provider_conversation_id: string | null
+          provider_id: string | null
+          provider_response_code: string | null
+          reference: string | null
+          status: Database["public"]["Enums"]["withdrawal_status"]
+          transaction_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "withdrawals"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -496,13 +604,64 @@ export type Database = {
         Returns: boolean
       }
       is_platform_admin: { Args: never; Returns: boolean }
+      mark_withdrawal_processing: {
+        Args: { _environment: string; _id: string }
+        Returns: boolean
+      }
+      request_withdrawal: {
+        Args: {
+          _account_holder: string
+          _account_number: string
+          _amount: number
+          _idempotency_key: string
+          _max_amount: number
+          _method: string
+          _min_amount: number
+        }
+        Returns: {
+          account_holder: string
+          account_number: string
+          amount: number
+          attempts: number
+          created_at: string
+          currency: string
+          environment: string | null
+          failure_reason: string | null
+          id: string
+          idempotency_key: string | null
+          method: string
+          notes: string | null
+          processed_at: string | null
+          provider: string | null
+          provider_conversation_id: string | null
+          provider_id: string | null
+          provider_response_code: string | null
+          reference: string | null
+          status: Database["public"]["Enums"]["withdrawal_status"]
+          transaction_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "withdrawals"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
     }
     Enums: {
       app_role: "admin" | "user" | "company"
       submission_status: "pending" | "approved" | "rejected"
       task_status: "active" | "paused" | "completed"
       transaction_type: "credit" | "debit" | "withdrawal" | "reward" | "fee"
-      withdrawal_status: "pending" | "approved" | "paid" | "rejected"
+      withdrawal_status:
+        | "pending"
+        | "approved"
+        | "paid"
+        | "rejected"
+        | "processing"
+        | "failed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -634,7 +793,14 @@ export const Constants = {
       submission_status: ["pending", "approved", "rejected"],
       task_status: ["active", "paused", "completed"],
       transaction_type: ["credit", "debit", "withdrawal", "reward", "fee"],
-      withdrawal_status: ["pending", "approved", "paid", "rejected"],
+      withdrawal_status: [
+        "pending",
+        "approved",
+        "paid",
+        "rejected",
+        "processing",
+        "failed",
+      ],
     },
   },
 } as const
