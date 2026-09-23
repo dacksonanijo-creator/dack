@@ -1,8 +1,23 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { Check, Lock, Smartphone, Wallet, CreditCard } from "lucide-react";
 import { useLocale, useT } from "@/i18n";
 import { cn } from "@/lib/utils";
+import { getMyPayouts, refreshMyPayouts, requestWithdrawal } from "@/lib/payouts/payouts.functions";
+import { PAYOUT_RATES, type WithdrawalStatus } from "@/lib/payouts/types";
+
+const WITHDRAW_ERRORS: Record<string, string> = {
+  insufficient_balance: "Saldo insuficiente.",
+  withdrawal_in_progress: "Já tens um levantamento em processamento.",
+  invalid_amount: "Valor inválido.",
+  invalid_account: "Número M-Pesa inválido (84/85 xxx xxxx).",
+  not_configured: "Levantamentos M-Pesa ainda não estão ativos.",
+  method_unavailable: "Método indisponível.",
+};
+const mapStatus = (s: WithdrawalStatus): RequestStatus =>
+  s === "paid" ? "paid" : s === "approved" ? "approved" : s === "failed" || s === "rejected" ? "rejected" : "review";
 
 export const Route = createFileRoute("/app/withdrawals")({
   head: () => ({
@@ -40,7 +55,6 @@ const userCountry = "MZ";
 const local = currencies[userCountry];
 
 const MIN_WITHDRAWAL = 3;
-const availableUsd = 0;
 
 const usd = (v: number) => `$${v.toFixed(2)}`;
 const toLocal = (v: number) =>
@@ -68,7 +82,11 @@ const statusTone: Record<RequestStatus, string> = {
 function WithdrawalsPage() {
   const t = useT();
   const { locale } = useLocale();
-  const [requests, setRequests] = useState<WithdrawalRequest[]>([]);
+  const qc = useQueryClient();
+  const fetchPayouts = useServerFn(getMyPayouts);
+  const refreshFn = useServerFn(refreshMyPayouts);
+  const requestFn = useServerFn(requestWithdrawal);
+  const payouts = useQuery({ queryKey: ["payouts"], queryFn: () => fetchPayouts() });
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState<1 | 2>(1);
   const [amount, setAmount] = useState("");
@@ -76,6 +94,27 @@ function WithdrawalsPage() {
   const [destination, setDestination] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [idemKey, setIdemKey] = useState(() => crypto.randomUUID());
+
+  const availableUsd = (payouts.data?.available ?? 0) / PAYOUT_RATES.USD_TO_MZN;
+  const requests: WithdrawalRequest[] = (payouts.data?.withdrawals ?? []).map((w) => ({
+    id: w.id,
+    amount: w.amount / PAYOUT_RATES.USD_TO_MZN,
+    method: w.method as MethodId,
+    date: new Date(w.createdAt).toLocaleDateString(locale, { day: "2-digit", month: "short", year: "numeric" }),
+    status: mapStatus(w.status),
+  }));
+  const hasProcessing = payouts.data?.withdrawals.some((w) => w.status === "processing");
+
+  useEffect(() => {
+    if (!hasProcessing) return;
+    const id = setInterval(async () => {
+      await refreshFn().catch(() => null);
+      qc.invalidateQueries({ queryKey: ["payouts"] });
+    }, 20000);
+    return () => clearInterval(id);
+  }, [hasProcessing, refreshFn, qc]);
 
   const methods: { id: MethodId; name: string; hint: string; icon: typeof Smartphone }[] = [
     { id: "mpesa", name: t("withdraw.method.mpesa"), hint: t("withdraw.hint.mobileWallet"), icon: Smartphone },
@@ -95,8 +134,8 @@ function WithdrawalsPage() {
   const amountNumber = Number(amount.replace(",", ".")) || 0;
 
   const amountValid = useMemo(
-    () => amountNumber >= MIN_WITHDRAWAL && amountNumber <= availableUsd && destination.trim().length >= 4,
-    [amountNumber, destination],
+    () => method === "mpesa" && amountNumber >= MIN_WITHDRAWAL && amountNumber <= availableUsd && destination.trim().length >= 9,
+    [amountNumber, destination, availableUsd, method],
   );
 
   const reset = () => {
@@ -106,24 +145,31 @@ function WithdrawalsPage() {
     setDestination("");
     setPassword("");
     setError(null);
+    setIdemKey(crypto.randomUUID());
   };
 
-  const submit = () => {
+  const submit = async () => {
     if (password.trim().length < 6) {
       setError(t("withdraw.error.password"));
       return;
     }
-    setRequests((prev) => [
-      {
-        id: `w${Date.now()}`,
-        amount: amountNumber,
-        method,
-        date: new Date().toLocaleDateString(locale, { day: "2-digit", month: "short", year: "numeric" }),
-        status: "review",
-      },
-      ...prev,
-    ]);
-    reset();
+    if (submitting) return;
+    setSubmitting(true);
+    try {
+      const res = await requestFn({
+        data: { method: "mpesa", amountUsd: amountNumber, account: destination, idempotencyKey: idemKey },
+      });
+      if (!res.ok) {
+        setError(WITHDRAW_ERRORS[res.error ?? ""] ?? "Não foi possível processar o pedido.");
+        return;
+      }
+      await qc.invalidateQueries({ queryKey: ["payouts"] });
+      reset();
+    } catch {
+      setError("Não foi possível processar o pedido.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
