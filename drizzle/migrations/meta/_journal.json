@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1790176307204,
+      "tag": "0000_mpesa_b2c_payouts",
+      "breakpoints": true
+    }
+  ]
+}
