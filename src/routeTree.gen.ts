@@ -49,6 +49,7 @@ import { Route as AdminBrandingRouteImport } from './routes/admin.branding'
 import { Route as AdminApisRouteImport } from './routes/admin.apis'
 import { Route as AppTasksIndexRouteImport } from './routes/app.tasks.index'
 import { Route as AppTasksTaskIdRouteImport } from './routes/app.tasks.$taskId'
+import { Route as ApiPublicPaymentsMpesaCallbackRouteImport } from './routes/api/public/payments/mpesa/callback'
 
 const WelcomeRoute = WelcomeRouteImport.update({
   id: '/welcome',
@@ -250,6 +251,12 @@ const AppTasksTaskIdRoute = AppTasksTaskIdRouteImport.update({
   path: '/tasks/$taskId',
   getParentRoute: () => AppRoute,
 } as any)
+const ApiPublicPaymentsMpesaCallbackRoute =
+  ApiPublicPaymentsMpesaCallbackRouteImport.update({
+    id: '/api/public/payments/mpesa/callback',
+    path: '/api/public/payments/mpesa/callback',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -292,6 +299,7 @@ export interface FileRoutesByFullPath {
   '/app/': typeof AppIndexRoute
   '/app/tasks/$taskId': typeof AppTasksTaskIdRoute
   '/app/tasks/': typeof AppTasksIndexRoute
+  '/api/public/payments/mpesa/callback': typeof ApiPublicPaymentsMpesaCallbackRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -332,6 +340,7 @@ export interface FileRoutesByTo {
   '/app': typeof AppIndexRoute
   '/app/tasks/$taskId': typeof AppTasksTaskIdRoute
   '/app/tasks': typeof AppTasksIndexRoute
+  '/api/public/payments/mpesa/callback': typeof ApiPublicPaymentsMpesaCallbackRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -375,6 +384,7 @@ export interface FileRoutesById {
   '/app/': typeof AppIndexRoute
   '/app/tasks/$taskId': typeof AppTasksTaskIdRoute
   '/app/tasks/': typeof AppTasksIndexRoute
+  '/api/public/payments/mpesa/callback': typeof ApiPublicPaymentsMpesaCallbackRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -419,6 +429,7 @@ export interface FileRouteTypes {
     | '/app/'
     | '/app/tasks/$taskId'
     | '/app/tasks/'
+    | '/api/public/payments/mpesa/callback'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -459,6 +470,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/app/tasks/$taskId'
     | '/app/tasks'
+    | '/api/public/payments/mpesa/callback'
   id:
     | '__root__'
     | '/'
@@ -501,6 +513,7 @@ export interface FileRouteTypes {
     | '/app/'
     | '/app/tasks/$taskId'
     | '/app/tasks/'
+    | '/api/public/payments/mpesa/callback'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -515,6 +528,7 @@ export interface RootRouteChildren {
   SignupRoute: typeof SignupRoute
   TermsRoute: typeof TermsRoute
   WelcomeRoute: typeof WelcomeRoute
+  ApiPublicPaymentsMpesaCallbackRoute: typeof ApiPublicPaymentsMpesaCallbackRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -799,6 +813,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppTasksTaskIdRouteImport
       parentRoute: typeof AppRoute
     }
+    '/api/public/payments/mpesa/callback': {
+      id: '/api/public/payments/mpesa/callback'
+      path: '/api/public/payments/mpesa/callback'
+      fullPath: '/api/public/payments/mpesa/callback'
+      preLoaderRoute: typeof ApiPublicPaymentsMpesaCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -888,6 +909,7 @@ const rootRouteChildren: RootRouteChildren = {
   SignupRoute: SignupRoute,
   TermsRoute: TermsRoute,
   WelcomeRoute: WelcomeRoute,
+  ApiPublicPaymentsMpesaCallbackRoute: ApiPublicPaymentsMpesaCallbackRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
