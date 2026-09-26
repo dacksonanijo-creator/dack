@@ -1,83 +1,65 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
-import { ArrowRight, Sparkles } from "lucide-react";
-import { TaskoraMark } from "@/components/taskora/logo";
-import { useT } from "@/i18n";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { ArrowRight } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Taskora — Transformando tempo em oportunidades" },
+      { title: "Nexora — Oportunidades que avançam contigo" },
       {
         name: "description",
-        content:
-          "Taskora é a plataforma de microtarefas remuneradas que transforma o teu tempo livre em oportunidades reais.",
+        content: "Nexora — uma experiência simples, moderna e preparada para o teu próximo passo.",
       },
-      { property: "og:title", content: "Taskora — Transformando tempo em oportunidades" },
-      {
-        property: "og:description",
-        content: "Microtarefas simples, pagamentos rápidos e uma experiência pensada para o teu telemóvel.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: Splash,
+  component: NexoraIntro,
 });
 
-function Splash() {
-  const navigate = useNavigate();
-  const t = useT();
-
-  useEffect(() => {
-    const timer = setTimeout(() => navigate({ to: "/welcome" }), 2200);
-    return () => clearTimeout(timer);
-  }, [navigate]);
-
+function NexoraIntro() {
   return (
-    <div className="relative grid min-h-screen overflow-hidden bg-gradient-hero px-6">
+    <main className="relative grid min-h-screen place-items-center overflow-hidden bg-gradient-hero px-6">
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute left-1/2 top-1/2 h-72 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/10 blur-3xl" />
-        <div className="absolute -right-20 -top-20 h-56 w-56 rounded-full bg-success/10 blur-3xl" />
+        <div className="absolute left-1/2 top-1/2 h-80 w-80 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/10 blur-3xl" />
+        <div className="absolute -left-24 -top-24 h-64 w-64 rounded-full bg-primary/10 blur-3xl" />
+        <div className="absolute -bottom-24 -right-24 h-64 w-64 rounded-full bg-success/10 blur-3xl" />
       </div>
 
-      <div className="relative flex flex-col items-center justify-center text-center">
-        <div className="relative">
-          <span className="absolute -inset-5 animate-pulse-ring rounded-[2rem] bg-primary/15" />
-          <div className="relative grid h-24 w-24 place-items-center rounded-[2rem] border border-white/60 bg-card/90 shadow-glow backdrop-blur">
-            <TaskoraMark className="h-16 w-16 animate-rise" />
-          </div>
-        </div>
-
-        <div className="mt-7 flex items-center gap-2 animate-rise [animation-delay:100ms]">
-          <Sparkles className="h-4 w-4 text-primary" />
-          <span className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
-            Plataforma de oportunidades
+      <div className="relative flex w-full max-w-md flex-col items-center text-center">
+        <Link
+          to="/welcome"
+          aria-label="Entrar na Nexora"
+          className="group relative rounded-[2rem] outline-none transition-transform duration-300 hover:scale-[1.04] focus-visible:ring-4 focus-visible:ring-primary/25"
+        >
+          <span className="absolute -inset-6 rounded-[2.5rem] bg-primary/10 blur-2xl transition-opacity duration-300 group-hover:opacity-80" />
+          <span className="relative grid h-32 w-32 place-items-center rounded-[2rem] border border-white/70 bg-card/90 shadow-glow backdrop-blur-xl sm:h-36 sm:w-36">
+            <span className="font-display text-6xl font-black tracking-[-0.08em] text-gradient sm:text-7xl">
+              N
+            </span>
           </span>
-        </div>
+        </Link>
 
-        <h1 className="mt-3 animate-rise font-display text-4xl font-extrabold tracking-tight [animation-delay:160ms] sm:text-5xl">
-          Taskora
-        </h1>
+        <Link
+          to="/welcome"
+          className="mt-7 rounded-xl px-4 py-2 font-display text-3xl font-extrabold tracking-[-0.04em] transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/20 sm:text-4xl"
+        >
+          N<span className="text-gradient">exora</span>
+        </Link>
 
-        <p className="mt-2 max-w-sm animate-rise text-sm leading-relaxed text-muted-foreground [animation-delay:240ms] sm:text-base">
-          {t("brand.tagline")}
+        <p className="mt-3 max-w-xs text-sm leading-relaxed text-muted-foreground sm:text-base">
+          O teu próximo passo começa aqui.
         </p>
 
-        <div className="mt-9 flex items-center gap-2 text-xs font-medium text-muted-foreground">
-          <span className="h-1.5 w-1.5 rounded-full bg-success" />
-          A preparar a tua experiência
-          <ArrowRight className="h-3.5 w-3.5" />
-        </div>
+        <Link
+          to="/welcome"
+          className="mt-9 inline-flex h-14 items-center gap-2 rounded-2xl bg-gradient-primary px-7 text-sm font-bold text-primary-foreground shadow-glow transition-all hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/25"
+        >
+          Entrar
+          <ArrowRight className="h-4 w-4" />
+        </Link>
 
-        <div className="mt-4 h-1 w-48 overflow-hidden rounded-full bg-muted/80">
-          <div className="h-full w-1/3 animate-[taskora-rise_1.6s_ease-in-out_infinite_alternate] rounded-full bg-gradient-primary" />
-        </div>
+        <p className="mt-8 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground/60">
+          Simples • Moderno • Feito para ti
+        </p>
       </div>
-
-      <div className="absolute bottom-7 left-0 right-0 text-center text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground/70">
-        Simples • Seguro • Feito para o teu telemóvel
-      </div>
-    </div>
+    </main>
   );
 }
