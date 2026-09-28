@@ -18,43 +18,45 @@ export function AuthLayout({
   backTo?: string;
 }) {
   const t = useT();
+
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-muted/40 px-4 py-10 sm:px-6">
+    <div className="relative flex min-h-screen items-center justify-center bg-background px-4 py-8 sm:px-6 sm:py-12">
       <Link
         to={backTo}
-        className="absolute left-4 top-4 grid h-10 w-10 place-items-center rounded-full border border-border bg-card text-muted-foreground shadow-sm transition-colors hover:text-foreground sm:left-6 sm:top-6"
+        className="absolute left-4 top-4 grid h-9 w-9 place-items-center rounded-full border border-border/80 bg-background text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 sm:left-6 sm:top-6"
         aria-label={t("auth.back")}
       >
         <ArrowLeft className="h-4 w-4" />
       </Link>
 
-      <div className="w-full max-w-[480px]">
-        <div className="animate-rise overflow-hidden rounded-[2rem] border border-border/60 bg-card shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-          {/* Cabeçalho */}
-          <div className="px-8 pb-6 pt-10 text-center">
-            <div className="mb-6 inline-flex items-center justify-center rounded-2xl bg-primary/5 p-2 ring-1 ring-border/60">
-              <TaskoraMark className="h-12 w-12" />
+      <div className="w-full max-w-[440px]">
+        <div className="overflow-hidden rounded-3xl border border-border/80 bg-card shadow-[0_18px_60px_rgba(15,23,42,0.08)]">
+          <div className="px-6 pb-7 pt-9 sm:px-8 sm:pt-10">
+            <div className="mb-7 flex justify-center">
+              <TaskoraMark className="h-11 w-11" />
             </div>
-            <h1 className="font-display text-2xl font-extrabold tracking-tight md:text-3xl">
-              {title}
-            </h1>
-            <p className="mt-2 text-sm text-muted-foreground md:text-base">{subtitle}</p>
+            <div className="text-center">
+              <h1 className="font-display text-[26px] font-extrabold tracking-tight text-foreground">
+                {title}
+              </h1>
+              <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-muted-foreground">
+                {subtitle}
+              </p>
+            </div>
           </div>
 
-          {/* Formulário */}
-          <div className="px-8 pb-10">{children}</div>
+          <div className="px-6 pb-7 sm:px-8 sm:pb-8">{children}</div>
 
-          {/* Selo de confiança */}
-          <div className="flex items-center justify-center gap-2 border-t border-border/60 bg-muted/40 px-8 py-5">
-            <ShieldCheck className="h-4 w-4 text-success" />
-            <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          <div className="flex items-center justify-center gap-2 border-t border-border/70 bg-muted/25 px-6 py-4">
+            <ShieldCheck className="h-3.5 w-3.5 text-primary" />
+            <span className="text-[11px] font-medium text-muted-foreground">
               {t("auth.trustBadge")}
             </span>
           </div>
         </div>
 
         {footer && (
-          <div className="mt-6 text-center text-sm text-muted-foreground">{footer}</div>
+          <div className="mt-5 px-3 text-center text-sm text-muted-foreground">{footer}</div>
         )}
       </div>
     </div>
@@ -70,7 +72,7 @@ export function Field({
 }) {
   return (
     <label className="block space-y-1.5">
-      <span className="ml-1 block text-[13px] font-semibold text-foreground/80">{label}</span>
+      <span className="ml-0.5 block text-[13px] font-semibold text-foreground">{label}</span>
       {children}
     </label>
   );
