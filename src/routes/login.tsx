@@ -25,7 +25,18 @@ export const Route = createFileRoute("/login")({
 });
 
 const input =
-  "h-11 w-full rounded-xl border border-border bg-background px-3.5 text-sm text-foreground outline-none transition-all placeholder:text-muted-foreground/70 focus:border-primary focus:ring-4 focus:ring-primary/10 disabled:cursor-not-allowed disabled:opacity-60";
+  "h-11.5 w-full rounded-xl border border-border bg-white px-3.5 text-sm text-foreground outline-none transition-all placeholder:text-muted-foreground/65 focus:border-primary focus:ring-4 focus:ring-primary/10 disabled:cursor-not-allowed disabled:opacity-60";
+
+function GoogleMark() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4.5 w-4.5">
+      <path fill="#4285F4" d="M21.35 12.27c0-.67-.06-1.32-.17-1.94H12v3.67h5.24a4.48 4.48 0 0 1-1.94 2.94v2.44h3.14c1.84-1.69 2.91-4.18 2.91-7.11Z" />
+      <path fill="#34A853" d="M12 21.6c2.63 0 4.84-.87 6.44-2.35l-3.14-2.44c-.87.58-1.98.92-3.3.92-2.54 0-4.7-1.72-5.47-4.03H3.29v2.52A9.72 9.72 0 0 0 12 21.6Z" />
+      <path fill="#FBBC05" d="M6.53 13.7a5.84 5.84 0 0 1 0-3.4V7.78H3.29a9.72 9.72 0 0 0 0 8.44l3.24-2.52Z" />
+      <path fill="#EA4335" d="M12 6.27c1.43 0 2.72.49 3.73 1.46l2.8-2.8C16.83 3.36 14.63 2.4 12 2.4a9.72 9.72 0 0 0-8.71 5.38l3.24 2.52C7.3 7.99 9.46 6.27 12 6.27Z" />
+    </svg>
+  );
+}
 
 function Login() {
   const t = useT();
@@ -59,7 +70,8 @@ function Login() {
     }
 
     const isEmail = emailRe.test(value);
-    const isPhone = /^\+?[1-9]\d{7,14}$/.test(value.replace(/[\s()-]/g, ""));
+    const normalizedPhone = value.replace(/[\s()-]/g, "");
+    const isPhone = /^\+?[1-9]\d{7,14}$/.test(normalizedPhone);
     if (!isEmail && !isPhone) {
       setError("Introduz um email válido ou um número de telefone em formato internacional.");
       return;
@@ -69,7 +81,7 @@ function Login() {
     try {
       const credentials = isEmail
         ? { email: value.toLowerCase(), password }
-        : { phone: value.replace(/[\s()-]/g, ""), password };
+        : { phone: normalizedPhone, password };
 
       const { data, error: err } = await supabase.auth.signInWithPassword(credentials);
       if (err) {
@@ -128,7 +140,7 @@ function Login() {
         </>
       }
     >
-      <form ref={formRef} className="space-y-4" onSubmit={onSubmit} noValidate>
+      <form ref={formRef} className="space-y-4.5" onSubmit={onSubmit} noValidate>
         <Field label="Email ou número de telefone">
           <div className="relative">
             {identifier.includes("@") ? (
@@ -142,13 +154,14 @@ function Login() {
               className={input + " pl-10"}
               name="email"
               autoComplete="username"
-              placeholder="Email ou +258 84 000 0000"
+              placeholder="nome@email.com ou +258 84 000 0000"
               value={identifier}
               onChange={(e) => {
                 setIdentifier(e.target.value);
                 setError(null);
               }}
               disabled={loading || googleLoading}
+              aria-label="Email ou número de telefone"
             />
           </div>
         </Field>
@@ -168,34 +181,42 @@ function Login() {
                 setError(null);
               }}
               disabled={loading || googleLoading}
+              aria-label="Palavra-passe"
             />
             <button
               type="button"
               onClick={() => setShowPassword((value) => !value)}
               className="absolute right-2 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
               aria-label={showPassword ? "Ocultar palavra-passe" : "Mostrar palavra-passe"}
+              aria-pressed={showPassword}
             >
               {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
           </div>
         </Field>
 
-        {error && (
-          <p role="alert" className="rounded-xl border border-destructive/20 bg-destructive/5 px-3 py-2.5 text-xs font-medium leading-5 text-destructive">
-            {error}
-          </p>
-        )}
-
-        <div className="flex justify-end">
-          <Link to="/forgot-password" className="text-xs font-semibold text-primary hover:underline">
+        <div className="flex min-h-5 items-center justify-end">
+          <Link
+            to="/forgot-password"
+            className="text-xs font-semibold text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+          >
             Esqueci-me da palavra-passe
           </Link>
         </div>
 
+        {error && (
+          <p
+            role="alert"
+            className="rounded-xl border border-destructive/20 bg-destructive/[0.06] px-3 py-2.5 text-xs font-medium leading-5 text-destructive"
+          >
+            {error}
+          </p>
+        )}
+
         <Button
           type="submit"
           disabled={loading || googleLoading}
-          className="h-11 w-full rounded-xl text-sm font-semibold"
+          className="h-11.5 w-full rounded-xl text-sm font-semibold shadow-[0_8px_20px_-10px_rgba(59,91,219,0.55)]"
         >
           {loading ? (
             <>
@@ -207,9 +228,9 @@ function Login() {
           )}
         </Button>
 
-        <div className="relative py-1">
-          <div className="absolute inset-x-0 top-1/2 border-t border-border/70" />
-          <span className="relative mx-auto block w-fit bg-card px-3 text-[11px] font-medium text-muted-foreground">
+        <div className="relative py-0.5">
+          <div className="absolute inset-x-0 top-1/2 border-t border-border/80" />
+          <span className="relative mx-auto block w-fit bg-white px-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
             ou
           </span>
         </div>
@@ -219,12 +240,12 @@ function Login() {
           variant="outline"
           onClick={continueWithGoogle}
           disabled={loading || googleLoading}
-          className="h-11 w-full rounded-xl border-border text-sm font-semibold"
+          className="h-11.5 w-full rounded-xl border-border bg-white text-sm font-semibold shadow-none hover:bg-muted/40"
         >
           {googleLoading ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           ) : (
-            <span className="mr-2 text-sm font-bold">G</span>
+            <span className="mr-2"><GoogleMark /></span>
           )}
           Continuar com Google
         </Button>
