@@ -88,8 +88,9 @@ function Signup() {
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (loading || !validate()) {
-      if (!loading && !validate()) toast.error(t("auth.signup.fixFields"));
+    if (loading) return;
+    if (!validate()) {
+      toast.error(t("auth.signup.fixFields"));
       return;
     }
 
