@@ -2,7 +2,7 @@ import type { Messages } from "../../types";
 
 const messages: Messages = {
   "auth.back": "Voltar",
-  "auth.trustBadge": "Transações 100% seguras",
+  "auth.trustBadge": "Proteção da conta e sessão segura",
   "auth.login.title": "Bem-vindo de volta",
   "auth.login.subtitle": "Entra para continuares onde ficaste.",
   "auth.login.emailLabel": "Email",
