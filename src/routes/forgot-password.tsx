@@ -70,8 +70,8 @@ function Forgot() {
       setSent(true);
       toast.success("Se existir uma conta associada a este contacto, receberás instruções de verificação.");
     } catch (err) {
-      setSent(true);
-      toast.success("Se existir uma conta associada a este contacto, receberás instruções de verificação.");
+      setError("Não foi possível iniciar a recuperação. Tenta novamente.");
+      toast.error("Não foi possível iniciar a recuperação. Tenta novamente.");
       console.error("[recovery]", err);
     } finally {
       setLoading(false);
