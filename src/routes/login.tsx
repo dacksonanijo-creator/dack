@@ -90,11 +90,16 @@ function Login() {
         toast.error(msg);
         return;
       }
-      if (!data.session) {
+      // Confirm that Supabase has persisted the session before entering the protected app.
+      // This avoids a race between auth storage and the /app route guard.
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !sessionData.session || sessionData.session.user.id !== data.session.user.id) {
         setError(t("auth.login.noSession"));
+        toast.error(t("auth.login.noSession"));
         return;
       }
-      navigate({ to: "/app" });
+
+      await navigate({ to: "/app", replace: true });
     } catch (err) {
       const msg = t(authErrorMessage(err instanceof Error ? err.message : String(err)));
       setError(msg);
