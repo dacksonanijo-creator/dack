@@ -1,5 +1,4 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowUpRight } from "lucide-react";
 import { TaskoraLogo } from "@/components/taskora/logo";
 import { LanguageSelect } from "@/components/taskora/language-select";
 
@@ -79,14 +78,6 @@ function Welcome() {
           <p className="relative mt-6 text-sm font-medium text-muted-foreground sm:text-base">
             Uma plataforma feita para o mundo.
           </p>
-
-          <Link
-            to="/signup"
-            className="group relative mt-8 inline-flex h-12 items-center gap-2 rounded-full bg-primary px-6 text-sm font-bold text-primary-foreground shadow-glow transition-all hover:-translate-y-0.5 hover:shadow-lg sm:mt-10 sm:h-13 sm:px-7"
-          >
-            Começar agora
-            <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-          </Link>
         </section>
       </main>
     </div>
