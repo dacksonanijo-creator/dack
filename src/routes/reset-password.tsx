@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { authErrorMessage } from "@/lib/auth-errors";
 import { useT } from "@/i18n";
+import { passwordIsStrong, passwordPolicyRules } from "@/lib/password-policy";
 
 export const Route = createFileRoute("/reset-password")({
   ssr: false,
@@ -43,7 +44,7 @@ function ResetPassword() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);\n  const [upgradeRequired, setUpgradeRequired] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setReady(Boolean(data.session)));
@@ -72,7 +73,7 @@ function ResetPassword() {
         toast.error(msg);
         return;
       }
-      toast.success("Palavra-passe atualizada com sucesso.");
+      sessionStorage.removeItem("taskora-password-upgrade-required");\n      toast.success("Palavra-passe atualizada com sucesso.");
       navigate({ to: "/app" });
     } finally {
       setLoading(false);
@@ -87,7 +88,7 @@ function ResetPassword() {
       footer={<Link to="/login" className="font-semibold text-primary hover:underline">Voltar ao início de sessão</Link>}
     >
       {!ready ? (
-        <p className="rounded-xl border border-border bg-muted/30 px-4 py-3 text-xs leading-5 text-muted-foreground">
+        {upgradeRequired && (\n          <div className="rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 text-xs leading-5 text-foreground">A tua palavra-passe anterior continua válida, mas precisa de ser atualizada para cumprir a nova política de segurança.</div>\n        )}\n        <p className="rounded-xl border border-border bg-muted/30 px-4 py-3 text-xs leading-5 text-muted-foreground">
           Abre esta página através do link ou código de recuperação enviado para o teu contacto.
         </p>
       ) : (
