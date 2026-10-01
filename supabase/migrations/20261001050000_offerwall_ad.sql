@@ -49,3 +49,64 @@ create table if not exists public.offerwall_ad_provider_config (
 alter table public.offerwall_ad_conversions enable row level security;
 alter table public.offerwall_ad_integration_logs enable row level security;
 alter table public.offerwall_ad_provider_config enable row level security;
+
+
+-- Secure storage for the Offerwall Ad credential.
+-- The API key is stored encrypted by Supabase Vault and is never exposed
+-- through the public provider configuration table.
+create extension if not exists supabase_vault with schema vault;
+
+create or replace function public.save_offerwall_ad_api_key(p_api_key text)
+returns boolean
+language plpgsql
+security definer
+set search_path = public, vault
+as $$
+declare
+  existing_id uuid;
+begin
+  if p_api_key is null or btrim(p_api_key) = '' then
+    raise exception 'API Key vazia';
+  end if;
+
+  select id
+    into existing_id
+    from vault.secrets
+   where name = 'taskora_offerwall_ad_api_key'
+   limit 1;
+
+  if existing_id is null then
+    perform vault.create_secret(
+      btrim(p_api_key),
+      'taskora_offerwall_ad_api_key',
+      'Offerwall Ad production API Key used by TASKORA'
+    );
+  else
+    perform vault.update_secret(
+      existing_id,
+      btrim(p_api_key),
+      'taskora_offerwall_ad_api_key',
+      'Offerwall Ad production API Key used by TASKORA'
+    );
+  end if;
+
+  return true;
+end;
+$$;
+
+create or replace function public.get_offerwall_ad_api_key()
+returns text
+language sql
+security definer
+set search_path = public, vault
+as $$
+  select decrypted_secret
+    from vault.decrypted_secrets
+   where name = 'taskora_offerwall_ad_api_key'
+   limit 1;
+$$;
+
+revoke all on function public.save_offerwall_ad_api_key(text) from public, anon, authenticated;
+revoke all on function public.get_offerwall_ad_api_key() from public, anon, authenticated;
+grant execute on function public.save_offerwall_ad_api_key(text) to service_role;
+grant execute on function public.get_offerwall_ad_api_key() to service_role;
