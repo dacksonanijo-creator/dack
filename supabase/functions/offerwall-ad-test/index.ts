@@ -49,9 +49,40 @@ async function requireAdmin(req: Request) {
   return allowed.has(email) || data.user?.app_metadata?.role === "admin";
 }
 
+function adminDatabaseClient() {
+  const url = Deno.env.get("SUPABASE_URL") ?? "";
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+  if (!url || !serviceRoleKey) return null;
+  return createClient(url, serviceRoleKey);
+}
+
+async function saveMetadata(
+  endpoint: string,
+  status: string,
+  testedAt: string | null,
+) {
+  const db = adminDatabaseClient();
+  if (!db) return;
+
+  await db.from("offerwall_ad_provider_config").upsert(
+    {
+      provider: "offerwall_ad",
+      environment: "production",
+      endpoint: endpoint || null,
+      enabled: status === "connected",
+      last_test_at: testedAt,
+      last_test_status: status,
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: "provider" },
+  );
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
-  if (req.method !== "POST") return json({ status: "communication_error", message: "Método não suportado." }, 405);
+  if (req.method !== "POST") {
+    return json({ status: "communication_error", message: "Método não suportado." }, 405);
+  }
 
   if (!(await requireAdmin(req))) {
     return json({ status: "communication_error", message: "Acesso administrativo não autorizado." }, 403);
@@ -62,22 +93,58 @@ Deno.serve(async (req) => {
     const endpoint = typeof body?.endpoint === "string" && body.endpoint.trim()
       ? body.endpoint.trim()
       : configuredEndpoint();
-    const apiKey = configuredKey();
+
+    // The manually entered key is accepted only for this HTTPS request.
+    // It is never persisted, logged, returned, or written to GitHub.
+    const apiKey =
+      typeof body?.apiKey === "string" && body.apiKey.trim()
+        ? body.apiKey.trim()
+        : configuredKey();
+
+    const action = body?.action === "save_configuration" ? "save_configuration" : "test_connection";
+
+    if (action === "save_configuration") {
+      if (!endpoint) {
+        return json({ status: "not_configured", message: "Informe o endpoint oficial do Offerwall Ad." });
+      }
+
+      let parsed: URL;
+      try {
+        parsed = new URL(endpoint);
+        if (parsed.protocol !== "https:") {
+          return json({ status: "communication_error", message: "O endpoint da API deve usar HTTPS." });
+        }
+      } catch {
+        return json({ status: "communication_error", message: "Endpoint da API inválido." });
+      }
+
+      await saveMetadata(parsed.toString(), "not_configured", null);
+      return json({
+        status: "not_configured",
+        message: "Configuração guardada. A API Key não foi armazenada; ela deve ser fornecida para o teste ou configurada como secret no backend.",
+      });
+    }
 
     if (!endpoint || !apiKey) {
-      return json({ status: "not_configured", message: "Offerwall Ad não está configurado no backend." });
+      return json({
+        status: "not_configured",
+        message: "Informe a API Key e o endpoint oficial do Offerwall Ad.",
+      });
     }
 
     let parsed: URL;
     try {
       parsed = new URL(endpoint);
       if (parsed.protocol !== "https:") {
+        await saveMetadata(endpoint, "communication_error", new Date().toISOString());
         return json({ status: "communication_error", message: "O endpoint da API deve usar HTTPS." });
       }
     } catch {
+      await saveMetadata(endpoint, "communication_error", new Date().toISOString());
       return json({ status: "communication_error", message: "Endpoint da API inválido." });
     }
 
+    const testedAt = new Date().toISOString();
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 10_000);
 
@@ -92,17 +159,25 @@ Deno.serve(async (req) => {
       });
 
       if (response.status === 401 || response.status === 403) {
-        return json({ status: "authentication_error", message: "A API Key foi rejeitada pelo Offerwall Ad." });
+        await saveMetadata(parsed.toString(), "authentication_error", testedAt);
+        return json({ status: "authentication_error", message: "A API Key foi rejeitada pelo Offerwall Ad.", testedAt });
       }
 
       if (!response.ok) {
+        await saveMetadata(parsed.toString(), "communication_error", testedAt);
         return json({
           status: "communication_error",
           message: `O Offerwall Ad respondeu com HTTP ${response.status}.`,
+          testedAt,
         });
       }
 
-      return json({ status: "connected", message: "Conexão com o Offerwall Ad estabelecida." });
+      await saveMetadata(parsed.toString(), "connected", testedAt);
+      return json({
+        status: "connected",
+        message: "Conexão com o Offerwall Ad estabelecida.",
+        testedAt,
+      });
     } finally {
       clearTimeout(timeout);
     }
