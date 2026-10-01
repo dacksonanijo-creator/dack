@@ -301,7 +301,7 @@ function Page() {
                 Segurança da credencial
               </div>
               <p className="mt-2 text-xs leading-5 text-muted-foreground">
-                A API Key não é incluída no código, GitHub, URL, localStorage, banco de dados ou logs. Para uso persistente no backend, configure <code>OFFERWALL_AD_API_KEY</code> como secret do Supabase Edge Functions.
+                A API Key não é incluída no código, GitHub, URL, localStorage ou logs. Quando guardada pelo painel, fica armazenada no Supabase Vault e só o backend pode recuperá-la para testar a conexão.
               </p>
             </div>
             <div className="rounded-xl border border-border/70 p-4">
