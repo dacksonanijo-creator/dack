@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { CheckCircle2, CircleAlert, Eye, EyeOff, KeyRound, Loader2, ServerCog, ShieldCheck, WifiOff } from "lucide-react";
+import { CheckCircle2, CircleAlert, KeyRound, Loader2, ServerCog, ShieldCheck, WifiOff } from "lucide-react";
 import { AdminPageHeader } from "@/components/taskora/admin-shell";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
@@ -28,9 +28,7 @@ const statusCopy: Record<ConnectionStatus, { label: string; icon: typeof CheckCi
 };
 
 function Page() {
-  const [apiKey, setApiKey] = useState("");
   const [endpoint, setEndpoint] = useState("");
-  const [showKey, setShowKey] = useState(false);
   const [status, setStatus] = useState<ConnectionStatus>("idle");
   const [message, setMessage] = useState("");
 
@@ -41,7 +39,6 @@ function Page() {
     const { data, error } = await supabase.functions.invoke("offerwall-ad-test", {
       body: {
         endpoint: endpoint.trim() || undefined,
-        apiKey: apiKey.trim() || undefined,
       },
     });
 
@@ -95,33 +92,17 @@ function Page() {
 
         <div className="space-y-6 px-5 py-6 sm:px-6">
           <div className="grid gap-5 md:grid-cols-2">
-            <label className="space-y-2">
+            <div className="space-y-2">
               <span className="text-sm font-medium text-foreground">API Key</span>
-              <div className="relative">
-                <input
-                  value={apiKey}
-                  onChange={(event) => {
-                    setApiKey(event.target.value);
-                    setStatus("idle");
-                    setMessage("");
-                  }}
-                  className="w-full rounded-xl border border-border bg-background px-3 py-2.5 pr-11 font-mono text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
-                  type={showKey ? "text" : "password"}
-                  placeholder="nxc_…"
-                  autoComplete="off"
-                  spellCheck={false}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowKey((value) => !value)}
-                  className="absolute right-1.5 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground"
-                  aria-label={showKey ? "Ocultar API Key" : "Mostrar API Key"}
-                >
-                  {showKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
+              <div className="flex items-center gap-3 rounded-xl border border-border bg-muted/20 px-3 py-2.5">
+                <KeyRound className="h-4 w-4 shrink-0 text-primary" />
+                <code className="min-w-0 flex-1 truncate text-sm">OFFERWALL_AD_API_KEY</code>
+                <span className="shrink-0 rounded-full border border-border bg-background px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  Secret backend
+                </span>
               </div>
-              <p className="text-xs text-muted-foreground">Não é guardada pelo frontend. Para produção, configure-a como secret <code>OFFERWALL_AD_API_KEY</code> no Supabase.</p>
-            </label>
+              <p className="text-xs text-muted-foreground">A chave nunca é recebida pelo frontend. Configure o valor real como secret no Supabase Edge Functions.</p>
+            </div>
 
             <label className="space-y-2">
               <span className="text-sm font-medium text-foreground">Endpoint oficial da API</span>
