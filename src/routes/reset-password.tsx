@@ -33,7 +33,8 @@ function ResetPassword() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);\n  const [upgradeRequired, setUpgradeRequired] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [upgradeRequired, setUpgradeRequired] = useState(false);
 
   useEffect(() => {
     setUpgradeRequired(sessionStorage.getItem("taskora-password-upgrade-required") === "1");
@@ -99,7 +100,7 @@ function ResetPassword() {
           <div className="rounded-xl border border-border/70 bg-muted/20 px-3 py-2.5">
             <p className="mb-2 text-[11px] font-semibold text-foreground">Requisitos da palavra-passe</p>
             <div className="grid gap-1.5 sm:grid-cols-2">
-              {passwordPolicyRules((rule) => {
+              {passwordPolicyRules(password).map((rule) => {
                 const valid = rule.valid;
                 return (
                   <div key={rule.key} className={"flex items-center gap-1.5 text-[11px] " + (valid ? "text-primary" : "text-muted-foreground")}>
