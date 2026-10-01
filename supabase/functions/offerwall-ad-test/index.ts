@@ -56,11 +56,7 @@ function adminDatabaseClient() {
   return createClient(url, serviceRoleKey);
 }
 
-async function saveMetadata(
-  endpoint: string,
-  status: string,
-  testedAt: string | null,
-) {
+async function saveMetadata(endpoint: string, status: string, testedAt: string | null) {
   const db = adminDatabaseClient();
   if (!db) return;
 
@@ -112,10 +108,10 @@ Deno.serve(async (req) => {
       try {
         parsed = new URL(endpoint);
         if (parsed.protocol !== "https:") {
-          return json({ status: "communication_error", message: "O endpoint da API deve usar HTTPS." });
+          return json({ status: "endpoint_error", message: "O endpoint da API deve usar HTTPS." });
         }
       } catch {
-        return json({ status: "communication_error", message: "Endpoint da API inválido." });
+        return json({ status: "endpoint_error", message: "Endpoint da API inválido." });
       }
 
       await saveMetadata(parsed.toString(), "not_configured", null);
@@ -136,12 +132,12 @@ Deno.serve(async (req) => {
     try {
       parsed = new URL(endpoint);
       if (parsed.protocol !== "https:") {
-        await saveMetadata(endpoint, "communication_error", new Date().toISOString());
-        return json({ status: "communication_error", message: "O endpoint da API deve usar HTTPS." });
+        await saveMetadata(endpoint, "endpoint_error", new Date().toISOString());
+        return json({ status: "endpoint_error", message: "O endpoint da API deve usar HTTPS." });
       }
     } catch {
-      await saveMetadata(endpoint, "communication_error", new Date().toISOString());
-      return json({ status: "communication_error", message: "Endpoint da API inválido." });
+      await saveMetadata(endpoint, "endpoint_error", new Date().toISOString());
+      return json({ status: "endpoint_error", message: "Endpoint da API inválido." });
     }
 
     const testedAt = new Date().toISOString();
