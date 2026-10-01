@@ -110,7 +110,8 @@ function Login() {
           toast.error("Atualiza a palavra-passe para continuar.");
           return;
         }
-        await navigate({ to: "/reset-password", search: { required: "1" }, replace: true });
+        sessionStorage.setItem("taskora-password-upgrade-required", "1");
+        await navigate({ to: "/reset-password", replace: true });
         return;
       }
 
