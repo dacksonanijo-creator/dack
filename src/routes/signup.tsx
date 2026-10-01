@@ -1,48 +1,3 @@
-import { useRef, useState } from "react";
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Check, Eye, EyeOff, Loader2 } from "lucide-react";
-import { toast } from "sonner";
-import { AuthLayout, Field } from "@/components/taskora/auth-layout";
-import { Button } from "@/components/ui/button";
-import { countries } from "@/components/taskora/mock-data";
-import { supabase } from "@/integrations/supabase/client";
-import { authErrorMessage, emailRe } from "@/lib/auth-errors";
-import { useT } from "@/i18n";
-import { passwordIsStrong } from "@/lib/password-policy";
-import { useAdoptDomFormValues } from "@/hooks/use-form-hydration";
-
-export const Route = createFileRoute("/signup")({
-  ssr: false,
-  head: () => ({
-    meta: [
-      { title: "Criar conta — Taskora" },
-      { name: "description", content: "Cria a tua conta Taskora de forma segura." },
-      { property: "og:title", content: "Criar conta — Taskora" },
-      { property: "og:description", content: "Junta-te à Taskora." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
-  component: Signup,
-});
-
-const input =
-  "h-11 w-full rounded-xl border border-border bg-background px-3.5 text-sm outline-none transition-all placeholder:text-muted-foreground/70 focus:border-primary focus:ring-4 focus:ring-primary/10";
-
-type Errors = Partial<Record<"fullName" | "email" | "password" | "confirm" | "terms", string>>;
-
-const passwordRules = [
-  { key: "uppercase", label: "Pelo menos 1 letra maiúscula", test: (v: string) => /[A-Z]/.test(v) },
-  { key: "lowercase", label: "Pelo menos 1 letra minúscula", test: (v: string) => /[a-z]/.test(v) },
-  { key: "number", label: "Pelo menos 1 número", test: (v: string) => /\d/.test(v) },
-  { key: "symbol", label: "Pelo menos 1 símbolo", test: (v: string) => /[^A-Za-z0-9]/.test(v) },
-  { key: "length", label: "Mínimo de 10 caracteres", test: (v: string) => v.length >= 10 },
-];
-
-function passwordIsStrong(value: string) {
-  return passwordRules.every((rule) => rule.test(value));
-}
-
 function Signup() {
   const t = useT();
   const navigate = useNavigate();
@@ -239,15 +194,12 @@ function PasswordRequirements({ value }: { value: string }) {
     <div className="mt-2 rounded-xl border border-border/70 bg-muted/20 px-3 py-2.5">
       <p className="mb-2 text-[11px] font-semibold text-foreground">Requisitos da palavra-passe</p>
       <div className="grid gap-1.5 sm:grid-cols-2">
-        {passwordRules.map((rule) => {
-          const valid = rule.test(value);
-          return (
-            <div key={rule.key} className={"flex items-center gap-1.5 text-[11px] " + (valid ? "text-primary" : "text-muted-foreground")}>
-              <Check className="h-3.5 w-3.5 shrink-0" />
-              <span>{rule.label}</span>
-            </div>
-          );
-        })}
+        {passwordPolicyRules(value).map((rule) => (
+          <div key={rule.key} className={"flex items-center gap-1.5 text-[11px] " + (rule.valid ? "text-primary" : "text-muted-foreground")}>
+            <Check className="h-3.5 w-3.5 shrink-0" />
+            <span>{rule.label}</span>
+          </div>
+        ))}
       </div>
     </div>
   );
