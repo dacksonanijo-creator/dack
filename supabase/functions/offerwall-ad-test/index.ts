@@ -56,6 +56,23 @@ function adminDatabaseClient() {
   return createClient(url, serviceRoleKey);
 }
 
+async function saveApiKey(apiKey: string) {
+  const db = adminDatabaseClient();
+  if (!db) throw new Error("Backend database client unavailable");
+
+  const { error } = await db.rpc("save_offerwall_ad_api_key", { p_api_key: apiKey });
+  if (error) throw new Error("Não foi possível guardar a credencial com segurança.");
+}
+
+async function getStoredApiKey(): Promise<string> {
+  const db = adminDatabaseClient();
+  if (!db) return "";
+
+  const { data, error } = await db.rpc("get_offerwall_ad_api_key");
+  if (error) return "";
+  return typeof data === "string" ? data.trim() : "";
+}
+
 async function saveMetadata(endpoint: string, status: string, testedAt: string | null) {
   const db = adminDatabaseClient();
   if (!db) return;
@@ -96,8 +113,6 @@ Deno.serve(async (req) => {
       typeof body?.apiKey === "string" && body.apiKey.trim()
         ? body.apiKey.trim()
         : configuredKey();
-
-    const action = body?.action === "save_configuration" ? "save_configuration" : "test_connection";
 
     if (action === "save_configuration") {
       if (!endpoint) {
