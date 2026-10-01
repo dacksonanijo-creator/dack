@@ -1,6 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { TaskoraMark } from "@/components/taskora/logo";
+import { supabase } from "@/integrations/supabase/client";
+import { isAdminEmail } from "@/lib/admin";
 import { useT } from "@/i18n";
 
 export const Route = createFileRoute("/")({
@@ -29,8 +31,41 @@ function Splash() {
   const t = useT();
 
   useEffect(() => {
-    const timer = setTimeout(() => navigate({ to: "/welcome" }), 2200);
-    return () => clearTimeout(timer);
+    let active = true;
+
+    const restoreSession = async () => {
+      try {
+        // Validate the persisted Supabase session before deciding where to land.
+        // Supabase handles refresh-token renewal through the configured auth client.
+        const { data } = await supabase.auth.getUser();
+        if (!active) return;
+
+        if (data.user) {
+          if (isAdminEmail(data.user.email)) {
+            await navigate({ to: "/admin", replace: true });
+          } else {
+            await navigate({ to: "/app", replace: true });
+          }
+          return;
+        }
+      } catch {
+        // No valid session: continue to the public welcome screen.
+      }
+
+      if (active) {
+        const timer = setTimeout(() => {
+          if (active) void navigate({ to: "/welcome", replace: true });
+        }, 900);
+        return () => clearTimeout(timer);
+      }
+
+      return undefined;
+    };
+
+    void restoreSession();
+    return () => {
+      active = false;
+    };
   }, [navigate]);
 
   return (
