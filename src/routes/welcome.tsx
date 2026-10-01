@@ -70,9 +70,9 @@ function Welcome() {
           </p>
 
           <h1 className="relative mt-4 max-w-3xl font-display text-5xl font-extrabold leading-[0.98] tracking-[-0.045em] sm:mt-5 sm:text-7xl lg:text-8xl">
-            O teu tempo.
+            O teu tempo
             <br />
-            <span className="text-gradient">As tuas oportunidades.</span>
+            <span className="text-gradient">As tuas oportunidades</span>
           </h1>
 
           <p className="relative mt-6 text-sm font-medium text-muted-foreground sm:text-base">
