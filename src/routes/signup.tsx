@@ -1,3 +1,36 @@
+import { useRef, useState } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { Check, Eye, EyeOff, Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import { AuthLayout, Field } from "@/components/taskora/auth-layout";
+import { Button } from "@/components/ui/button";
+import { countries } from "@/components/taskora/mock-data";
+import { supabase } from "@/integrations/supabase/client";
+import { authErrorMessage, emailRe } from "@/lib/auth-errors";
+import { useT } from "@/i18n";
+import { passwordIsStrong, passwordPolicyRules } from "@/lib/password-policy";
+import { useAdoptDomFormValues } from "@/hooks/use-form-hydration";
+
+export const Route = createFileRoute("/signup")({
+  ssr: false,
+  head: () => ({
+    meta: [
+      { title: "Criar conta — Taskora" },
+      { name: "description", content: "Cria a tua conta Taskora de forma segura." },
+      { property: "og:title", content: "Criar conta — Taskora" },
+      { property: "og:description", content: "Junta-te à Taskora." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
+  component: Signup,
+});
+
+const input =
+  "h-11 w-full rounded-xl border border-border bg-background px-3.5 text-sm outline-none transition-all placeholder:text-muted-foreground/70 focus:border-primary focus:ring-4 focus:ring-primary/10";
+
+type Errors = Partial<Record<"fullName" | "email" | "password" | "confirm" | "terms", string>>;
+
 function Signup() {
   const t = useT();
   const navigate = useNavigate();
