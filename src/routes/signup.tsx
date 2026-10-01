@@ -8,6 +8,7 @@ import { countries } from "@/components/taskora/mock-data";
 import { supabase } from "@/integrations/supabase/client";
 import { authErrorMessage, emailRe } from "@/lib/auth-errors";
 import { useT } from "@/i18n";
+import { passwordIsStrong } from "@/lib/password-policy";
 import { useAdoptDomFormValues } from "@/hooks/use-form-hydration";
 
 export const Route = createFileRoute("/signup")({
