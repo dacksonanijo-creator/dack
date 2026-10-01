@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { authErrorMessage, emailRe } from "@/lib/auth-errors";
 import { useT } from "@/i18n";
+import { passwordMeetsPolicy } from "@/lib/password-policy";
 import { useAdoptDomFormValues } from "@/hooks/use-form-hydration";
 
 export const Route = createFileRoute("/login")({
@@ -84,21 +85,42 @@ function Login() {
         : { phone: normalizedPhone, password };
 
       const { data, error: err } = await supabase.auth.signInWithPassword(credentials);
-      if (err) {
+
+      const weakPassword =
+        Boolean(err) &&
+        (String((err as { code?: string }).code ?? "").toLowerCase() === "weak_password" ||
+          /weak.?password/i.test(err.message ?? ""));
+
+      // A legacy password may be valid but below the new strength policy.
+      // Do not recreate/reset the account: if Supabase has persisted a valid
+      // session, send the user directly to the mandatory password upgrade.
+      if (err && !weakPassword) {
         const msg = t(authErrorMessage(err.message));
         setError(msg);
         toast.error(msg);
         return;
       }
-      // Confirm that Supabase has persisted the session before entering the protected app.
-      // This avoids a race between auth storage and the /app route guard.
+
       const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-      if (sessionError || !sessionData.session || sessionData.session.user.id !== data.session.user.id) {
+      const session = sessionData.session ?? data.session;
+
+      if (weakPassword) {
+        if (!session) {
+          setError("A tua palavra-passe antiga foi reconhecida, mas é necessário concluir a atualização através do fluxo de recuperação.");
+          toast.error("Atualiza a palavra-passe para continuar.");
+          return;
+        }
+        await navigate({ to: "/reset-password", search: { required: "1" }, replace: true });
+        return;
+      }
+
+      if (sessionError || !session || !data.session || session.user.id !== data.session.user.id) {
         setError(t("auth.login.noSession"));
         toast.error(t("auth.login.noSession"));
         return;
       }
 
+      void passwordMeetsPolicy;
       await navigate({ to: "/app", replace: true });
     } catch (err) {
       const msg = t(authErrorMessage(err instanceof Error ? err.message : String(err)));
