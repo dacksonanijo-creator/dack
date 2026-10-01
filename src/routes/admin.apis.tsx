@@ -1,6 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { CheckCircle2, CircleAlert, KeyRound, Loader2, ServerCog, ShieldCheck, WifiOff } from "lucide-react";
+import {
+  CheckCircle2,
+  CircleAlert,
+  Eye,
+  EyeOff,
+  KeyRound,
+  Loader2,
+  Save,
+  ServerCog,
+  ShieldCheck,
+  Wifi,
+  WifiOff,
+} from "lucide-react";
 import { AdminPageHeader } from "@/components/taskora/admin-shell";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
@@ -16,41 +28,76 @@ export const Route = createFileRoute("/admin/apis")({
   component: Page,
 });
 
-type ConnectionStatus = "idle" | "loading" | "connected" | "authentication_error" | "communication_error" | "not_configured";
+type ConnectionStatus =
+  | "idle"
+  | "loading"
+  | "saving"
+  | "connected"
+  | "authentication_error"
+  | "endpoint_error"
+  | "communication_error"
+  | "not_configured";
 
-const statusCopy: Record<ConnectionStatus, { label: string; icon: typeof CheckCircle2; className: string }> = {
-  idle: { label: "Ainda não testado", icon: ServerCog, className: "text-muted-foreground" },
+const statusCopy: Record<
+  ConnectionStatus,
+  { label: string; icon: typeof CheckCircle2; className: string }
+> = {
+  idle: { label: "Não configurado", icon: ServerCog, className: "text-muted-foreground" },
   loading: { label: "A testar conexão…", icon: Loader2, className: "text-primary" },
+  saving: { label: "A guardar…", icon: Loader2, className: "text-primary" },
   connected: { label: "Conectado", icon: CheckCircle2, className: "text-emerald-600" },
-  authentication_error: { label: "Erro de autenticação", icon: CircleAlert, className: "text-destructive" },
+  authentication_error: { label: "Chave inválida", icon: CircleAlert, className: "text-destructive" },
+  endpoint_error: { label: "Endpoint inválido", icon: CircleAlert, className: "text-destructive" },
   communication_error: { label: "Erro de comunicação", icon: WifiOff, className: "text-amber-600" },
   not_configured: { label: "Não configurado", icon: KeyRound, className: "text-muted-foreground" },
 };
 
 function Page() {
+  const [apiKey, setApiKey] = useState("");
+  const [showApiKey, setShowApiKey] = useState(false);
   const [endpoint, setEndpoint] = useState("");
   const [status, setStatus] = useState<ConnectionStatus>("idle");
   const [message, setMessage] = useState("");
+  const [lastTestAt, setLastTestAt] = useState<string | null>(null);
 
-  const testConnection = async () => {
-    setStatus("loading");
-    setMessage("");
-
+  const invoke = async (action: "save_configuration" | "test_connection") => {
     const { data, error } = await supabase.functions.invoke("offerwall-ad-test", {
       body: {
+        action,
         endpoint: endpoint.trim() || undefined,
+        ...(action === "test_connection" ? { apiKey: apiKey.trim() || undefined } : {}),
       },
     });
 
     if (error) {
       setStatus("communication_error");
-      setMessage("Não foi possível executar o teste de conexão.");
+      setMessage("Não foi possível comunicar com o backend do TASKORA.");
       return;
     }
 
     const nextStatus = (data?.status ?? "communication_error") as ConnectionStatus;
     setStatus(statusCopy[nextStatus] ? nextStatus : "communication_error");
-    setMessage(typeof data?.message === "string" ? data.message : "O teste terminou sem uma mensagem de diagnóstico.");
+    setMessage(
+      typeof data?.message === "string"
+        ? data.message
+        : "A operação terminou sem uma mensagem de diagnóstico.",
+    );
+
+    if (typeof data?.testedAt === "string") {
+      setLastTestAt(data.testedAt);
+    }
+  };
+
+  const saveConfiguration = async () => {
+    setStatus("saving");
+    setMessage("");
+    await invoke("save_configuration");
+  };
+
+  const testConnection = async () => {
+    setStatus("loading");
+    setMessage("");
+    await invoke("test_connection");
   };
 
   const current = statusCopy[status];
@@ -60,7 +107,7 @@ function Page() {
     <div className="space-y-6">
       <AdminPageHeader
         title="APIs de tarefas"
-        description="Integrações com fornecedores externos de tarefas. Nesta fase, configurar e testar apenas a conexão do Offerwall Ad."
+        description="Configure e teste fornecedores externos de tarefas. O primeiro fornecedor disponível é o Offerwall Ad."
       />
 
       <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
@@ -74,38 +121,73 @@ function Page() {
                 <div className="flex flex-wrap items-center gap-2">
                   <h2 className="text-lg font-semibold text-foreground">Offerwall Ad</h2>
                   <span className="rounded-full border border-border bg-background px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                    API de ofertas
+                  </span>
+                  <span className="rounded-full border border-border bg-background px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                     Produção
                   </span>
                 </div>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Publisher API preparada para conexão server-side. A sincronização de ofertas e os Postbacks S2S serão ativados numa fase seguinte.
+                  Configuração inicial do fornecedor. Sincronização de ofertas, Postbacks S2S e conversões ficam para a próxima etapa.
                 </p>
               </div>
             </div>
 
             <div className={cn("flex shrink-0 items-center gap-2 text-sm font-semibold", current.className)}>
-              <StatusIcon className={cn("h-4 w-4", status === "loading" && "animate-spin")} />
+              <StatusIcon className={cn("h-4 w-4", (status === "loading" || status === "saving") && "animate-spin")} />
               {current.label}
             </div>
           </div>
         </div>
 
         <div className="space-y-6 px-5 py-6 sm:px-6">
-          <div className="grid gap-5 md:grid-cols-2">
-            <div className="space-y-2">
-              <span className="text-sm font-medium text-foreground">API Key</span>
-              <div className="flex items-center gap-3 rounded-xl border border-border bg-muted/20 px-3 py-2.5">
-                <KeyRound className="h-4 w-4 shrink-0 text-primary" />
-                <code className="min-w-0 flex-1 truncate text-sm">OFFERWALL_AD_API_KEY</code>
-                <span className="shrink-0 rounded-full border border-border bg-background px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-                  Secret backend
-                </span>
+          <div className="rounded-xl border border-border bg-background p-4">
+            <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-sm font-semibold text-foreground">Configurar fornecedor</p>
+                <p className="text-xs text-muted-foreground">Offerwall Ad · Ambiente de produção</p>
               </div>
-              <p className="text-xs text-muted-foreground">A chave nunca é recebida pelo frontend. Configure o valor real como secret no Supabase Edge Functions.</p>
+              <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-600">
+                <ShieldCheck className="h-4 w-4" />
+                Área administrativa protegida
+              </span>
             </div>
+          </div>
+
+          <div className="grid gap-5 md:grid-cols-2">
+            <label className="space-y-2">
+              <span className="text-sm font-medium text-foreground">API Key</span>
+              <div className="flex items-center gap-2 rounded-xl border border-border bg-background px-3 py-2.5 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/10">
+                <KeyRound className="h-4 w-4 shrink-0 text-primary" />
+                <input
+                  value={apiKey}
+                  onChange={(event) => {
+                    setApiKey(event.target.value);
+                    setStatus("idle");
+                    setMessage("");
+                  }}
+                  className="min-w-0 flex-1 bg-transparent text-sm outline-none"
+                  type={showApiKey ? "text" : "password"}
+                  placeholder="Cole a API Key do Offerwall Ad"
+                  autoComplete="new-password"
+                  spellCheck={false}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowApiKey((visible) => !visible)}
+                  className="rounded-lg p-1.5 text-muted-foreground transition hover:bg-muted hover:text-foreground"
+                  aria-label={showApiKey ? "Ocultar API Key" : "Mostrar API Key"}
+                >
+                  {showApiKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+              <p className="text-xs leading-5 text-muted-foreground">
+                A chave é mantida somente na memória desta página e enviada por HTTPS apenas durante o teste. Não é guardada no navegador, banco de dados, logs ou GitHub.
+              </p>
+            </label>
 
             <label className="space-y-2">
-              <span className="text-sm font-medium text-foreground">Endpoint oficial da API</span>
+              <span className="text-sm font-medium text-foreground">Endpoint da API</span>
               <input
                 value={endpoint}
                 onChange={(event) => {
@@ -115,54 +197,104 @@ function Page() {
                 }}
                 className="w-full rounded-xl border border-border bg-background px-3 py-2.5 font-mono text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
                 type="url"
-                placeholder="Cole aqui o endpoint indicado na documentação oficial"
+                placeholder="Endpoint oficial fornecido pelo Offerwall Ad"
                 autoComplete="off"
                 spellCheck={false}
               />
-              <p className="text-xs text-muted-foreground">O TASKORA não inventa nem assume um endpoint. Use exatamente o endpoint fornecido pelo Offerwall Ad.</p>
+              <p className="text-xs leading-5 text-muted-foreground">
+                Não existe endpoint inventado pelo TASKORA. Informe exatamente o endpoint indicado na documentação ou painel oficial do fornecedor.
+              </p>
             </label>
           </div>
 
           <div className="flex flex-col gap-3 rounded-xl border border-border/70 bg-muted/20 p-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="text-sm font-semibold text-foreground">Estado da integração</p>
-              <p className="mt-1 text-xs text-muted-foreground">O teste é executado no backend/Edge Function e usa autenticação Bearer.</p>
+              <p className="text-sm font-semibold text-foreground">Guardar configuração</p>
+              <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                Guarda apenas os dados não secretos da integração. A API Key nunca é persistida pelo painel.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => void saveConfiguration()}
+              disabled={status === "loading" || status === "saving"}
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 text-sm font-semibold text-foreground transition hover:bg-muted disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {status === "saving" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+              Guardar configuração
+            </button>
+          </div>
+
+          <div className="flex flex-col gap-3 rounded-xl border border-primary/15 bg-primary/[0.03] p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm font-semibold text-foreground">Teste de conexão</p>
+              <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                O teste usa a API Key digitada ou, se vazia, o secret <code>OFFERWALL_AD_API_KEY</code> configurado no backend.
+              </p>
+              {lastTestAt && (
+                <p className="mt-2 text-xs font-medium text-muted-foreground">
+                  Último teste: {new Date(lastTestAt).toLocaleString("pt-MZ")}
+                </p>
+              )}
             </div>
             <button
               type="button"
               onClick={() => void testConnection()}
-              disabled={status === "loading"}
+              disabled={status === "loading" || status === "saving"}
               className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {status === "loading" ? <Loader2 className="h-4 w-4 animate-spin" /> : <WifiOff className="h-4 w-4 rotate-45" />}
+              {status === "loading" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wifi className="h-4 w-4" />}
               Testar conexão
             </button>
           </div>
 
           {message && (
-            <div className={cn(
-              "rounded-xl border px-4 py-3 text-sm",
-              status === "connected" ? "border-emerald-200 bg-emerald-50 text-emerald-800" :
-              status === "authentication_error" ? "border-destructive/20 bg-destructive/5 text-destructive" :
-              "border-border bg-muted/20 text-muted-foreground",
-            )}>
+            <div
+              className={cn(
+                "rounded-xl border px-4 py-3 text-sm",
+                status === "connected"
+                  ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+                  : status === "authentication_error" || status === "endpoint_error"
+                    ? "border-destructive/20 bg-destructive/5 text-destructive"
+                    : "border-border bg-muted/20 text-muted-foreground",
+              )}
+            >
               {message}
             </div>
           )}
 
           <div className="grid gap-3 md:grid-cols-2">
             <div className="rounded-xl border border-border/70 p-4">
-              <div className="flex items-center gap-2 text-sm font-semibold"><ShieldCheck className="h-4 w-4 text-primary" /> Segurança</div>
-              <p className="mt-2 text-xs leading-5 text-muted-foreground">A API Key nunca é gravada no código, GitHub, banco público ou interface pública. O backend pode ler <code>OFFERWALL_AD_API_KEY</code> como secret.</p>
+              <div className="flex items-center gap-2 text-sm font-semibold">
+                <ShieldCheck className="h-4 w-4 text-primary" />
+                Segurança da credencial
+              </div>
+              <p className="mt-2 text-xs leading-5 text-muted-foreground">
+                A API Key não é incluída no código, GitHub, URL, localStorage, banco de dados ou logs. Para uso persistente no backend, configure <code>OFFERWALL_AD_API_KEY</code> como secret do Supabase Edge Functions.
+              </p>
             </div>
             <div className="rounded-xl border border-border/70 p-4">
-              <div className="flex items-center gap-2 text-sm font-semibold"><KeyRound className="h-4 w-4 text-primary" /> Próxima fase preparada</div>
-              <p className="mt-2 text-xs leading-5 text-muted-foreground">A estrutura deixa espaço para ofertas, filtros por país/dispositivo, sincronização, Postback S2S, reversões e idempotência sem mexer na carteira nesta fase.</p>
+              <div className="flex items-center gap-2 text-sm font-semibold">
+                <KeyRound className="h-4 w-4 text-primary" />
+                Próxima fase
+              </div>
+              <p className="mt-2 text-xs leading-5 text-muted-foreground">
+                Depois de confirmar a conexão, avançaremos separadamente para sincronização de ofertas. Postbacks, callbacks, conversões, carteira, pagamentos e recompensas continuam desativados.
+              </p>
             </div>
           </div>
 
           <div className="rounded-xl border border-dashed border-border p-4 text-xs text-muted-foreground">
-            Documentação oficial: <a href="https://offerwall.ad/offerwall-api" target="_blank" rel="noreferrer" className="font-medium text-primary hover:underline">Offerwall API</a>. A API oficial usa <code>Authorization: Bearer &lt;API_KEY&gt;</code>; não foi adicionado nenhum endpoint não confirmado.
+            Documentação oficial:{" "}
+            <a
+              href="https://offerwall.ad/offerwall-api"
+              target="_blank"
+              rel="noreferrer"
+              className="font-medium text-primary hover:underline"
+            >
+              Offerwall API
+            </a>
+            . A autenticação utiliza Bearer e nenhum endpoint é assumido pelo TASKORA.
           </div>
         </div>
       </section>
