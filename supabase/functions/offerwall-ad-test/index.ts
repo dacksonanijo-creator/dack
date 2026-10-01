@@ -62,9 +62,7 @@ Deno.serve(async (req) => {
     const endpoint = typeof body?.endpoint === "string" && body.endpoint.trim()
       ? body.endpoint.trim()
       : configuredEndpoint();
-    const apiKey = typeof body?.apiKey === "string" && body.apiKey.trim()
-      ? body.apiKey.trim()
-      : configuredKey();
+    const apiKey = configuredKey();
 
     if (!endpoint || !apiKey) {
       return json({ status: "not_configured", message: "Offerwall Ad não está configurado no backend." });
