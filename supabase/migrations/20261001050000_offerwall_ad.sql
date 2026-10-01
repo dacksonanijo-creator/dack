@@ -34,5 +34,18 @@ create table if not exists public.offerwall_ad_integration_logs (
 create index if not exists offerwall_ad_integration_logs_created_at_idx
   on public.offerwall_ad_integration_logs (created_at desc);
 
+create table if not exists public.offerwall_ad_provider_config (
+  id uuid primary key default gen_random_uuid(),
+  provider text not null unique default 'offerwall_ad',
+  environment text not null default 'production' check (environment = 'production'),
+  endpoint text,
+  enabled boolean not null default false,
+  last_test_at timestamptz,
+  last_test_status text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
 alter table public.offerwall_ad_conversions enable row level security;
 alter table public.offerwall_ad_integration_logs enable row level security;
+alter table public.offerwall_ad_provider_config enable row level security;
