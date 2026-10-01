@@ -58,9 +58,25 @@ function Page() {
   const [endpoint, setEndpoint] = useState("");
   const [status, setStatus] = useState<ConnectionStatus>("idle");
   const [message, setMessage] = useState("");
-  const [lastTestAt, setLastTestAt] = useState<string | null>(null);\n  const [apiKeyConfigured, setApiKeyConfigured] = useState(false);\n  const [showConfiguration, setShowConfiguration] = useState(false);
+  const [lastTestAt, setLastTestAt] = useState<string | null>(null);
+  const [apiKeyConfigured, setApiKeyConfigured] = useState(false);
+  const [showConfiguration, setShowConfiguration] = useState(true);
 
-  useEffect(() => {\n    void (async () => {\n      const { data } = await supabase.functions.invoke("offerwall-ad-test", {\n        body: { action: "get_configuration" },\n      });\n      if (data) {\n        if (typeof data.endpoint === "string") setEndpoint(data.endpoint);\n        if (typeof data.testedAt === "string") setLastTestAt(data.testedAt);\n        setApiKeyConfigured(Boolean(data.apiKeyConfigured));\n        if (data.status && statusCopy[data.status as ConnectionStatus]) setStatus(data.status as ConnectionStatus);\n      }\n    })();\n  }, []);\n\n  const invoke = async (action: "save_configuration" | "test_connection") => {
+  useEffect(() => {
+    void (async () => {
+      const { data } = await supabase.functions.invoke("offerwall-ad-test", {
+        body: { action: "get_configuration" },
+      });
+      if (data) {
+        if (typeof data.endpoint === "string") setEndpoint(data.endpoint);
+        if (typeof data.testedAt === "string") setLastTestAt(data.testedAt);
+        setApiKeyConfigured(Boolean(data.apiKeyConfigured));
+        if (data.status && statusCopy[data.status as ConnectionStatus]) setStatus(data.status as ConnectionStatus);
+      }
+    })();
+  }, []);
+
+  const invoke = async (action: "save_configuration" | "test_connection") => {
     const { data, error } = await supabase.functions.invoke("offerwall-ad-test", {
       body: {
         action,
@@ -140,14 +156,29 @@ function Page() {
           </div>
         </div>
 
-        <div className="space-y-6 px-5 py-6 sm:px-6">\n          {!showConfiguration && (\n            <div className="rounded-xl border border-border bg-background p-5">\n              <p className="text-sm font-semibold text-foreground">Configuração da API</p>\n              <p className="mt-1 text-xs text-muted-foreground">API Key: {apiKeyConfigured ? "Configurada com segurança no backend" : "Não configurada"} · Endpoint: {endpoint || "Não definido"}</p>\n            </div>\n          )}\n\n          {showConfiguration && (
+        <div className="space-y-6 px-5 py-6 sm:px-6">
+          {!showConfiguration && (
+            <div className="rounded-xl border border-border bg-background p-5">
+              <p className="text-sm font-semibold text-foreground">Configuração da API</p>
+              <p className="mt-1 text-xs text-muted-foreground">API Key: {apiKeyConfigured ? "Configurada com segurança no backend" : "Não configurada"} · Endpoint: {endpoint || "Não definido"}</p>
+            </div>
+          )}
+
+          {showConfiguration && (
           <div className="rounded-xl border border-border bg-background p-4">
             <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="text-sm font-semibold text-foreground">Configurar fornecedor</p>
                 <p className="text-xs text-muted-foreground">Offerwall Ad · Ambiente de produção</p>
               </div>
-              <button\n                type="button"\n                onClick={() => setShowConfiguration((visible) => !visible)}\n                className="rounded-xl border border-primary/20 bg-primary/5 px-3.5 py-2 text-xs font-semibold text-primary transition hover:bg-primary/10"\n              >\n                {showConfiguration ? "Fechar configuração" : "Configurar"}\n              </button>\n              <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-600">
+              <button
+                type="button"
+                onClick={() => setShowConfiguration((visible) => !visible)}
+                className="rounded-xl border border-primary/20 bg-primary/5 px-3.5 py-2 text-xs font-semibold text-primary transition hover:bg-primary/10"
+              >
+                {showConfiguration ? "Fechar configuração" : "Configurar"}
+              </button>
+              <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-600">
                 <ShieldCheck className="h-4 w-4" />
                 Área administrativa protegida
               </span>
@@ -284,7 +315,9 @@ function Page() {
             </div>
           </div>
 
-          </div>}\n\n          <div className="rounded-xl border border-dashed border-border p-4 text-xs text-muted-foreground">
+          </div>}
+
+          <div className="rounded-xl border border-dashed border-border p-4 text-xs text-muted-foreground">
             Documentação oficial:{" "}
             <a
               href="https://offerwall.ad/offerwall-api"
