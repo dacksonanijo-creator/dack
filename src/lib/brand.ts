@@ -1,38 +1,34 @@
 /**
  * ============================================================
- *  IDENTIDADE VISUAL DA TASKORA — LOGÓTIPO OFICIAL
+ *  IDENTIDADE VISUAL OFICIAL — TASKORA
  * ============================================================
  *
- *  COMO INSERIR O TEU LOGÓTIPO (PNG, SVG, JPG ou WebP):
+ *  O símbolo proprietário da marca é desenhado em SVG no
+ *  componente TaskoraMark. Não depende de ícones, stock images
+ *  ou ficheiros externos.
  *
- *  1. Coloca o ficheiro em `src/assets/` (ex.: src/assets/taskora-logo.svg)
- *  2. Importa-o aqui em cima:
- *       import logo from "@/assets/taskora-logo.svg";
- *       import logoDark from "@/assets/taskora-logo-dark.svg"; // opcional
- *  3. Substitui `null` pelos imports:
- *       export const brandLogo = { light: logo, dark: logoDark };
- *
- *  Enquanto estiver `null`, a plataforma mostra um espaço reservado
- *  (placeholder) em todos os ecrãs onde a marca aparece.
- *
- *  Nenhum logótipo é gerado automaticamente.
+ *  O branding administrativo continua disponível: uma imagem
+ *  publicada pelo administrador pode substituir o símbolo nativo.
  * ============================================================
  */
 
 export const brandName = "Taskora";
 
+export const brandPalette = {
+  primary: "#4F46E5",
+  secondary: "#16A34A",
+  ink: "#111827",
+  paper: "#FFFFFF",
+} as const;
+
 export const brandLogo: {
-  /** Logótipo usado em fundos claros (tema claro). */
   light: string | null;
-  /** Logótipo usado em fundos escuros (tema escuro). Opcional. */
   dark: string | null;
-  /** Texto alternativo da imagem. */
   alt: string;
-  /** Mostrar o nome da marca ao lado do logótipo. */
   showWordmark: boolean;
 } = {
   light: null,
   dark: null,
-  alt: "Logótipo Taskora",
+  alt: "Símbolo oficial da marca TASKORA",
   showWordmark: true,
 };
