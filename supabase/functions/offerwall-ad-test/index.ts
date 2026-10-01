@@ -107,16 +107,44 @@ Deno.serve(async (req) => {
       ? body.endpoint.trim()
       : configuredEndpoint();
 
-    // The manually entered key is accepted only for this HTTPS request.
-    // It is never persisted, logged, returned, or written to GitHub.
-    const apiKey =
+    const transientApiKey =
       typeof body?.apiKey === "string" && body.apiKey.trim()
         ? body.apiKey.trim()
-        : configuredKey();
+        : "";
+
+    const action = body?.action === "save_configuration"
+      ? "save_configuration"
+      : body?.action === "get_configuration"
+        ? "get_configuration"
+        : "test_connection";
+
+    if (action === "get_configuration") {
+      const db = adminDatabaseClient();
+      if (!db) return json({ status: "communication_error", message: "Backend database indisponível." }, 500);
+      const { data } = await db.from("offerwall_ad_provider_config")
+        .select("endpoint, enabled, last_test_at, last_test_status")
+        .eq("provider", "offerwall_ad")
+        .maybeSingle();
+      const storedKey = await getStoredApiKey();
+      return json({
+        status: data?.last_test_status ?? "not_configured",
+        endpoint: data?.endpoint ?? configuredEndpoint(),
+        enabled: Boolean(data?.enabled),
+        testedAt: data?.last_test_at ?? null,
+        apiKeyConfigured: Boolean(storedKey || configuredKey()),
+      });
+    }
+
+    // A manually entered key is used only during this HTTPS request.
+    // Persistent storage is handled exclusively by the backend through Supabase Vault.
+    const apiKey = transientApiKey || await getStoredApiKey() || configuredKey();
 
     if (action === "save_configuration") {
       if (!endpoint) {
         return json({ status: "not_configured", message: "Informe o endpoint oficial do Offerwall Ad." });
+      }
+      if (!transientApiKey && !(await getStoredApiKey()) && !configuredKey()) {
+        return json({ status: "not_configured", message: "Informe a API Key do Offerwall Ad para guardar a configuração." });
       }
 
       let parsed: URL;
@@ -129,10 +157,12 @@ Deno.serve(async (req) => {
         return json({ status: "endpoint_error", message: "Endpoint da API inválido." });
       }
 
+      if (transientApiKey) await saveApiKey(transientApiKey);
       await saveMetadata(parsed.toString(), "not_configured", null);
       return json({
         status: "not_configured",
-        message: "Configuração guardada. A API Key não foi armazenada; ela deve ser fornecida para o teste ou configurada como secret no backend.",
+        message: "Configuração guardada com segurança. A API Key foi armazenada no backend e não será exibida novamente.",
+        apiKeyConfigured: true,
       });
     }
 
