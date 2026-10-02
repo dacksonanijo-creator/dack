@@ -43,13 +43,13 @@ function TaskoraOriginalMark({ className }: { className?: string }) {
  * prioridade. Na ausência de uma imagem publicada, usa o símbolo oficial
  * desenhado no código da identidade TASKORA.
  */
-export function TaskoraMark({ className }: { className?: string }) {
+export function TaskoraMark({ className, forceNative = false }: { className?: string; forceNative?: boolean }) {
   const branding = useBranding();
   const alt = brandLogo.alt;
   const light = branding.logoLight ?? brandLogo.light;
   const dark = branding.logoDark ?? brandLogo.dark;
 
-  if (light || dark) {
+  if (!forceNative && (light || dark)) {
     const primary = light ?? dark!;
     const secondary = dark ?? light!;
     return (
