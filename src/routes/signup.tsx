@@ -45,7 +45,8 @@ type Errors = Partial<Record<"fullName" | "email" | "password" | "confirm" | "te
 function Signup() {
   const t = useT();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);\n  const [googleLoading, setGoogleLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [errors, setErrors] = useState<Errors>({});
   const [accepted, setAccepted] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
