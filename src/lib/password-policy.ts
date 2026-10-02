@@ -25,3 +25,5 @@ export function passwordPolicyRules(value: string) {
     { key: "length", label: "Mínimo de 10 caracteres", valid: value.length >= PASSWORD_POLICY.minLength },
   ];
 }
+
+export const passwordIsStrong = passwordMeetsPolicy;

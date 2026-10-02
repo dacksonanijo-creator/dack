@@ -165,6 +165,7 @@ function Page() {
           )}
 
           {showConfiguration && (
+          <>
           <div className="rounded-xl border border-border bg-background p-4">
             <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
               <div>
@@ -315,7 +316,8 @@ function Page() {
             </div>
           </div>
 
-          </div>}
+          </>
+          )}
 
           <div className="rounded-xl border border-dashed border-border p-4 text-xs text-muted-foreground">
             Documentação oficial:{" "}

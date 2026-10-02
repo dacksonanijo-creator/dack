@@ -89,7 +89,7 @@ function Login() {
       const weakPassword =
         Boolean(err) &&
         (String((err as { code?: string }).code ?? "").toLowerCase() === "weak_password" ||
-          /weak.?password/i.test(err.message ?? ""));
+          /weak.?password/i.test(err?.message ?? ""));
 
       // A legacy password may be valid but below the new strength policy.
       // Do not recreate/reset the account: if Supabase has persisted a valid
