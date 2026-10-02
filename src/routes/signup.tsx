@@ -29,12 +29,23 @@ export const Route = createFileRoute("/signup")({
 const input =
   "h-11 w-full rounded-xl border border-border bg-background px-3.5 text-sm outline-none transition-all placeholder:text-muted-foreground/70 focus:border-primary focus:ring-4 focus:ring-primary/10";
 
+function GoogleMark() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4.5 w-4.5">
+      <path fill="#4285F4" d="M21.35 12.27c0-.67-.06-1.32-.17-1.94H12v3.67h5.24a4.48 4.48 0 0 1-1.94 2.94v2.44h3.14c1.84-1.69 2.91-4.18 2.91-7.11Z" />
+      <path fill="#34A853" d="M12 21.6c2.63 0 4.84-.87 6.44-2.35l-3.14-2.44c-.87.58-1.98.92-3.3.92-2.54 0-4.7-1.72-5.47-4.03H3.29v2.52A9.72 9.72 0 0 0 12 21.6Z" />
+      <path fill="#FBBC05" d="M6.53 13.7a5.84 5.84 0 0 1 0-3.4V7.78H3.29a9.72 9.72 0 0 0 0 8.44l3.24-2.52Z" />
+      <path fill="#EA4335" d="M12 6.27c1.43 0 2.72.49 3.73 1.46l2.8-2.8C16.83 3.36 14.63 2.4 12 2.4a9.72 9.72 0 0 0-8.71 5.38l3.24 2.52C7.3 7.99 9.46 6.27 12 6.27Z" />
+    </svg>
+  );
+}
+
 type Errors = Partial<Record<"fullName" | "email" | "password" | "confirm" | "terms", string>>;
 
 function Signup() {
   const t = useT();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);\n  const [googleLoading, setGoogleLoading] = useState(false);
   const [errors, setErrors] = useState<Errors>({});
   const [accepted, setAccepted] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -75,9 +86,35 @@ function Signup() {
     return Object.keys(next).length === 0;
   };
 
+  const continueWithGoogle = async () => {
+    if (loading || googleLoading) return;
+    setErrors({});
+    setGoogleLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: window.location.origin + "/app",
+          queryParams: { access_type: "offline", prompt: "select_account" },
+        },
+      });
+      if (error) {
+        const msg = t(authErrorMessage(error.message));
+        setErrors({ email: msg });
+        toast.error(msg);
+        setGoogleLoading(false);
+      }
+    } catch (err) {
+      const msg = t(authErrorMessage(err instanceof Error ? err.message : String(err)));
+      setErrors({ email: msg });
+      toast.error(msg);
+      setGoogleLoading(false);
+    }
+  };
+
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (loading) return;
+    if (loading || googleLoading) return;
     if (!validate()) {
       toast.error(t("auth.signup.fixFields"));
       return;
@@ -193,6 +230,16 @@ function Signup() {
 
         <Button type="submit" disabled={loading} className="h-11 w-full rounded-xl text-sm font-semibold">
           {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />A criar conta…</> : "Criar conta"}
+        </Button>
+
+        <div className="relative py-0.5">
+          <div className="absolute inset-x-0 top-1/2 border-t border-border/80" />
+          <span className="relative mx-auto block w-fit bg-white px-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">ou</span>
+        </div>
+
+        <Button type="button" variant="outline" onClick={continueWithGoogle} disabled={loading || googleLoading} className="h-11 w-full rounded-xl border-border bg-white text-sm font-semibold shadow-none hover:bg-muted/40">
+          {googleLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <span className="mr-2"><GoogleMark /></span>}
+          Continuar com Google
         </Button>
       </form>
     </AuthLayout>
