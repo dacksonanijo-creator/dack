@@ -10,7 +10,7 @@ const messages: Messages = {
   "shell.group.system": "Sistema",
   "shell.group.session": "Sessão",
   "shell.item.withdrawals": "Levantamentos",
-  "shell.item.activity": "Atividade",
+  "shell.item.activity": "Actividade",
   "shell.item.rewards": "Recompensas",
   "shell.item.notifications": "Notificações",
   "shell.item.settings": "Definições",
