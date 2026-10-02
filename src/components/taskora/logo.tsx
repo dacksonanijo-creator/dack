@@ -19,8 +19,8 @@ function TaskoraOriginalMark({ className }: { className?: string }) {
     >
       <defs>
         <linearGradient id="taskora-mark-gradient" x1="10" y1="10" x2="54" y2="54" gradientUnits="userSpaceOnUse">
-          <stop stopColor="currentColor" />
-          <stop offset="1" stopColor="var(--success)" />
+          <stop stopColor="#4F46E5" />
+          <stop offset="1" stopColor="#16A34A" />
         </linearGradient>
       </defs>
       <path
@@ -29,10 +29,10 @@ function TaskoraOriginalMark({ className }: { className?: string }) {
       />
       <path
         d="M43 31h8v15c0 2.8-2.2 5-5 5h-3c-2.8 0-5-2.2-5-5V31h5Z"
-        fill="currentColor"
+        fill="#4F46E5"
         opacity=".18"
       />
-      <circle cx="48" cy="18" r="4" fill="var(--success)" />
+      <circle cx="48" cy="18" r="4" fill="#16A34A" />
     </svg>
   );
 }
