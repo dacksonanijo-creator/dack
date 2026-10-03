@@ -33,6 +33,8 @@ function Page(){
   const [busy,setBusy]=useState<string|null>(null);
   const [mfa,setMfa]=useState<Array<{id:string;status:string;factor_type:string;friendly_name?:string|null}>>([]);
   const [mfaBusy,setMfaBusy]=useState(false);
+  const [mfaSetup,setMfaSetup]=useState<{id:string;qr:string;secret:string}|null>(null);
+  const [mfaCode,setMfaCode]=useState("");
 
   const load=useCallback(async()=>{
     setLoading(true);
@@ -121,20 +123,29 @@ function Page(){
     try{
       const {data,error}=await supabase.auth.mfa.enroll({factorType:"totp",friendlyName:"Taskora Admin"});
       if(error) throw error;
-      if(!data?.id) throw new Error("Não foi possível preparar o autenticador.");
-      const code=window.prompt("Introduz o código de 6 dígitos do aplicativo autenticador para confirmar o 2FA:");
-      if(!code||!/^\d{6}$/.test(code)){await supabase.auth.mfa.unenroll({factorId:data.id});throw new Error("Configuração cancelada: código inválido.");}
-      const challenge=await supabase.auth.mfa.challenge({factorId:data.id});
-      if(challenge.error) throw challenge.error;
-      const verified=await supabase.auth.mfa.verify({factorId:data.id,challengeId:challenge.data.id,code});
-      if(verified.error) throw verified.error;
-      await supabase.rpc("write_security_audit",{p_action:"activou 2FA",p_area:"Segurança",p_resource_type:"admin_account"});
-      toast.success("2FA activado com sucesso.");
-      await loadMfa();
-    }catch(e){toast.error(e instanceof Error?e.message:"Não foi possível activar o 2FA.");}
+      if(!data?.id||!data.totp?.qr_code||!data.totp?.secret) throw new Error("Não foi possível preparar o autenticador.");
+      setMfaSetup({id:data.id,qr:data.totp.qr_code,secret:data.totp.secret});
+      setMfaCode("");
+    }catch(e){toast.error(e instanceof Error?e.message:"Não foi possível preparar o 2FA.");}
     finally{setMfaBusy(false);}
   }
 
+  async function confirmMfa(){
+    if(!mfaSetup||!/^[0-9]{6}$/.test(mfaCode)) return;
+    setMfaBusy(true);
+    try{
+      const challenge=await supabase.auth.mfa.challenge({factorId:mfaSetup.id});
+      if(challenge.error) throw challenge.error;
+      const verified=await supabase.auth.mfa.verify({factorId:mfaSetup.id,challengeId:challenge.data.id,code:mfaCode});
+      if(verified.error) throw verified.error;
+      await supabase.rpc("write_security_audit",{p_action:"activou 2FA",p_area:"Segurança",p_resource_type:"admin_account"});
+      toast.success("2FA activado com sucesso.");
+      setMfaSetup(null);
+      setMfaCode("");
+      await loadMfa();
+    }catch(e){toast.error(e instanceof Error?e.message:"Código 2FA inválido.");}
+    finally{setMfaBusy(false);}
+  }
   async function disableMfa(id:string){
     setMfaBusy(true);
     try{
@@ -172,8 +183,24 @@ function Page(){
       {events.length===0?<Empty text="Nenhum evento de acesso registado."/>:<div className="overflow-x-auto"><table className="w-full min-w-[720px] text-sm"><thead><tr className="border-b border-border text-left text-xs text-muted-foreground"><th className="px-2 py-2">Data/hora</th><th className="px-2 py-2">Utilizador</th><th className="px-2 py-2">Evento</th><th className="px-2 py-2">Dispositivo</th><th className="px-2 py-2">Navegador</th><th className="px-2 py-2">Estado</th></tr></thead><tbody>{events.map(e=><tr key={e.id} className="border-b border-border/60"><td className="px-2 py-2.5">{formatDate(e.created_at)}</td><td className="px-2 py-2.5">{e.user_id??"—"}</td><td className="px-2 py-2.5">{eventLabel(e.event_type)}</td><td className="px-2 py-2.5">{e.device??"—"}</td><td className="px-2 py-2.5">{e.browser??"—"}</td><td className="px-2 py-2.5">{e.success?"Sucesso":"Falhado"}</td></tr>)}</tbody></table></div>}
     </Section>
 
-    <Section title="Autenticação de dois fatores (2FA)" icon={<LockKeyhole className="h-5 w-5"/>} description="TOTP para a conta administrativa actualmente autenticada.">
-      {activeMfa.length===0?<div className="flex flex-col gap-3 rounded-xl border border-border p-4 sm:flex-row sm:items-center sm:justify-between"><div><p className="font-semibold">2FA não configurado nesta conta</p><p className="mt-1 text-sm text-muted-foreground">A activação só termina depois da validação do código do autenticador.</p></div><button type="button" onClick={()=>void enableMfa()} disabled={mfaBusy} className="rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground">{mfaBusy?"A configurar…":"Configurar 2FA"}</button></div>:activeMfa.map(f=><div key={f.id} className="flex flex-col gap-3 rounded-xl border border-border p-4 sm:flex-row sm:items-center sm:justify-between"><div><p className="font-semibold">2FA activo</p><p className="mt-1 text-sm text-muted-foreground">{f.friendly_name??"Aplicativo autenticador"} · factor verificado</p></div><button type="button" onClick={()=>void disableMfa(f.id)} disabled={mfaBusy} className="rounded-xl border border-destructive/30 px-4 py-2.5 text-sm font-semibold text-destructive">Desactivar 2FA</button></div>)}
+    <Section title="Autenticação de dois fatores (2FA)" icon={<LockKeyhole className="h-5 w-5"/>} description="TOTP para a conta administrativa actualmente autentactiveMfa.length===0?(mfaSetup?<div className="rounded-xl border border-border p-4">
+        <p className="font-semibold">Adicionar autenticador</p>
+        <p className="mt-1 text-sm text-muted-foreground">Digitaliza o QR Code no teu aplicativo autenticador. Se não conseguires, usa a chave secreta.</p>
+        <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center">
+          <img src={"data:image/svg+xml;utf8,"+encodeURIComponent(mfaSetup.qr)} alt="QR Code para configurar 2FA" className="h-44 w-44 rounded-xl border border-border bg-white p-2"/>
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-medium text-muted-foreground">Chave secreta</p>
+            <p className="mt-1 break-all rounded-lg bg-muted p-2 font-mono text-xs">{mfaSetup.secret}</p>
+            <label className="mt-3 block text-xs font-medium text-muted-foreground">Código de confirmação
+              <input value={mfaCode} onChange={e=>setMfaCode(e.target.value.replace(/\D/g,"").slice(0,6))} inputMode="numeric" autoComplete="one-time-code" className="mt-1 h-10 w-full rounded-lg border border-border bg-background px-3 text-center text-lg tracking-[0.3em]"/>
+            </label>
+            <button type="button" onClick={()=>void confirmMfa()} disabled={mfaBusy||mfaCode.length!==6} className="mt-3 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground disabled:opacity-50">{mfaBusy?"A verificar…":"Confirmar e activar"}</button>
+          </div>
+        </div>
+      </div>:<div className="flex flex-col gap-3 rounded-xl border border-border p-4 sm:flex-row sm:items-center sm:justify-between">
+        <div><p className="font-semibold">2FA não configurado nesta conta</p><p className="mt-1 text-sm text-muted-foreground">A activação só termina depois da validação do código do autenticador.</p></div>
+        <button type="button" onClick={()=>void enableMfa()} disabled={mfaBusy} className="rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground">{mfaBusy?"A preparar…":"Configurar 2FA"}</button>
+      </div>):activeMfa.map(f=><div key={f.id} className="flex flex-col gap-3 rounded-xl border border-border p-4 sm:flex-row sm:items-center sm:justify-between"><div><p className="font-semibold">2FA activo</p><p className="mt-1 text-sm text-muted-foreground">{f.friendly_name??"Aplicativo autenticador"} · factor verificado</p></div><button type="button" onClick={()=>void disableMfa(f.id)} disabled={mfaBusy} className="rounded-xl border border-destructive/30 px-4 py-2.5 text-sm font-semibold text-destructive">Desactivar 2FA</button></div>)
     </Section>
 
     <Section title="Permissões administrativas" icon={<Shield className="h-5 w-5"/>} description="Estrutura preparada para níveis futuros, sem alterar os administradores actuais.">
