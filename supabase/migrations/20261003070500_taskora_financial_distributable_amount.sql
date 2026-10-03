@@ -94,7 +94,7 @@ begin
   v_user_amount := round(v_distributable * v_rule.user_percent / 100, 2);
   v_taskora_amount := round(v_distributable - v_user_amount, 2);
 
-  if v_user_amount + v_taskora_amount <> v_net then
+  if v_user_amount + v_taskora_amount <> v_distributable then
     raise exception 'distribution rounding mismatch';
   end if;
 
