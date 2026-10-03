@@ -180,7 +180,7 @@ Deno.serve(async (req) => {
       }
       const now = new Date().toISOString();
       await db.from("ayet_studios_provider_config")
-        .upsert({ provider: "ayet_studios", enabled, updated_at: now }, { onConflict: "provider" });
+        .upsert({ provider: "ayet_studios", enabled, last_test_status: enabled ? "connected" : "disabled", updated_at: now }, { onConflict: "provider" });
       const { data: integration } = await db.from("task_provider_integrations")
         .select("display_name, integration_type, environment")
         .eq("provider_key", "ayet_studios")
