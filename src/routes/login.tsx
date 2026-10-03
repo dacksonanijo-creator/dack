@@ -101,6 +101,15 @@ function Login() {
         return;
       }
 
+      if (err) {
+        void supabase.rpc("log_security_access_event", {
+          p_event_type: "login_failed",
+          p_success: false,
+          p_device: /Mobi|Android|iPhone/i.test(navigator.userAgent) ? "Dispositivo móvel" : "Computador",
+          p_browser: navigator.userAgent.match(/(Chrome|Firefox|Safari|Edge|Opera)\\/?[\\d.]*/i)?.[0] ?? "Navegador",
+        });
+      }
+
       const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
       const session = sessionData.session ?? data.session;
 
@@ -122,6 +131,12 @@ function Login() {
       }
 
       void passwordMeetsPolicy;
+      void supabase.rpc("log_security_access_event", {
+        p_event_type: "login_success",
+        p_success: true,
+        p_device: /Mobi|Android|iPhone/i.test(navigator.userAgent) ? "Dispositivo móvel" : "Computador",
+        p_browser: navigator.userAgent.match(/(Chrome|Firefox|Safari|Edge|Opera)\\/?[\\d.]*/i)?.[0] ?? "Navegador",
+      });
       await navigate({ to: "/app", replace: true });
     } catch (err) {
       const msg = t(authErrorMessage(err instanceof Error ? err.message : String(err)));
