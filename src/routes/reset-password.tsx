@@ -64,6 +64,7 @@ function ResetPassword() {
         toast.error(msg);
         return;
       }
+      await (supabase as any).rpc("log_security_access_event", { p_event_type: "password_change", p_success: true, p_device: navigator.userAgent, p_browser: navigator.userAgent });
       sessionStorage.removeItem("taskora-password-upgrade-required");
       toast.success("Palavra-passe atualizada com sucesso.");
       navigate({ to: "/app" });
