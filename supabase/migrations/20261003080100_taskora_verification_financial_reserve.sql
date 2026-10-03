@@ -151,22 +151,27 @@ begin
   if v_v.id is null then raise exception 'verification not found'; end if;
   if v_v.status in ('APPROVED','REJECTED') then return v_v; end if;
 
-  update public.task_verifications
-  set status=p_result,
-      decision_reason=nullif(btrim(p_reason),''),
-      provider_result=coalesce(p_provider_result,'{}'::jsonb),
-      updated_at=now()
-  where id=v_v.id
-  returning * into v_v;
-
-  insert into public.task_verification_events(verification_id,event_type,from_status,to_status,actor_id,reason,metadata)
-  values(v_v.id,'PROVIDER_OR_AUTOMATIC_RESULT',v_v.status,p_result,null,p_reason,coalesce(p_provider_result,'{}'::jsonb));
-
   if p_result='APPROVED' then
-    -- The actual financial release is deliberately delegated to the protected admin/service path.
     v_v := public.approve_task_verification(v_v.id,p_reason);
+    update public.task_verifications
+    set provider_result=coalesce(p_provider_result,'{}'::jsonb),updated_at=now()
+    where id=v_v.id returning * into v_v;
   elsif p_result='REJECTED' then
     v_v := public.reject_task_verification(v_v.id,coalesce(p_reason,'Rejected by verification source'));
+    update public.task_verifications
+    set provider_result=coalesce(p_provider_result,'{}'::jsonb),updated_at=now()
+    where id=v_v.id returning * into v_v;
+  else
+    update public.task_verifications
+    set status=p_result,
+        decision_reason=nullif(btrim(p_reason),''),
+        provider_result=coalesce(p_provider_result,'{}'::jsonb),
+        updated_at=now()
+    where id=v_v.id
+    returning * into v_v;
+
+    insert into public.task_verification_events(verification_id,event_type,from_status,to_status,actor_id,reason,metadata)
+    values(v_v.id,'PROVIDER_OR_AUTOMATIC_RESULT',null,p_result,null,p_reason,coalesce(p_provider_result,'{}'::jsonb));
   end if;
 
   return v_v;
