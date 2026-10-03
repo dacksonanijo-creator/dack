@@ -151,8 +151,8 @@ function Page() {
       {selectedProvider === "payted" && <section className="rounded-2xl border border-border bg-card p-5 shadow-sm">
         <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <h2 className="text-lg font-semibold">Gateway de pagamento</h2>
-            <p className="text-sm text-muted-foreground">Preparado para PayTED ou outro gateway compatível, sem ficar preso a um provedor.</p>
+            <h2 className="text-lg font-semibold">PayTED</h2>
+            <p className="text-sm text-muted-foreground">Configuração específica do PayTED. Esta página permanece independente das outras plataformas.</p>
           </div>
           <button type="button" onClick={() => setEnabled((value) => !value)} className="rounded-full border px-3 py-1.5 text-sm font-medium">
             {enabled ? "Ativo" : "Inativo"}
@@ -160,15 +160,6 @@ function Page() {
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
-          <label className="space-y-1.5">
-            <span className="text-sm font-medium">Provedor</span>
-            <select className="w-full rounded-xl border bg-background px-3 py-2.5" defaultValue="">
-              <option value="" disabled>Selecionar provedor</option>
-              <option value="payted">PayTED</option>
-              <option value="other">Outro gateway</option>
-            </select>
-          </label>
-
           <label className="space-y-1.5">
             <span className="text-sm font-medium">Ambiente</span>
             <select className="w-full rounded-xl border bg-background px-3 py-2.5" value={environment} onChange={(event) => setEnvironment(event.target.value as "sandbox" | "production")}>
