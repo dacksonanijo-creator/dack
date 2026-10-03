@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, CheckCircle2 } from "lucide-react";
-import { useState } from "react";
+import { useState, type FormEvent, type ReactNode } from "react";
 import { AdminPageHeader } from "@/components/taskora/admin-shell";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -23,7 +23,7 @@ function CreateAdminTask() {
   const slots = Number(form.slots);
   const minimumBudget = Number.isFinite(reward) && Number.isFinite(slots) ? reward * slots : 0;
 
-  const submit = async (e: React.FormEvent) => {
+  const submit = async (e: FormEvent) => {
     e.preventDefault();
     setSaving(true); setError("");
     const { error: saveError } = await (supabase as any).rpc("create_admin_task", {
@@ -78,6 +78,6 @@ function CreateAdminTask() {
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ label, children }: { label: string; children: ReactNode }) {
   return <label className="block text-sm font-medium">{label}<span className="[&_input]:mt-1 [&_input]:w-full [&_input]:rounded-xl [&_input]:border [&_input]:border-border [&_input]:bg-background [&_input]:px-3 [&_input]:py-2 [&_input]:outline-none [&_input]:focus:border-primary [&_select]:mt-1 [&_select]:w-full [&_select]:rounded-xl [&_select]:border [&_select]:border-border [&_select]:bg-background [&_select]:px-3 [&_select]:py-2">{children}</span></label>;
 }
