@@ -27,18 +27,28 @@ type Wallet = {
   reversed_amount: number;
 };
 
+type Reconciliation = { open_flags: number };
+
 function PlatformWalletPage() {
   const [wallet, setWallet] = useState<Wallet | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [reconciliation, setReconciliation] = useState<Reconciliation | null>(null);
 
   const load = async () => {
     setLoading(true);
     setError("");
     const client = supabase as any;
-    const { data, error: loadError } = await client.rpc("get_taskora_financial_wallet");
-    if (loadError) setError(loadError.message || "Não foi possível carregar a carteira financeira.");
-    else setWallet(Array.isArray(data) ? data[0] ?? null : data ?? null);
+    const [walletResult, reconciliationResult] = await Promise.all([
+      client.rpc("get_taskora_financial_wallet"),
+      client.rpc("get_taskora_financial_reconciliation"),
+    ]);
+    if (walletResult.error || reconciliationResult.error) {
+      setError(walletResult.error?.message || reconciliationResult.error?.message || "Não foi possível carregar a carteira financeira.");
+    } else {
+      setWallet(Array.isArray(walletResult.data) ? walletResult.data[0] ?? null : walletResult.data ?? null);
+      setReconciliation(Array.isArray(reconciliationResult.data) ? reconciliationResult.data[0] ?? null : reconciliationResult.data ?? null);
+    }
     setLoading(false);
   };
 
@@ -112,6 +122,12 @@ function PlatformWalletPage() {
           </div>
         ) : null}
       </section>
+
+      {reconciliation && reconciliation.open_flags > 0 && (
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-xs text-amber-700 dark:text-amber-300">
+          Existem {reconciliation.open_flags} divergência(s) de reconciliação aberta(s). Nenhum valor é corrigido automaticamente.
+        </div>
+      )}
 
       <div className="rounded-xl border border-border bg-muted/30 px-4 py-3 text-xs text-muted-foreground">
         O saldo dos utilizadores não é tratado como receita TASKORA. Reservas e pagamentos são registados separadamente e só uma confirmação real do backend/provedor pode finalizar um payout.
