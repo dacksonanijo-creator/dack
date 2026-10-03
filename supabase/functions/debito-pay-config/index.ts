@@ -186,13 +186,29 @@ Deno.serve(async (req) => {
 
     if (action === "set_enabled") {
       const enabled = Boolean(body?.enabled);
+
+      if (enabled) {
+        if (!existing.apiKeyConfigured || !existing.webhookSecretConfigured) {
+          return json({
+            status: "not_configured",
+            message: "Configure a API Key e o Webhook Secret antes de ativar o Debito Pay.",
+          });
+        }
+        if (existing.status !== "connected") {
+          return json({
+            status: existing.status,
+            message: "Teste a conexão com sucesso antes de ativar o Debito Pay.",
+          });
+        }
+      }
+
       await saveMetadata({
         environment,
         merchantId,
         walletCode,
         baseUrl,
         enabled,
-        status: enabled ? (existing.status === "disabled" ? "not_configured" : existing.status) : "disabled",
+        status: enabled ? existing.status : "disabled",
         lastCommunicationAt: new Date().toISOString(),
       });
       return json(await getConfig());
