@@ -52,6 +52,14 @@ export async function recognizeTaskConversion(input: TaskConversionInput) {
   return data;
 }
 
+export async function confirmTaskConversion(conversionId: string) {
+  const { data, error } = await (supabaseAdmin as any).rpc("confirm_task_conversion", {
+    p_conversion_id: conversionId,
+  });
+  if (error) throw error;
+  return data;
+}
+
 export async function makeTaskConversionAvailable(conversionId: string) {
   const { data, error } = await (supabaseAdmin as any).rpc("make_task_conversion_available", {
     p_conversion_id: conversionId,
