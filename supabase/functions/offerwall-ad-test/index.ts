@@ -153,7 +153,7 @@ Deno.serve(async (req) => {
       const db = adminDatabaseClient();
       if (!db) return json({ status: "communication_error", message: "Backend database indisponível." }, 500);
       const { data } = await db.from("offerwall_ad_provider_config")
-        .select("endpoint, enabled, last_test_at, last_test_status")
+        .select("endpoint, enabled, last_test_at, last_communication_at, last_test_status")
         .eq("provider", "offerwall_ad")
         .maybeSingle();
       const storedKey = await getStoredApiKey();
@@ -162,6 +162,7 @@ Deno.serve(async (req) => {
         endpoint: data?.endpoint ?? configuredEndpoint(),
         enabled: Boolean(data?.enabled),
         testedAt: data?.last_test_at ?? null,
+        lastCommunicationAt: data?.last_communication_at ?? null,
         apiKeyConfigured: Boolean(storedKey || configuredKey()),
       });
     }
