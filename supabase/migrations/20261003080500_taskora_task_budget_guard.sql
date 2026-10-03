@@ -6,12 +6,18 @@ language plpgsql
 set search_path = ''
 as $$
 begin
-  if new.origin is null then
-    new.origin := case
-      when new.external_source is not null or new.partner_api_id is not null then 'provider'
-      when new.company_id is not null then 'company'
-      else 'admin'
-    end;
+  if tg_op = 'INSERT' then
+    if new.company_id is not null then
+      new.origin := 'company';
+    elsif new.external_source is not null or new.partner_api_id is not null then
+      new.origin := 'provider';
+    elsif public.is_taskora_admin() then
+      new.origin := 'admin';
+    else
+      raise exception 'admin tasks must be created through the protected admin workflow';
+    end if;
+  elsif new.origin is null then
+    new.origin := old.origin;
   end if;
 
   if tg_op = 'INSERT' and new.origin <> 'provider' and new.reward > 0 and new.budget_total is null then
