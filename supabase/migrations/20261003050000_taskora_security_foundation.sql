@@ -424,7 +424,12 @@ begin
       and browser is not distinct from p_browser
       and created_at >= now() - interval '15 minutes';
 
-    if v_failed_count >= 5 then
+    if v_failed_count >= 5 and not exists (
+      select 1 from public.security_alerts
+      where alert_type='repeated_login_failures'
+        and status in ('open','acknowledged')
+        and created_at >= now() - interval '15 minutes'
+    ) then
       insert into public.security_alerts(alert_type,severity,title,description,metadata)
       values(
         'repeated_login_failures',
