@@ -79,7 +79,6 @@ function Page() {
   const [providers, setProviders] = useState<RegisteredProvider[]>([]);
   const [installedIntegrations, setInstalledIntegrations] = useState<InstalledIntegration[]>([]);
   const [selectedProvider, setSelectedProvider] = useState("");
-  const [showAddProvider, setShowAddProvider] = useState(false);
   const [loadingProviders, setLoadingProviders] = useState(true);
 
   const [apiKey, setApiKey] = useState("");
