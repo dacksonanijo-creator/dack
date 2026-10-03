@@ -10,6 +10,7 @@ create or replace function public.register_provider_task_conversion(
   p_provider_transaction_id text,
   p_conversion_id text,
   p_event_id text,
+  p_signature_verified boolean,
   p_gross_amount numeric,
   p_provider_fees numeric,
   p_adjustments numeric,
@@ -32,6 +33,7 @@ declare
   v_idempotency text;
 begin
   if auth.role() <> 'service_role' then raise exception 'service role required'; end if;
+  if p_signature_verified is not true then raise exception 'provider signature/authenticity must be verified'; end if;
   if p_result not in ('APPROVED','REJECTED','PENDING','REVIEW') then raise exception 'invalid verification result'; end if;
 
   select * into v_task from public.tasks where id=p_task_id for update;
@@ -103,5 +105,5 @@ begin
 end;
 $$;
 
-revoke all on function public.register_provider_task_conversion(uuid,uuid,text,text,text,text,numeric,numeric,numeric,numeric,text,text,text,jsonb) from public, anon, authenticated;
+revoke all on function public.register_provider_task_conversion(uuid,uuid,text,text,text,text,boolean,numeric,numeric,numeric,numeric,text,text,text,jsonb) from public, anon, authenticated;
 grant execute on function public.register_provider_task_conversion(uuid,uuid,text,text,text,text,numeric,numeric,numeric,numeric,text,text,text,jsonb) to service_role;
