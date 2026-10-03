@@ -69,6 +69,18 @@ function Page(){
 
   const activeMfa=useMemo(()=>mfa.filter(x=>x.factor_type==="totp"&&x.status==="verified"),[mfa]);
 
+  async function saveRuleConfig(rule:Rule, configuration:Record<string,unknown>){
+    setBusy(rule.id+"-config");
+    try{
+      const {error}=await supabase.from("security_fraud_rules").update({configuration,updated_by:(await supabase.auth.getUser()).data.user?.id??null}).eq("id",rule.id);
+      if(error) throw error;
+      await supabase.rpc("write_security_audit",{p_action:"alterou configuração de regra anti-fraude",p_area:"Segurança",p_resource_type:"fraud_rule",p_resource_id:rule.id,p_metadata:{rule_key:rule.rule_key}});
+      setRules(x=>x.map(r=>r.id===rule.id?{...r,configuration}:r));
+      toast.success("Configuração guardada.");
+    }catch(e){toast.error(e instanceof Error?e.message:"Não foi possível guardar a configuração.");}
+    finally{setBusy(null);}
+  }
+
   async function toggleRule(rule:Rule){
     setBusy(rule.id);
     try{
@@ -149,7 +161,7 @@ function Page(){
     </div>
 
     <Section title="Regras anti-fraude" icon={<Shield className="h-5 w-5"/>} description="Regras configuráveis. Só as regras activadas devem produzir acções no backend.">
-      <div className="grid gap-3 md:grid-cols-2">{rules.map(rule=><div key={rule.id} className="rounded-xl border border-border p-4"><div className="flex items-start justify-between gap-3"><div><p className="font-semibold">{rule.name}</p><p className="mt-1 text-sm text-muted-foreground">{rule.description}</p></div><button type="button" onClick={()=>void toggleRule(rule)} disabled={busy===rule.id} className="rounded-lg p-1 text-muted-foreground hover:text-foreground disabled:opacity-50">{busy===rule.id?<Loader2 className="h-5 w-5 animate-spin"/>:rule.enabled?<ToggleRight className="h-6 w-6 text-primary"/>:<ToggleLeft className="h-6 w-6"/>}</button></div><p className="mt-3 text-xs text-muted-foreground">Estado: <strong>{rule.enabled?"Activada":"Desactivada"}</strong></p></div>)}</div>
+      <div className="grid gap-3 md:grid-cols-2">{rules.map(rule=><div key={rule.id} className="rounded-xl border border-border p-4"><div className="flex items-start justify-between gap-3"><div><p className="font-semibold">{rule.name}</p><p className="mt-1 text-sm text-muted-foreground">{rule.description}</p></div><button type="button" onClick={()=>void toggleRule(rule)} disabled={busy===rule.id} className="rounded-lg p-1 text-muted-foreground hover:text-foreground disabled:opacity-50">{busy===rule.id?<Loader2 className="h-5 w-5 animate-spin"/>:rule.enabled?<ToggleRight className="h-6 w-6 text-primary"/>:<ToggleLeft className="h-6 w-6"/>}</button></div><p className="mt-3 text-xs text-muted-foreground">Estado: <strong>{rule.enabled?"Activada":"Desactivada"}</strong></p><RuleConfiguration rule={rule} busy={busy} onSave={saveRuleConfig}/></div>)}</div>
     </Section>
 
     <Section title="Contas suspeitas" icon={<UserRound className="h-5 w-5"/>} description="Somente sinalizações reais são apresentadas.">
@@ -161,7 +173,7 @@ function Page(){
     </Section>
 
     <Section title="Autenticação de dois fatores (2FA)" icon={<LockKeyhole className="h-5 w-5"/>} description="TOTP para a conta administrativa actualmente autenticada.">
-      {mfa.length===0?<div className="flex flex-col gap-3 rounded-xl border border-border p-4 sm:flex-row sm:items-center sm:justify-between"><div><p className="font-semibold">2FA não configurado nesta conta</p><p className="mt-1 text-sm text-muted-foreground">A activação só termina depois da validação do código do autenticador.</p></div><button type="button" onClick={()=>void enableMfa()} disabled={mfaBusy} className="rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground">{mfaBusy?"A configurar…":"Configurar 2FA"}</button></div>:activeMfa.map(f=><div key={f.id} className="flex flex-col gap-3 rounded-xl border border-border p-4 sm:flex-row sm:items-center sm:justify-between"><div><p className="font-semibold">2FA activo</p><p className="mt-1 text-sm text-muted-foreground">{f.friendly_name??"Aplicativo autenticador"} · factor verificado</p></div><button type="button" onClick={()=>void disableMfa(f.id)} disabled={mfaBusy} className="rounded-xl border border-destructive/30 px-4 py-2.5 text-sm font-semibold text-destructive">Desactivar 2FA</button></div>)}
+      {activeMfa.length===0?<div className="flex flex-col gap-3 rounded-xl border border-border p-4 sm:flex-row sm:items-center sm:justify-between"><div><p className="font-semibold">2FA não configurado nesta conta</p><p className="mt-1 text-sm text-muted-foreground">A activação só termina depois da validação do código do autenticador.</p></div><button type="button" onClick={()=>void enableMfa()} disabled={mfaBusy} className="rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground">{mfaBusy?"A configurar…":"Configurar 2FA"}</button></div>:activeMfa.map(f=><div key={f.id} className="flex flex-col gap-3 rounded-xl border border-border p-4 sm:flex-row sm:items-center sm:justify-between"><div><p className="font-semibold">2FA activo</p><p className="mt-1 text-sm text-muted-foreground">{f.friendly_name??"Aplicativo autenticador"} · factor verificado</p></div><button type="button" onClick={()=>void disableMfa(f.id)} disabled={mfaBusy} className="rounded-xl border border-destructive/30 px-4 py-2.5 text-sm font-semibold text-destructive">Desactivar 2FA</button></div>)}
     </Section>
 
     <Section title="Permissões administrativas" icon={<Shield className="h-5 w-5"/>} description="Estrutura preparada para níveis futuros, sem alterar os administradores actuais.">
@@ -191,5 +203,15 @@ function Page(){
 function Section({title,icon,description,children}:{title:string;icon:React.ReactNode;description:string;children:React.ReactNode}){return <section className="rounded-2xl border border-border bg-card p-5 shadow-sm"><div className="flex items-start gap-3"><span className="mt-0.5 text-muted-foreground">{icon}</span><div className="flex-1"><h2 className="text-lg font-semibold">{title}</h2><p className="mt-1 text-sm text-muted-foreground">{description}</p></div></div><div className="mt-5">{children}</div></section>;}
 function Summary({label,value,icon}:{label:string;value:string;icon:React.ReactNode}){return <div className="rounded-xl border border-border bg-card p-3.5"><div className="flex items-center gap-2 text-xs text-muted-foreground">{icon}{label}</div><p className="mt-1 text-xl font-semibold">{value}</p></div>;}
 function Empty({text}:{text:string}){return <div className="rounded-xl border border-dashed border-border bg-muted/20 px-4 py-5 text-sm text-muted-foreground">{text}</div>;}
+function RuleConfiguration({rule,busy,onSave}:{rule:Rule;busy:string|null;onSave:(rule:Rule,configuration:Record<string,unknown>)=>Promise<void>}){
+  const threshold=typeof rule.configuration.threshold==="number"?String(rule.configuration.threshold):"";
+  const windowMinutes=typeof rule.configuration.window_minutes==="number"?String(rule.configuration.window_minutes):"";
+  if(!("threshold" in rule.configuration)&&!("window_minutes" in rule.configuration)) return null;
+  return <div className="mt-4 grid gap-2 sm:grid-cols-2">
+    {"threshold" in rule.configuration&&<label className="text-xs text-muted-foreground">Limite<input defaultValue={threshold} type="number" min="1" className="mt-1 h-9 w-full rounded-lg border border-border bg-background px-2 text-sm" onBlur={e=>{const n=Number(e.target.value);if(Number.isFinite(n)&&n>0&&n!==Number(threshold))void onSave(rule,{...rule.configuration,threshold:n});}}/></label>}
+    {"window_minutes" in rule.configuration&&<label className="text-xs text-muted-foreground">Janela (minutos)<input defaultValue={windowMinutes} type="number" min="1" className="mt-1 h-9 w-full rounded-lg border border-border bg-background px-2 text-sm" onBlur={e=>{const n=Number(e.target.value);if(Number.isFinite(n)&&n>0&&n!==Number(windowMinutes))void onSave(rule,{...rule.configuration,window_minutes:n});}}/></label>}
+    {busy===rule.id+"-config"&&<span className="text-xs text-muted-foreground sm:col-span-2">A guardar…</span>}
+  </div>;
+}
 function eventLabel(v:string){const m:Record<string,string>={login_success:"Login bem-sucedido",login_failed:"Login falhado",account_recovery:"Recuperação de conta",authentication_change:"Alteração de autenticação",password_change:"Alteração de palavra-passe",two_factor_enabled:"2FA activado",two_factor_disabled:"2FA desactivado"};return m[v]??v;}
 function formatDate(v:string|null){if(!v)return "—";const d=new Date(v);if(Number.isNaN(d.getTime()))return "—";return new Intl.DateTimeFormat("pt-PT",{dateStyle:"medium",timeStyle:"short"}).format(d);}
