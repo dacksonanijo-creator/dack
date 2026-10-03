@@ -74,10 +74,19 @@ async function saveMetadata(adslotId: string, status: string, testedAt: string |
   const db = adminDatabaseClient();
   if (!db) return;
 
+  let enabled = enabledOverride;
+  if (enabled === undefined) {
+    const { data: current } = await db.from("ayet_studios_provider_config")
+      .select("enabled")
+      .eq("provider", "ayet_studios")
+      .maybeSingle();
+    enabled = Boolean(current?.enabled);
+  }
+
   const payload = {
     provider: "ayet_studios",
     integration_type: "offerwall_surveywall", environment: "production", adslot_id: adslotId || null,
-    enabled: enabledOverride ?? status === "connected",
+    enabled,
     last_test_at: testedAt,
     last_test_status: status,
     updated_at: new Date().toISOString(),
