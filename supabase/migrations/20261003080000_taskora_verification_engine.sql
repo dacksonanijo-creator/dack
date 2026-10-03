@@ -195,7 +195,7 @@ declare
   v_v public.task_verifications%rowtype;
   v_c public.financial_task_conversions%rowtype;
 begin
-  if not public.is_taskora_admin() then raise exception 'not authorized'; end if;
+  if auth.role() <> 'service_role' and not public.is_taskora_admin() then raise exception 'not authorized'; end if;
 
   select * into v_v from public.task_verifications where id=p_verification_id for update;
   if v_v.id is null then raise exception 'verification not found'; end if;
@@ -252,7 +252,7 @@ as $$
 declare
   v_v public.task_verifications%rowtype;
 begin
-  if not public.is_taskora_admin() then raise exception 'not authorized'; end if;
+  if auth.role() <> 'service_role' and not public.is_taskora_admin() then raise exception 'not authorized'; end if;
   if p_reason is null or btrim(p_reason)='' then raise exception 'rejection reason is required'; end if;
 
   select * into v_v from public.task_verifications where id=p_verification_id for update;
