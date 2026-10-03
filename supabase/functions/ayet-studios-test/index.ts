@@ -107,10 +107,10 @@ async function saveMetadata(adslotId: string, status: string, testedAt: string |
       integration_type: integration.integration_type,
       environment: integration.environment,
       status: status === "connected" ? "connected" : status === "disabled" ? "disabled" : status === "not_configured" ? "not_configured" : "error",
-      enabled: status === "connected",
+      enabled,
       credentials_configured: true,
       last_test_at: testedAt,
-      registered_at: status === "connected" ? new Date().toISOString() : null,
+      registered_at: enabled ? new Date().toISOString() : null,
       updated_at: new Date().toISOString(),
     }, { onConflict: "provider_key" });
   }
