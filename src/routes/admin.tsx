@@ -10,6 +10,13 @@ export const Route = createFileRoute("/admin")({
     if (error || !data.user) throw redirect({ to: "/login" });
     if (!isAdminEmail(data.user.email)) throw redirect({ to: "/app" });
 
+    const { data: factors } = await supabase.auth.mfa.listFactors();
+    const verifiedTotp = (factors?.all ?? []).some((factor) => factor.factor_type === "totp" && factor.status === "verified");
+    if (verifiedTotp) {
+      const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+      if (aal?.currentLevel !== "aal2") throw redirect({ to: "/admin/2fa" });
+    }
+
     const sessionKey = sessionStorage.getItem("taskora-admin-session-key") ?? crypto.randomUUID();
     sessionStorage.setItem("taskora-admin-session-key", sessionKey);
     await supabase.rpc("touch_security_session", {
