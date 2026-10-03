@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from "react";
 import { AdminPageHeader } from "@/components/taskora/admin-shell";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -282,7 +282,7 @@ function ProviderCard(props: {
   activateBusy: boolean;
   deactivateBusy: boolean;
   activationAllowed: boolean;
-  configRef: React.RefObject<HTMLDivElement | null>;
+  configRef: RefObject<HTMLDivElement | null>;
   offerwallEndpoint: string;
   setOfferwallEndpoint: (value: string) => void;
   offerwallKey: string;
@@ -408,12 +408,19 @@ function ProviderCard(props: {
 
 function normalizeState(provider: ProviderKey, data: any): ProviderState {
   const configured = Boolean(data?.apiKeyConfigured && (provider === "offerwall_ad" ? data?.endpoint : data?.adslotId));
+  const technicalStatus: TechnicalStatus =
+    data?.status === "connected"
+      ? "connected"
+      : data?.status === "attention"
+        ? "attention"
+        : data?.status === "not_configured"
+          ? "not_configured"
+          : "error";
+
   return {
     provider,
     enabled: Boolean(data?.enabled),
-    status: data?.enabled
-      ? (data?.status === "connected" ? "connected" : data?.status === "attention" ? "attention" : data?.status === "not_configured" ? "not_configured" : "error")
-      : configured ? "disabled" : "not_configured",
+    status: data?.enabled ? technicalStatus : technicalStatus === "connected" ? "disabled" : "not_configured",
     credentialsConfigured: configured,
     testedAt: data?.testedAt ?? null,
     lastCommunicationAt: data?.lastCommunicationAt ?? null,
