@@ -26,7 +26,7 @@ export type TaskConversionInput = {
  * validated the conversion value. The browser must never supply the amount.
  */
 export async function recognizeTaskConversion(input: TaskConversionInput) {
-  const { data, error } = await supabaseAdmin.rpc("recognize_task_conversion", {
+  const { data, error } = await (supabaseAdmin as any).rpc("recognize_task_conversion", {
     p_task_id: input.taskId ?? null,
     p_conversion_id: input.conversionId,
     p_user_id: input.userId,
@@ -51,7 +51,7 @@ export async function recognizeTaskConversion(input: TaskConversionInput) {
 }
 
 export async function makeTaskConversionAvailable(conversionId: string) {
-  const { data, error } = await supabaseAdmin.rpc("make_task_conversion_available", {
+  const { data, error } = await (supabaseAdmin as any).rpc("make_task_conversion_available", {
     p_conversion_id: conversionId,
   });
   if (error) throw error;
