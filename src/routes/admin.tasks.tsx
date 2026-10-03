@@ -106,12 +106,20 @@ function Page() {
         title="Tarefas"
         description="Fontes de tarefas, estado das integrações e disponibilidade real de ofertas."
         action={
-          <Link
-            to="/admin/verifications"
-            className="inline-flex items-center gap-2 rounded-xl border border-border px-4 py-2.5 text-sm font-semibold hover:bg-muted"
-          >
-            Verificações pendentes
-          </Link>
+          <div className="flex flex-wrap gap-2">
+            <Link
+              to="/admin/tasks/new"
+              className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90"
+            >
+              Criar tarefa
+            </Link>
+            <Link
+              to="/admin/verifications"
+              className="inline-flex items-center gap-2 rounded-xl border border-border px-4 py-2.5 text-sm font-semibold hover:bg-muted"
+            >
+              Verificações pendentes
+            </Link>
+          </div>
         }
       />
 
