@@ -47,8 +47,6 @@ Deno.serve(async (req) => {
         .order("display_name"),
       client.from("task_provider_registry")
         .select("provider_key, display_name, integration_type, environment, status, enabled, credentials_configured, last_test_at, registered_at")
-        .eq("status", "connected")
-        .eq("enabled", true)
         .order("display_name"),
     ]);
 
