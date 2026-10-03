@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { AdminPageHeader } from "@/components/taskora/admin-shell";
 import { Eye, EyeOff } from "lucide-react";
 
@@ -51,14 +51,14 @@ function Page() {
 
           <div className="mt-6 grid gap-4 md:grid-cols-2">
             <Field label="Ambiente">
-              <select className="field" defaultValue="sandbox">
+              <select className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10" defaultValue="sandbox">
                 <option value="sandbox">Sandbox / Testes</option>
                 <option value="production">Produção</option>
               </select>
             </Field>
 
             <Field label="API Base URL">
-              <input className="field" placeholder="https://api.exemplo.com" type="url" autoComplete="off" />
+              <input className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10" placeholder="https://api.exemplo.com" type="url" autoComplete="off" />
             </Field>
 
             <SecretField label="API Key" show={showPaytedSecrets} />
@@ -66,7 +66,7 @@ function Page() {
             <SecretField label="Webhook Secret" show={showPaytedSecrets} />
 
             <Field label="Moeda principal">
-              <select className="field" defaultValue="USD">
+              <select className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10" defaultValue="USD">
                 <option value="USD">USD</option>
                 <option value="MZN">MZN</option>
               </select>
@@ -90,22 +90,22 @@ function Page() {
 
           <div className="mt-6 grid gap-5 md:grid-cols-2">
             <Field label="Ambiente">
-              <select className="field" defaultValue="sandbox">
+              <select className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10" defaultValue="sandbox">
                 <option value="sandbox">Sandbox / Testes</option>
                 <option value="production">Produção</option>
               </select>
             </Field>
 
             <Field label="Merchant ID">
-              <input className="field font-mono" placeholder="Merchant ID" autoComplete="off" />
+              <input className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 font-mono" placeholder="Merchant ID" autoComplete="off" />
             </Field>
 
             <Field label="Wallet Code">
-              <input className="field font-mono" placeholder="Wallet Code" autoComplete="off" />
+              <input className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 font-mono" placeholder="Wallet Code" autoComplete="off" />
             </Field>
 
             <Field label="Base URL / Endpoint">
-              <input className="field font-mono" placeholder="Base URL / Endpoint" type="url" autoComplete="off" />
+              <input className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 font-mono" placeholder="Base URL / Endpoint" type="url" autoComplete="off" />
             </Field>
 
             <SecretField label="API Key" show={showDebitoApiKey} onToggle={() => setShowDebitoApiKey((value) => !value)} />
@@ -117,7 +117,7 @@ function Page() {
             />
 
             <Field label="Webhook URL" full>
-              <input className="field font-mono" placeholder="Webhook URL" autoComplete="off" />
+              <input className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 font-mono" placeholder="Webhook URL" autoComplete="off" />
             </Field>
           </div>
         </section>
@@ -126,7 +126,7 @@ function Page() {
   );
 }
 
-function Field({ label, children, full = false }: { label: string; children: React.ReactNode; full?: boolean }) {
+function Field({ label, children, full = false }: { label: string; children: ReactNode; full?: boolean }) {
   return (
     <label className={full ? "space-y-1.5 md:col-span-2" : "space-y-1.5"}>
       <span className="text-sm font-medium">{label}</span>
