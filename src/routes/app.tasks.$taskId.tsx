@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { ArrowLeft, CalendarClock, CheckCircle2, Clock3, ExternalLink, Globe2, ShieldCheck, Wallet } from "lucide-react";
 import { tasks, taskRules } from "@/components/taskora/mock-data";
@@ -8,6 +9,7 @@ import { listExternalTasks } from "@/lib/tasks/tasks.functions";
 import type { UnifiedTask } from "@/lib/tasks/types";
 import { useT } from "@/i18n";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/app/tasks/$taskId")({
   head: () => ({
@@ -39,14 +41,26 @@ function TaskDetailRoute() {
   const t = useT();
   const { taskId } = useParams({ from: "/app/tasks/$taskId" });
   const fetchTasks = useServerFn(listExternalTasks);
-  const { data, isPending } = useQuery({
+  const { data: data, isPending } = useQuery({
     queryKey: ["external-tasks"],
     queryFn: () => fetchTasks({ data: {} }),
     staleTime: 60_000,
     retry: 1,
   });
 
+  const { data: taskoraData } = useQuery({
+    queryKey: ["taskora-task", taskId],
+    queryFn: async () => {
+      const { data: rows, error } = await (supabase as any).rpc("get_available_taskora_tasks");
+      if (error) throw error;
+      return (Array.isArray(rows) ? rows : []).find((row: any) => row.id === taskId) ?? null;
+    },
+    staleTime: 30_000,
+    retry: 1,
+  });
+
   const external = data?.tasks.find((task) => task.id === taskId);
+  if (taskoraData) return <TaskoraTaskDetail task={taskoraData} />;
   if (external) return <ExternalTaskDetail task={external} />;
 
   const mock = tasks.find((task) => task.id === taskId);
@@ -66,6 +80,48 @@ function TaskDetailRoute() {
       <BackLink />
       <div className="rounded-xl border border-dashed border-border/70 bg-card p-6 text-center text-xs text-muted-foreground">
         {t("tasks.emptyState.title")}
+      </div>
+    </div>
+  );
+}
+
+function TaskoraTaskDetail({ task }: { task: any }) {
+  const [proof, setProof] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [message, setMessage] = useState("");
+
+  const submit = async () => {
+    setSubmitting(true); setMessage("");
+    const { error } = await (supabase as any).rpc("submit_task_for_verification", {
+      p_task_id: task.id,
+      p_proof: proof.trim() || null,
+      p_evidence: {},
+    });
+    setSubmitting(false);
+    setMessage(error ? error.message : "Conclusão submetida. A recompensa está reservada e aguarda verificação.");
+  };
+
+  return (
+    <div className="space-y-4">
+      <BackLink />
+      <div className="rounded-xl border border-border/70 bg-card p-4">
+        <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary">{task.category}</span>
+        <h1 className="mt-2 font-display text-base font-extrabold">{task.title}</h1>
+        <p className="mt-3 text-xs leading-relaxed text-muted-foreground">{task.description}</p>
+        <div className="mt-4 grid grid-cols-3 gap-2 border-t border-border pt-3 text-center">
+          <div><p className="text-[10px] uppercase text-muted-foreground">Recompensa</p><p className="font-display text-sm font-bold text-money">{Number(task.reward).toFixed(2)} {task.currency}</p></div>
+          <div><p className="text-[10px] uppercase text-muted-foreground">Vagas</p><p className="font-display text-sm font-bold">{Math.max(0, task.slots-task.slots_filled)}</p></div>
+          <div><p className="text-[10px] uppercase text-muted-foreground">Verificação</p><p className="font-display text-sm font-bold">{task.verification_method}</p></div>
+        </div>
+      </div>
+      <div className="rounded-xl border border-border/70 bg-card p-4">
+        <h2 className="font-display text-sm font-bold">Submeter conclusão</h2>
+        <p className="mt-1 text-xs text-muted-foreground">A recompensa não fica disponível imediatamente. Primeiro é criada uma reserva financeira e a conclusão passa pelo Motor de Verificação TASKORA.</p>
+        <textarea value={proof} onChange={(e)=>setProof(e.target.value)} rows={4} className="mt-3 w-full rounded-xl border border-border bg-background px-3 py-2 text-xs outline-none focus:border-primary" placeholder="Evidência ou código, quando a tarefa exigir." />
+        {message && <p className="mt-2 text-xs text-muted-foreground">{message}</p>}
+        <button type="button" disabled={submitting} onClick={() => void submit()} className="mt-3 rounded-md bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground disabled:opacity-50">
+          {submitting ? "A submeter…" : "Submeter para verificação"}
+        </button>
       </div>
     </div>
   );
