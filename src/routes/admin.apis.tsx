@@ -403,6 +403,229 @@ function Page() {
           </div>
         </div>
       </section>
+
+
+      <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+        <div className="border-b border-border/70 bg-muted/20 px-5 py-5 sm:px-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div className="flex gap-3">
+              <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
+                <ServerCog className="h-5 w-5" />
+              </div>
+              <div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <h2 className="text-lg font-semibold text-foreground">ayeT-Studios</h2>
+                  <span className="rounded-full border border-border bg-background px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                    Offerwall / Surveywall API
+                  </span>
+                  <span className="rounded-full border border-border bg-background px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                    Produção
+                  </span>
+                </div>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Segundo fornecedor externo preparado para integração futura de ofertas e surveys.
+                </p>
+              </div>
+            </div>
+
+            <div className={cn("flex shrink-0 items-center gap-2 text-sm font-semibold", ayetCurrent.className)}>
+              <AyetStatusIcon className={cn("h-4 w-4", (ayetStatus === "loading" || ayetStatus === "saving") && "animate-spin")} />
+              {ayetCurrent.label}
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-6 px-5 py-6 sm:px-6">
+          {!showAyetConfiguration && (
+            <div className="rounded-xl border border-border bg-background p-5">
+              <p className="text-sm font-semibold text-foreground">Configuração do ayeT-Studios</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                API Key: {ayetApiKeyConfigured ? "Configurada com segurança no backend" : "Não configurada"} · Adslot ID: {ayetAdslotId || "Não definido"} · Ambiente: Produção
+              </p>
+            </div>
+          )}
+
+          {showAyetConfiguration && (
+            <>
+              <div className="rounded-xl border border-border bg-background p-4">
+                <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">Configurar fornecedor</p>
+                    <p className="text-xs text-muted-foreground">ayeT-Studios · Offerwall / Surveywall API · Ambiente de produção</p>
+                  </div>
+                  <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-600">
+                    <ShieldCheck className="h-4 w-4" />
+                    Área administrativa protegida
+                  </span>
+                </div>
+              </div>
+
+              <div className="grid gap-5 md:grid-cols-2">
+                <label className="space-y-2">
+                  <span className="text-sm font-medium text-foreground">API Key</span>
+                  <div className="flex items-center gap-2 rounded-xl border border-border bg-background px-3 py-2.5 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/10">
+                    <KeyRound className="h-4 w-4 shrink-0 text-primary" />
+                    <input
+                      value={ayetApiKey}
+                      onChange={(event) => {
+                        setAyetApiKey(event.target.value);
+                        setAyetStatus("idle");
+                        setAyetMessage("");
+                      }}
+                      className="min-w-0 flex-1 bg-transparent text-sm outline-none"
+                      type={showAyetApiKey ? "text" : "password"}
+                      placeholder={ayetApiKeyConfigured ? "API Key já configurada — deixe vazio para manter" : "Cole a API Key do ayeT-Studios"}
+                      autoComplete="new-password"
+                      spellCheck={false}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowAyetApiKey((visible) => !visible)}
+                      className="rounded-lg p-1.5 text-muted-foreground transition hover:bg-muted hover:text-foreground"
+                      aria-label={showAyetApiKey ? "Ocultar API Key" : "Mostrar API Key"}
+                    >
+                      {showAyetApiKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                  <p className="text-xs leading-5 text-muted-foreground">
+                    A chave é enviada por HTTPS ao backend, guardada no Supabase Vault e nunca devolvida completa ao frontend, ao GitHub ou aos logs.
+                  </p>
+                </label>
+
+                <label className="space-y-2">
+                  <span className="text-sm font-medium text-foreground">Adslot ID</span>
+                  <input
+                    value={ayetAdslotId}
+                    onChange={(event) => {
+                      setAyetAdslotId(event.target.value.replace(/\D/g, ""));
+                      setAyetStatus("idle");
+                      setAyetMessage("");
+                    }}
+                    className="w-full rounded-xl border border-border bg-background px-3 py-2.5 font-mono text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
+                    inputMode="numeric"
+                    placeholder="Ex.: 12345"
+                    autoComplete="off"
+                    spellCheck={false}
+                  />
+                  <p className="text-xs leading-5 text-muted-foreground">
+                    O ID do adslot é obtido no painel do ayeT-Studios, conforme a documentação oficial.
+                  </p>
+                </label>
+
+                <div className="space-y-2">
+                  <span className="text-sm font-medium text-foreground">Ambiente</span>
+                  <div className="rounded-xl border border-border bg-muted/20 px-3 py-2.5 text-sm font-medium text-foreground">
+                    Produção · Live Server
+                  </div>
+                  <p className="text-xs leading-5 text-muted-foreground">
+                    Nesta etapa é usado somente o Live Server documentado pelo ayeT-Studios.
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <span className="text-sm font-medium text-foreground">Tipo</span>
+                  <div className="rounded-xl border border-border bg-muted/20 px-3 py-2.5 text-sm font-medium text-foreground">
+                    Offerwall / Surveywall API
+                  </div>
+                  <p className="text-xs leading-5 text-muted-foreground">
+                    A estrutura fica preparada para os dois formatos; nenhuma sincronização automática é executada nesta fase.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-3 rounded-xl border border-border/70 bg-muted/20 p-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-foreground">Guardar configuração</p>
+                  <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                    Guarda o Adslot ID e, quando informada, a API Key de forma segura no backend. A chave nunca é exibida novamente.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => void saveAyetConfiguration()}
+                  disabled={ayetStatus === "loading" || ayetStatus === "saving"}
+                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 text-sm font-semibold text-foreground transition hover:bg-muted disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {ayetStatus === "saving" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                  Guardar configuração
+                </button>
+              </div>
+
+              <div className="flex flex-col gap-3 rounded-xl border border-primary/15 bg-primary/[0.03] p-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-foreground">Teste de conexão</p>
+                  <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                    Testa o Adslot ID através do endpoint Offerwall oficial do ayeT-Studios. A API Key permanece somente no backend.
+                  </p>
+                  {ayetLastTestAt && (
+                    <p className="mt-2 text-xs font-medium text-muted-foreground">
+                      Último teste: {new Date(ayetLastTestAt).toLocaleString("pt-MZ")}
+                    </p>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => void testAyetConnection()}
+                  disabled={ayetStatus === "loading" || ayetStatus === "saving"}
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {ayetStatus === "loading" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wifi className="h-4 w-4" />}
+                  Testar conexão
+                </button>
+              </div>
+
+              {ayetMessage && (
+                <div
+                  className={cn(
+                    "rounded-xl border px-4 py-3 text-sm",
+                    ayetStatus === "connected"
+                      ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+                      : ayetStatus === "authentication_error" || ayetStatus === "endpoint_error"
+                        ? "border-destructive/20 bg-destructive/5 text-destructive"
+                        : "border-border bg-muted/20 text-muted-foreground",
+                  )}
+                >
+                  {ayetMessage}
+                </div>
+              )}
+
+              <div className="grid gap-3 md:grid-cols-2">
+                <div className="rounded-xl border border-border/70 p-4">
+                  <div className="flex items-center gap-2 text-sm font-semibold">
+                    <ShieldCheck className="h-4 w-4 text-primary" />
+                    Segurança da credencial
+                  </div>
+                  <p className="mt-2 text-xs leading-5 text-muted-foreground">
+                    A API Key não é incluída no código, GitHub, URL, localStorage ou logs. O backend é o único componente autorizado a recuperá-la.
+                  </p>
+                </div>
+                <div className="rounded-xl border border-border/70 p-4">
+                  <div className="flex items-center gap-2 text-sm font-semibold">
+                    <ServerCog className="h-4 w-4 text-primary" />
+                    Próxima fase
+                  </div>
+                  <p className="mt-2 text-xs leading-5 text-muted-foreground">
+                    Consultar ofertas, filtros por país/dispositivo, callbacks, chargebacks, conversões e deduplicação ficam preparados para uma fase posterior. Não são executados agora.
+                  </p>
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-dashed border-border p-4 text-xs text-muted-foreground">
+                Documentação oficial:{" "}
+                <a
+                  href="https://www.ayetstudios.com/openapi/publisher-doc"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="font-medium text-primary hover:underline"
+                >
+                  ayeT-Studios Publisher API
+                </a>
+                . O teste usa o endpoint Offerwall documentado e não inventa endpoints ou parâmetros.
+              </div>
+            </>
+          )}
+        </div>
+      </section>
     </div>
   );
 }
