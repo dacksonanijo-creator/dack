@@ -183,24 +183,39 @@ function Page(){
       {events.length===0?<Empty text="Nenhum evento de acesso registado."/>:<div className="overflow-x-auto"><table className="w-full min-w-[720px] text-sm"><thead><tr className="border-b border-border text-left text-xs text-muted-foreground"><th className="px-2 py-2">Data/hora</th><th className="px-2 py-2">Utilizador</th><th className="px-2 py-2">Evento</th><th className="px-2 py-2">Dispositivo</th><th className="px-2 py-2">Navegador</th><th className="px-2 py-2">Estado</th></tr></thead><tbody>{events.map(e=><tr key={e.id} className="border-b border-border/60"><td className="px-2 py-2.5">{formatDate(e.created_at)}</td><td className="px-2 py-2.5">{e.user_id??"—"}</td><td className="px-2 py-2.5">{eventLabel(e.event_type)}</td><td className="px-2 py-2.5">{e.device??"—"}</td><td className="px-2 py-2.5">{e.browser??"—"}</td><td className="px-2 py-2.5">{e.success?"Sucesso":"Falhado"}</td></tr>)}</tbody></table></div>}
     </Section>
 
-    <Section title="Autenticação de dois fatores (2FA)" icon={<LockKeyhole className="h-5 w-5"/>} description="TOTP para a conta administrativa actualmente autentactiveMfa.length===0?(mfaSetup?<div className="rounded-xl border border-border p-4">
-        <p className="font-semibold">Adicionar autenticador</p>
-        <p className="mt-1 text-sm text-muted-foreground">Digitaliza o QR Code no teu aplicativo autenticador. Se não conseguires, usa a chave secreta.</p>
-        <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center">
-          <img src={"data:image/svg+xml;utf8,"+encodeURIComponent(mfaSetup.qr)} alt="QR Code para configurar 2FA" className="h-44 w-44 rounded-xl border border-border bg-white p-2"/>
-          <div className="min-w-0 flex-1">
-            <p className="text-xs font-medium text-muted-foreground">Chave secreta</p>
-            <p className="mt-1 break-all rounded-lg bg-muted p-2 font-mono text-xs">{mfaSetup.secret}</p>
-            <label className="mt-3 block text-xs font-medium text-muted-foreground">Código de confirmação
-              <input value={mfaCode} onChange={e=>setMfaCode(e.target.value.replace(/\D/g,"").slice(0,6))} inputMode="numeric" autoComplete="one-time-code" className="mt-1 h-10 w-full rounded-lg border border-border bg-background px-3 text-center text-lg tracking-[0.3em]"/>
-            </label>
-            <button type="button" onClick={()=>void confirmMfa()} disabled={mfaBusy||mfaCode.length!==6} className="mt-3 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground disabled:opacity-50">{mfaBusy?"A verificar…":"Confirmar e activar"}</button>
+    <Section title="Autenticação de dois fatores (2FA)" icon={<LockKeyhole className="h-5 w-5"/>} description="TOTP para a conta administrativa actualmente autenticada.">
+      {activeMfa.length===0 ? (
+        mfaSetup ? (
+          <div className="rounded-xl border border-border p-4">
+            <p className="font-semibold">Adicionar autenticador</p>
+            <p className="mt-1 text-sm text-muted-foreground">Digitaliza o QR Code no teu aplicativo autenticador. Se não conseguires, usa a chave secreta.</p>
+            <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center">
+              <img src={"data:image/svg+xml;utf8,"+encodeURIComponent(mfaSetup.qr)} alt="QR Code para configurar 2FA" className="h-44 w-44 rounded-xl border border-border bg-white p-2"/>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-medium text-muted-foreground">Chave secreta</p>
+                <p className="mt-1 break-all rounded-lg bg-muted p-2 font-mono text-xs">{mfaSetup.secret}</p>
+                <label className="mt-3 block text-xs font-medium text-muted-foreground">Código de confirmação
+                  <input value={mfaCode} onChange={e=>setMfaCode(e.target.value.replace(/\D/g,"").slice(0,6))} inputMode="numeric" autoComplete="one-time-code" className="mt-1 h-10 w-full rounded-lg border border-border bg-background px-3 text-center text-lg tracking-[0.3em]"/>
+                </label>
+                <button type="button" onClick={()=>void confirmMfa()} disabled={mfaBusy||mfaCode.length!==6} className="mt-3 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground disabled:opacity-50">{mfaBusy?"A verificar…":"Confirmar e activar"}</button>
+              </div>
+            </div>
           </div>
+        ) : (
+          <div className="flex flex-col gap-3 rounded-xl border border-border p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="font-semibold">2FA não configurado nesta conta</p>
+              <p className="mt-1 text-sm text-muted-foreground">A activação só termina depois da validação do código do autenticador.</p>
+            </div>
+            <button type="button" onClick={()=>void enableMfa()} disabled={mfaBusy} className="rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground">{mfaBusy?"A preparar…":"Configurar 2FA"}</button>
+          </div>
+        )
+      ) : activeMfa.map(f=>
+        <div key={f.id} className="flex flex-col gap-3 rounded-xl border border-border p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div><p className="font-semibold">2FA activo</p><p className="mt-1 text-sm text-muted-foreground">{f.friendly_name??"Aplicativo autenticador"} · factor verificado</p></div>
+          <button type="button" onClick={()=>void disableMfa(f.id)} disabled={mfaBusy} className="rounded-xl border border-destructive/30 px-4 py-2.5 text-sm font-semibold text-destructive">Desactivar 2FA</button>
         </div>
-      </div>:<div className="flex flex-col gap-3 rounded-xl border border-border p-4 sm:flex-row sm:items-center sm:justify-between">
-        <div><p className="font-semibold">2FA não configurado nesta conta</p><p className="mt-1 text-sm text-muted-foreground">A activação só termina depois da validação do código do autenticador.</p></div>
-        <button type="button" onClick={()=>void enableMfa()} disabled={mfaBusy} className="rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground">{mfaBusy?"A preparar…":"Configurar 2FA"}</button>
-      </div>):activeMfa.map(f=><div key={f.id} className="flex flex-col gap-3 rounded-xl border border-border p-4 sm:flex-row sm:items-center sm:justify-between"><div><p className="font-semibold">2FA activo</p><p className="mt-1 text-sm text-muted-foreground">{f.friendly_name??"Aplicativo autenticador"} · factor verificado</p></div><button type="button" onClick={()=>void disableMfa(f.id)} disabled={mfaBusy} className="rounded-xl border border-destructive/30 px-4 py-2.5 text-sm font-semibold text-destructive">Desactivar 2FA</button></div>)
+      )}
     </Section>
 
     <Section title="Permissões administrativas" icon={<Shield className="h-5 w-5"/>} description="Estrutura preparada para níveis futuros, sem alterar os administradores actuais.">
