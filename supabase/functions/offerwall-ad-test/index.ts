@@ -178,7 +178,7 @@ Deno.serve(async (req) => {
       }
       const now = new Date().toISOString();
       await db.from("offerwall_ad_provider_config")
-        .upsert({ provider: "offerwall_ad", enabled, updated_at: now }, { onConflict: "provider" });
+        .upsert({ provider: "offerwall_ad", enabled, last_test_status: enabled ? "connected" : "disabled", updated_at: now }, { onConflict: "provider" });
       const { data: integration } = await db.from("task_provider_integrations")
         .select("display_name, integration_type, environment")
         .eq("provider_key", "offerwall_ad")
