@@ -62,6 +62,15 @@ function Page() {
   const [apiKeyConfigured, setApiKeyConfigured] = useState(false);
   const [showConfiguration, setShowConfiguration] = useState(true);
 
+  const [ayetApiKey, setAyetApiKey] = useState("");
+  const [showAyetApiKey, setShowAyetApiKey] = useState(false);
+  const [ayetAdslotId, setAyetAdslotId] = useState("");
+  const [ayetStatus, setAyetStatus] = useState<ConnectionStatus>("idle");
+  const [ayetMessage, setAyetMessage] = useState("");
+  const [ayetLastTestAt, setAyetLastTestAt] = useState<string | null>(null);
+  const [ayetApiKeyConfigured, setAyetApiKeyConfigured] = useState(false);
+  const [showAyetConfiguration, setShowAyetConfiguration] = useState(true);
+
   useEffect(() => {
     void (async () => {
       const { data } = await supabase.functions.invoke("offerwall-ad-test", {
@@ -72,6 +81,22 @@ function Page() {
         if (typeof data.testedAt === "string") setLastTestAt(data.testedAt);
         setApiKeyConfigured(Boolean(data.apiKeyConfigured));
         if (data.status && statusCopy[data.status as ConnectionStatus]) setStatus(data.status as ConnectionStatus);
+      }
+    })();
+  }, []);
+
+  useEffect(() => {
+    void (async () => {
+      const { data } = await supabase.functions.invoke("ayet-studios-test", {
+        body: { action: "get_configuration" },
+      });
+      if (data) {
+        if (typeof data.adslotId === "string") setAyetAdslotId(data.adslotId);
+        if (typeof data.testedAt === "string") setAyetLastTestAt(data.testedAt);
+        setAyetApiKeyConfigured(Boolean(data.apiKeyConfigured));
+        if (data.status && statusCopy[data.status as ConnectionStatus]) {
+          setAyetStatus(data.status as ConnectionStatus);
+        }
       }
     })();
   }, []);
@@ -116,8 +141,53 @@ function Page() {
     await invoke("test_connection");
   };
 
+  const invokeAyet = async (action: "save_configuration" | "test_connection") => {
+    const { data, error } = await supabase.functions.invoke("ayet-studios-test", {
+      body: {
+        action,
+        adslotId: ayetAdslotId.trim() || undefined,
+        ...(ayetApiKey.trim() ? { apiKey: ayetApiKey.trim() } : {}),
+      },
+    });
+
+    if (error) {
+      setAyetStatus("communication_error");
+      setAyetMessage("Não foi possível comunicar com o backend do TASKORA.");
+      return;
+    }
+
+    const nextStatus = (data?.status ?? "communication_error") as ConnectionStatus;
+    setAyetStatus(statusCopy[nextStatus] ? nextStatus : "communication_error");
+    setAyetMessage(
+      typeof data?.message === "string"
+        ? data.message
+        : "A operação terminou sem uma mensagem de diagnóstico.",
+    );
+
+    if (typeof data?.testedAt === "string") {
+      setAyetLastTestAt(data.testedAt);
+    }
+    if (typeof data?.apiKeyConfigured === "boolean") {
+      setAyetApiKeyConfigured(data.apiKeyConfigured);
+    }
+  };
+
+  const saveAyetConfiguration = async () => {
+    setAyetStatus("saving");
+    setAyetMessage("");
+    await invokeAyet("save_configuration");
+  };
+
+  const testAyetConnection = async () => {
+    setAyetStatus("loading");
+    setAyetMessage("");
+    await invokeAyet("test_connection");
+  };
+
   const current = statusCopy[status];
   const StatusIcon = current.icon;
+  const ayetCurrent = statusCopy[ayetStatus];
+  const AyetStatusIcon = ayetCurrent.icon;
 
   return (
     <div className="space-y-6">
