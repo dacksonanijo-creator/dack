@@ -70,14 +70,14 @@ async function getStoredApiKey(): Promise<string> {
   return typeof data === "string" ? data.trim() : "";
 }
 
-async function saveMetadata(adslotId: string, status: string, testedAt: string | null) {
+async function saveMetadata(adslotId: string, status: string, testedAt: string | null, enabledOverride?: boolean) {
   const db = adminDatabaseClient();
   if (!db) return;
 
   const payload = {
     provider: "ayet_studios",
     integration_type: "offerwall_surveywall", environment: "production", adslot_id: adslotId || null,
-    enabled: status === "connected",
+    enabled: enabledOverride ?? status === "connected",
     last_test_at: testedAt,
     last_test_status: status,
     updated_at: new Date().toISOString(),
@@ -130,7 +130,9 @@ Deno.serve(async (req) => {
         ? "save_configuration"
         : body?.action === "get_configuration"
           ? "get_configuration"
-          : "test_connection";
+          : body?.action === "set_enabled"
+            ? "set_enabled"
+            : "test_connection";
 
     if (action === "get_configuration") {
       const db = adminDatabaseClient();
@@ -153,6 +155,45 @@ Deno.serve(async (req) => {
         enabled: Boolean(data?.enabled),
         testedAt: data?.last_test_at ?? null,
         apiKeyConfigured: Boolean(storedKey),
+      });
+    }
+
+    if (action === "set_enabled") {
+      const db = adminDatabaseClient();
+      if (!db) return json({ status: "communication_error", message: "Backend database indisponível." }, 500);
+      const enabled = body?.enabled === true;
+      const { data } = await db.from("ayet_studios_provider_config")
+        .select("last_test_status")
+        .eq("provider", "ayet_studios")
+        .maybeSingle();
+      if (enabled && data?.last_test_status !== "connected") {
+        return json({ status: "not_configured", message: "Teste a conexão com sucesso antes de ativar o fornecedor." });
+      }
+      const now = new Date().toISOString();
+      await db.from("ayet_studios_provider_config")
+        .upsert({ provider: "ayet_studios", enabled, updated_at: now }, { onConflict: "provider" });
+      const { data: integration } = await db.from("task_provider_integrations")
+        .select("display_name, integration_type, environment")
+        .eq("provider_key", "ayet_studios")
+        .maybeSingle();
+      if (integration) {
+        await db.from("task_provider_registry").upsert({
+          provider_key: "ayet_studios",
+          display_name: integration.display_name,
+          integration_type: integration.integration_type,
+          environment: integration.environment,
+          status: enabled ? "connected" : "disabled",
+          enabled,
+          credentials_configured: true,
+          last_test_at: data?.last_test_status === "connected" ? now : null,
+          registered_at: enabled ? now : null,
+          updated_at: now,
+        }, { onConflict: "provider_key" });
+      }
+      return json({
+        status: enabled ? "connected" : "disabled",
+        enabled,
+        message: enabled ? "ayeT-Studios ativado." : "ayeT-Studios desativado.",
       });
     }
 
