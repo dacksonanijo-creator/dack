@@ -7,6 +7,7 @@ import {
   EyeOff,
   KeyRound,
   Loader2,
+  Plus,
   Save,
   ServerCog,
   ShieldCheck,
@@ -27,6 +28,26 @@ export const Route = createFileRoute("/admin/apis")({
   }),
   component: Page,
 });
+
+type RegisteredProvider = {
+  provider_key: string;
+  display_name: string;
+  integration_type: string;
+  environment: string;
+  status: string;
+  enabled: boolean;
+  credentials_configured: boolean;
+  last_test_at: string | null;
+  registered_at: string | null;
+};
+
+type InstalledIntegration = {
+  provider_key: string;
+  display_name: string;
+  integration_type: string;
+  environment: string;
+  config_route: string;
+};
 
 type ConnectionStatus =
   | "idle"
@@ -53,6 +74,12 @@ const statusCopy: Record<
 };
 
 function Page() {
+  const [providers, setProviders] = useState<RegisteredProvider[]>([]);
+  const [installedIntegrations, setInstalledIntegrations] = useState<InstalledIntegration[]>([]);
+  const [selectedProvider, setSelectedProvider] = useState("");
+  const [showAddProvider, setShowAddProvider] = useState(false);
+  const [loadingProviders, setLoadingProviders] = useState(true);
+
   const [apiKey, setApiKey] = useState("");
   const [showApiKey, setShowApiKey] = useState(false);
   const [endpoint, setEndpoint] = useState("");
@@ -70,6 +97,30 @@ function Page() {
   const [ayetLastTestAt, setAyetLastTestAt] = useState<string | null>(null);
   const [ayetApiKeyConfigured, setAyetApiKeyConfigured] = useState(false);
   const [showAyetConfiguration, setShowAyetConfiguration] = useState(true);
+
+  const loadProviders = async () => {
+    setLoadingProviders(true);
+    const { data, error } = await supabase.functions.invoke("task-providers", {
+      body: { action: "get_providers" },
+    });
+
+    if (!error && data) {
+      const nextProviders = Array.isArray(data.providers) ? data.providers as RegisteredProvider[] : [];
+      const nextCatalog = Array.isArray(data.catalog) ? data.catalog as InstalledIntegration[] : [];
+      setProviders(nextProviders);
+      setInstalledIntegrations(nextCatalog);
+      setSelectedProvider((current) =>
+        current && nextProviders.some((provider) => provider.provider_key === current)
+          ? current
+          : nextProviders[0]?.provider_key ?? "",
+      );
+    }
+    setLoadingProviders(false);
+  };
+
+  useEffect(() => {
+    void loadProviders();
+  }, []);
 
   useEffect(() => {
     void (async () => {
@@ -118,6 +169,7 @@ function Page() {
 
     const nextStatus = (data?.status ?? "communication_error") as ConnectionStatus;
     setStatus(statusCopy[nextStatus] ? nextStatus : "communication_error");
+    if (nextStatus === "connected" || action === "save_configuration") void loadProviders();
     setMessage(
       typeof data?.message === "string"
         ? data.message
@@ -158,6 +210,7 @@ function Page() {
 
     const nextStatus = (data?.status ?? "communication_error") as ConnectionStatus;
     setAyetStatus(statusCopy[nextStatus] ? nextStatus : "communication_error");
+    if (nextStatus === "connected" || action === "save_configuration") void loadProviders();
     setAyetMessage(
       typeof data?.message === "string"
         ? data.message
@@ -200,6 +253,51 @@ function Page() {
         description="Configure e teste fornecedores externos de tarefas, mantendo cada integração isolada."
       />
 
+      <section className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div className="min-w-0 flex-1">
+            <label className="block text-sm font-semibold text-foreground">Fornecedor</label>
+            <p className="mt-1 text-xs leading-5 text-muted-foreground">
+              A seleção contém somente fornecedores que já têm integração, credenciais guardadas e teste de conexão concluído com sucesso.
+            </p>
+            <select
+              value={selectedProvider}
+              onChange={(event) => setSelectedProvider(event.target.value)}
+              disabled={loadingProviders || providers.length === 0}
+              className="mt-3 w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm font-medium outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10 disabled:cursor-not-allowed disabled:opacity-60 lg:max-w-xl"
+            >
+              <option value="">
+                {loadingProviders ? "A carregar fornecedores…" : providers.length ? "Selecionar fornecedor" : "Nenhum fornecedor disponível"}
+              </option>
+              {providers.map((provider) => (
+                <option key={provider.provider_key} value={provider.provider_key}>
+                  {provider.display_name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setShowAddProvider(true)}
+            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-primary/20 bg-primary/5 px-4 py-2.5 text-sm font-semibold text-primary transition hover:bg-primary/10"
+          >
+            <Plus className="h-4 w-4" />
+            Adicionar fornecedor
+          </button>
+        </div>
+      </section>
+
+      {!loadingProviders && providers.length === 0 && (
+        <div className="rounded-2xl border border-dashed border-border bg-card p-6 text-center">
+          <p className="text-sm font-semibold text-foreground">Nenhum fornecedor registado</p>
+          <p className="mt-1 text-xs leading-5 text-muted-foreground">
+            Um fornecedor só aparece aqui depois de a integração correspondente existir, as credenciais serem guardadas e o teste de conexão terminar com sucesso.
+          </p>
+        </div>
+      )}
+
+      {selectedProvider === "offerwall_ad" && (
       <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
         <div className="border-b border-border/70 bg-muted/20 px-5 py-5 sm:px-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -409,6 +507,10 @@ function Page() {
       </section>
 
 
+
+      )}
+
+      {selectedProvider === "ayet_studios" && (
       <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
         <div className="border-b border-border/70 bg-muted/20 px-5 py-5 sm:px-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -650,6 +752,7 @@ function Page() {
           )}
         </div>
       </section>
-    </div>
+
+      )}    </div>
   );
 }
