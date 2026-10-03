@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { AdminPageHeader } from "@/components/taskora/admin-shell";
 import { supabase } from "@/integrations/supabase/client";
@@ -105,6 +105,14 @@ function Page() {
       <AdminPageHeader
         title="Tarefas"
         description="Fontes de tarefas, estado das integrações e disponibilidade real de ofertas."
+        action={
+          <Link
+            to="/admin/verifications"
+            className="inline-flex items-center gap-2 rounded-xl border border-border px-4 py-2.5 text-sm font-semibold hover:bg-muted"
+          >
+            Verificações pendentes
+          </Link>
+        }
       />
 
       {error && (
