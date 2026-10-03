@@ -22,7 +22,7 @@ export const Route = createFileRoute("/admin")({
     await supabase.rpc("touch_security_session", {
       p_session_key: sessionKey,
       p_device: /Mobi|Android|iPhone/i.test(navigator.userAgent) ? "Dispositivo móvel" : "Computador",
-      p_browser: navigator.userAgent.match(/(Chrome|Firefox|Safari|Edge|Opera)\\/?[\\d.]*/i)?.[0] ?? "Navegador",
+      p_browser: navigator.userAgent.match(/(Chrome|Firefox|Safari|Edge|Opera)\/?[\d.]*/i)?.[0] ?? "Navegador",
       p_user_agent: navigator.userAgent,
     });
 
