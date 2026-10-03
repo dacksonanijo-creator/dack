@@ -106,7 +106,7 @@ function Login() {
           p_event_type: "login_failed",
           p_success: false,
           p_device: /Mobi|Android|iPhone/i.test(navigator.userAgent) ? "Dispositivo móvel" : "Computador",
-          p_browser: navigator.userAgent.match(/(Chrome|Firefox|Safari|Edge|Opera)\\/?[\\d.]*/i)?.[0] ?? "Navegador",
+          p_browser: navigator.userAgent.match(/(Chrome|Firefox|Safari|Edge|Opera)\/?[\d.]*/i)?.[0] ?? "Navegador",
         });
       }
 
@@ -135,7 +135,7 @@ function Login() {
         p_event_type: "login_success",
         p_success: true,
         p_device: /Mobi|Android|iPhone/i.test(navigator.userAgent) ? "Dispositivo móvel" : "Computador",
-        p_browser: navigator.userAgent.match(/(Chrome|Firefox|Safari|Edge|Opera)\\/?[\\d.]*/i)?.[0] ?? "Navegador",
+        p_browser: navigator.userAgent.match(/(Chrome|Firefox|Safari|Edge|Opera)\/?[\d.]*/i)?.[0] ?? "Navegador",
       });
       await navigate({ to: "/app", replace: true });
     } catch (err) {
