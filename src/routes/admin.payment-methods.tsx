@@ -17,6 +17,7 @@ export const Route = createFileRoute("/admin/payment-methods")({
 });
 
 function Page() {
+  const [selectedProvider, setSelectedProvider] = useState<"payted" | "debito_pay">("payted");
   const [showSecrets, setShowSecrets] = useState(false);
   const [environment, setEnvironment] = useState<"sandbox" | "production">("sandbox");
   const [enabled, setEnabled] = useState(false);
@@ -119,9 +120,35 @@ function Page() {
 
   return (
     <div className="space-y-6">
-      <AdminPageHeader title="Métodos de pagamento" description="Configure o gateway usado pelo TASKORA para depósitos empresariais e levantamentos." />
+      <AdminPageHeader title="Métodos de pagamento" description="Selecione o fornecedor para abrir somente a configuração específica dessa plataforma." />
 
       <section className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+        <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-lg font-semibold">Fornecedor de pagamento</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Cada fornecedor possui a sua própria configuração, teste, ativação e desativação. Novas APIs serão adicionadas à seleção somente depois de estudarmos a documentação oficial e criarmos a página específica.
+            </p>
+          </div>
+          <span className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/20 px-3 py-1.5 text-xs font-medium text-muted-foreground">
+            <span className="h-2 w-2 rounded-full bg-emerald-500" />
+            Seleção de plataformas
+          </span>
+        </div>
+        <label className="block max-w-xl space-y-1.5">
+          <span className="text-sm font-medium">Selecionar plataforma</span>
+          <select
+            className="w-full rounded-xl border border-border bg-background px-3 py-3 text-sm font-semibold outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
+            value={selectedProvider}
+            onChange={(event) => setSelectedProvider(event.target.value as "payted" | "debito_pay")}
+          >
+            <option value="payted">PayTED</option>
+            <option value="debito_pay">Debito Pay</option>
+          </select>
+        </label>
+      </section>
+
+      {selectedProvider === "payted" && <section className="rounded-2xl border border-border bg-card p-5 shadow-sm">
         <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <h2 className="text-lg font-semibold">Gateway de pagamento</h2>
@@ -193,8 +220,9 @@ function Page() {
         {environment === "production" && (
           <p className="mt-4 text-sm text-amber-600">Produção: valide primeiro credenciais, endpoints, webhooks e permissões do provedor.</p>
         )}
-      </section>
-      <section className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+      </section>}
+
+      {selectedProvider === "debito_pay" && <section className="rounded-2xl border border-border bg-card p-5 shadow-sm">
         <div className="mb-6 flex flex-col gap-4 border-b border-border/70 pb-5 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <div className="flex flex-wrap items-center gap-2">
@@ -410,7 +438,7 @@ function Page() {
             </p>
           </div>
         </div>
-      </section>
+      </section>}
 
     </div>
   );
