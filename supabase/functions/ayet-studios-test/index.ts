@@ -74,19 +74,37 @@ async function saveMetadata(adslotId: string, status: string, testedAt: string |
   const db = adminDatabaseClient();
   if (!db) return;
 
-  await db.from("ayet_studios_provider_config").upsert(
-    {
-      provider: "ayet_studios",
-      integration_type: "offerwall_surveywall",
-      environment: "production",
-      adslot_id: adslotId || null,
+  const payload = {
+    provider: "ayet_studios",
+    integration_type: "offerwall_surveywall", environment: "production", adslot_id: adslotId || null,
+    enabled: status === "connected",
+    last_test_at: testedAt,
+    last_test_status: status,
+    updated_at: new Date().toISOString(),
+  };
+
+  await db.from("ayet_studios_provider_config").upsert(payload, { onConflict: "provider" });
+
+  const { data: integration } = await db
+    .from("task_provider_integrations")
+    .select("display_name, integration_type, environment")
+    .eq("provider_key", "ayet_studios")
+    .maybeSingle();
+
+  if (integration) {
+    await db.from("task_provider_registry").upsert({
+      provider_key: "ayet_studios",
+      display_name: integration.display_name,
+      integration_type: integration.integration_type,
+      environment: integration.environment,
+      status: status === "connected" ? "connected" : status === "disabled" ? "disabled" : status === "not_configured" ? "not_configured" : "error",
       enabled: status === "connected",
+      credentials_configured: true,
       last_test_at: testedAt,
-      last_test_status: status,
+      registered_at: status === "connected" ? new Date().toISOString() : null,
       updated_at: new Date().toISOString(),
-    },
-    { onConflict: "provider" },
-  );
+    }, { onConflict: "provider_key" });
+  }
 }
 
 Deno.serve(async (req) => {
