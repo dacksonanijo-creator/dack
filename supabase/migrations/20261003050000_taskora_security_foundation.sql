@@ -287,3 +287,105 @@ end;
 $$;
 
 grant execute on function public.log_security_access_event(text,boolean,text,text) to anon, authenticated;
+
+
+-- If an administrator has enrolled MFA, every direct access to security data requires AAL2.
+create policy security_mfa_security_fraud_rules on public.security_fraud_rules as restrictive for all to authenticated using (
+  array[(select auth.jwt()->>'aal')] <@ (
+    select case when count(id) > 0 then array['aal2'] else array['aal1','aal2'] end
+    from auth.mfa_factors where user_id=(select auth.uid()) and status='verified'
+  )
+) with check (
+  array[(select auth.jwt()->>'aal')] <@ (
+    select case when count(id) > 0 then array['aal2'] else array['aal1','aal2'] end
+    from auth.mfa_factors where user_id=(select auth.uid()) and status='verified'
+  )
+);
+create policy security_mfa_security_suspicious_accounts on public.security_suspicious_accounts as restrictive for all to authenticated using (
+  array[(select auth.jwt()->>'aal')] <@ (
+    select case when count(id) > 0 then array['aal2'] else array['aal1','aal2'] end
+    from auth.mfa_factors where user_id=(select auth.uid()) and status='verified'
+  )
+) with check (
+  array[(select auth.jwt()->>'aal')] <@ (
+    select case when count(id) > 0 then array['aal2'] else array['aal1','aal2'] end
+    from auth.mfa_factors where user_id=(select auth.uid()) and status='verified'
+  )
+);
+create policy security_mfa_security_access_events on public.security_access_events as restrictive for all to authenticated using (
+  array[(select auth.jwt()->>'aal')] <@ (
+    select case when count(id) > 0 then array['aal2'] else array['aal1','aal2'] end
+    from auth.mfa_factors where user_id=(select auth.uid()) and status='verified'
+  )
+) with check (
+  array[(select auth.jwt()->>'aal')] <@ (
+    select case when count(id) > 0 then array['aal2'] else array['aal1','aal2'] end
+    from auth.mfa_factors where user_id=(select auth.uid()) and status='verified'
+  )
+);
+create policy security_mfa_security_admin_roles on public.security_admin_roles as restrictive for all to authenticated using (
+  array[(select auth.jwt()->>'aal')] <@ (
+    select case when count(id) > 0 then array['aal2'] else array['aal1','aal2'] end
+    from auth.mfa_factors where user_id=(select auth.uid()) and status='verified'
+  )
+) with check (
+  array[(select auth.jwt()->>'aal')] <@ (
+    select case when count(id) > 0 then array['aal2'] else array['aal1','aal2'] end
+    from auth.mfa_factors where user_id=(select auth.uid()) and status='verified'
+  )
+);
+create policy security_mfa_security_admin_permissions on public.security_admin_permissions as restrictive for all to authenticated using (
+  array[(select auth.jwt()->>'aal')] <@ (
+    select case when count(id) > 0 then array['aal2'] else array['aal1','aal2'] end
+    from auth.mfa_factors where user_id=(select auth.uid()) and status='verified'
+  )
+) with check (
+  array[(select auth.jwt()->>'aal')] <@ (
+    select case when count(id) > 0 then array['aal2'] else array['aal1','aal2'] end
+    from auth.mfa_factors where user_id=(select auth.uid()) and status='verified'
+  )
+);
+create policy security_mfa_security_account_blocks on public.security_account_blocks as restrictive for all to authenticated using (
+  array[(select auth.jwt()->>'aal')] <@ (
+    select case when count(id) > 0 then array['aal2'] else array['aal1','aal2'] end
+    from auth.mfa_factors where user_id=(select auth.uid()) and status='verified'
+  )
+) with check (
+  array[(select auth.jwt()->>'aal')] <@ (
+    select case when count(id) > 0 then array['aal2'] else array['aal1','aal2'] end
+    from auth.mfa_factors where user_id=(select auth.uid()) and status='verified'
+  )
+);
+create policy security_mfa_security_admin_sessions on public.security_admin_sessions as restrictive for all to authenticated using (
+  array[(select auth.jwt()->>'aal')] <@ (
+    select case when count(id) > 0 then array['aal2'] else array['aal1','aal2'] end
+    from auth.mfa_factors where user_id=(select auth.uid()) and status='verified'
+  )
+) with check (
+  array[(select auth.jwt()->>'aal')] <@ (
+    select case when count(id) > 0 then array['aal2'] else array['aal1','aal2'] end
+    from auth.mfa_factors where user_id=(select auth.uid()) and status='verified'
+  )
+);
+create policy security_mfa_security_alerts on public.security_alerts as restrictive for all to authenticated using (
+  array[(select auth.jwt()->>'aal')] <@ (
+    select case when count(id) > 0 then array['aal2'] else array['aal1','aal2'] end
+    from auth.mfa_factors where user_id=(select auth.uid()) and status='verified'
+  )
+) with check (
+  array[(select auth.jwt()->>'aal')] <@ (
+    select case when count(id) > 0 then array['aal2'] else array['aal1','aal2'] end
+    from auth.mfa_factors where user_id=(select auth.uid()) and status='verified'
+  )
+);
+create policy security_mfa_security_audit_log on public.security_audit_log as restrictive for all to authenticated using (
+  array[(select auth.jwt()->>'aal')] <@ (
+    select case when count(id) > 0 then array['aal2'] else array['aal1','aal2'] end
+    from auth.mfa_factors where user_id=(select auth.uid()) and status='verified'
+  )
+) with check (
+  array[(select auth.jwt()->>'aal')] <@ (
+    select case when count(id) > 0 then array['aal2'] else array['aal1','aal2'] end
+    from auth.mfa_factors where user_id=(select auth.uid()) and status='verified'
+  )
+);
