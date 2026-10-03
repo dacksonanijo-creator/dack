@@ -1,35 +1,34 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { Bell } from "lucide-react";
-import { useT } from "@/i18n";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
+import { Bell, CheckCheck, Mail, Settings2, Smartphone } from "lucide-react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/app/notifications")({
-  head: () => ({
-    meta: [
-      { title: "Notificações — Taskora" },
-      { name: "description", content: "Aqui verás aprovações, novas tarefas e avisos da tua conta Taskora." },
-      { property: "og:title", content: "Notificações — Taskora" },
-      { property: "og:description", content: "Aprovações, novas tarefas e avisos da conta." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
+  head: () => ({ meta: [
+    { title: "Notificações — Taskora" },
+    { name: "description", content: "Notificações e comunicações da tua conta Taskora." },
+  ]}),
   component: Notifications,
 });
 
-function Notifications() {
-  const t = useT();
-  return (
-    <div className="space-y-6">
-      <h1 className="font-display text-2xl font-extrabold">{t("pages.notifications.title")}</h1>
-      <div className="grid place-items-center rounded-3xl border border-dashed border-border bg-card/50 px-6 py-16 text-center">
-        <span className="grid h-12 w-12 place-items-center rounded-2xl bg-primary/10 text-primary">
-          <Bell className="h-5 w-5" />
-        </span>
-        <p className="mt-4 font-display text-base font-bold">{t("pages.notifications.emptyTitle")}</p>
-        <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-          {t("pages.notifications.emptyDesc")}
-        </p>
-      </div>
-    </div>
-  );
+type NotificationRow={id:string;title:string;message:string;type:string;priority:string;route:string|null;created_at:string;read_at:string|null};
+const categories=[["tasks","Tarefas"],["activity","Actividades"],["campaigns","Campanhas"],["promotions","Promoções"],["news","Novidades"],["emails","Emails"],["push","Notificações de dispositivo"]] as const;
+
+function Notifications(){
+ const navigate=useNavigate(); const [items,setItems]=useState<NotificationRow[]>([]); const [prefs,setPrefs]=useState<Record<string,{in_app:boolean;push:boolean;email:boolean}>>({}); const [loading,setLoading]=useState(true); const [pushConfigured,setPushConfigured]=useState(false);
+ const load=async()=>{setLoading(true);const [{data:n,error:nErr},{data:p}]=await Promise.all([(supabase as any).from("notifications").select("id,title,message,type,priority,route,created_at,read_at").order("created_at",{ascending:false}).limit(50),(supabase as any).from("notification_preferences").select("category,in_app,push,email")]);if(nErr)toast.error("Não foi possível carregar as notificações.");setItems(n??[]);setPrefs(Object.fromEntries((p??[]).map((x:any)=>[x.category,{in_app:x.in_app,push:x.push,email:x.email}])));setLoading(false);};
+ useEffect(()=>{void load();setPushConfigured(Boolean(import.meta.env.VITE_VAPID_PUBLIC_KEY));},[]);
+ const unread=useMemo(()=>items.filter(x=>!x.read_at).length,[items]);
+ const open=async(item:NotificationRow)=>{if(!item.read_at){const now=new Date().toISOString();await (supabase as any).from("notifications").update({read_at:now}).eq("id",item.id);setItems(x=>x.map(n=>n.id===item.id?{...n,read_at:now}:n));}if(item.route)navigate({to:item.route as any});};
+ const markAll=async()=>{await (supabase as any).rpc("mark_all_notifications_read");setItems(x=>x.map(n=>({...n,read_at:n.read_at??new Date().toISOString()})));};
+ const updatePref=async(category:string,key:"in_app"|"push"|"email",value:boolean)=>{const current=prefs[category]??{in_app:true,push:true,email:true};const next={...current,[key]:value};const {error}=await (supabase as any).rpc("set_notification_preference",{p_category:category,p_in_app:next.in_app,p_push:next.push,p_email:next.email});if(error)toast.error("Não foi possível guardar a preferência.");else setPrefs(x=>({...x,[category]:next}));};
+ const enablePush=async()=>{if(!import.meta.env.VITE_VAPID_PUBLIC_KEY)return toast.error("Notificações de dispositivo não configuradas.");if(!("Notification"in window)||!("serviceWorker"in navigator))return toast.error("Este dispositivo não suporta notificações push.");const permission=await Notification.requestPermission();if(permission!=="granted")return;const reg=await navigator.serviceWorker.register("/taskora-sw.js");const sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:import.meta.env.VITE_VAPID_PUBLIC_KEY});const json=sub.toJSON();if(!json.endpoint||!json.keys)return toast.error("Não foi possível registar o dispositivo.");const {error}=await (supabase as any).from("notification_devices").upsert({user_id:(await supabase.auth.getUser()).data.user?.id,endpoint:json.endpoint,subscription:json,user_agent:navigator.userAgent,active:true,last_seen_at:new Date().toISOString()},{onConflict:"endpoint"});if(error)toast.error(error.message);else toast.success("Dispositivo autorizado para notificações.");};
+ return <div className="space-y-5">
+   <section className="flex items-center gap-3"><span className="grid h-10 w-10 place-items-center rounded-xl bg-primary/10 text-primary"><Bell className="h-5 w-5"/></span><div className="min-w-0 flex-1"><h1 className="font-display text-2xl font-extrabold">Notificações</h1><p className="text-sm text-muted-foreground">{unread?unread+" não lida"+(unread===1?"":"s"):"Tudo lido"}</p></div>{unread>0&&<Button size="sm" variant="outline" className="h-8 rounded-lg text-xs" onClick={markAll}><CheckCheck className="mr-1.5 h-3.5 w-3.5"/>Ler todas</Button>}</section>
+   <section className="overflow-hidden rounded-2xl border bg-card shadow-soft">{loading?<div className="p-8 text-center text-sm text-muted-foreground">A carregar…</div>:items.length?items.map(n=><button key={n.id} type="button" onClick={()=>open(n)} className={"flex w-full items-start gap-3 border-b px-4 py-3.5 text-left transition-colors last:border-0 hover:bg-muted/60 "+(!n.read_at?"bg-primary/[0.035]":"")}><span className={"mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-lg "+(n.priority==="urgent"?"bg-destructive/10 text-destructive":n.priority==="important"?"bg-primary/10 text-primary":"bg-muted text-muted-foreground")}><Bell className="h-4 w-4"/></span><span className="min-w-0 flex-1"><span className="flex items-center gap-2"><span className="truncate text-sm font-semibold">{n.title}</span>{!n.read_at&&<span className="h-1.5 w-1.5 shrink-0 rounded-full bg-primary"/>}</span><span className="mt-1 block text-xs leading-5 text-muted-foreground">{n.message}</span><span className="mt-1 block text-[10px] text-muted-foreground">{new Date(n.created_at).toLocaleString("pt-PT")}</span></span></button>):<div className="grid place-items-center p-12 text-center"><Bell className="h-6 w-6 text-muted-foreground"/><p className="mt-3 text-sm font-semibold">Nenhuma notificação</p><p className="mt-1 text-xs text-muted-foreground">Quando algo importante acontecer na tua conta, aparecerá aqui.</p></div>}</section>
+   <section className="rounded-2xl border bg-card p-4 shadow-soft"><div className="flex items-center gap-3"><Settings2 className="h-4 w-4 text-muted-foreground"/><div><h2 className="text-sm font-semibold">Preferências</h2><p className="text-[11px] text-muted-foreground">Controla canais de comunicações não críticas.</p></div></div><div className="mt-3 divide-y divide-border/70">{categories.map(([key,label])=>{const p=prefs[key]??{in_app:true,push:true,email:true};return <div key={key} className="flex items-center gap-3 py-3"><div className="min-w-0 flex-1"><p className="text-sm font-medium">{label}</p><p className="text-[10px] text-muted-foreground">Preferência por canal.</p></div><label className="flex items-center gap-1 text-[10px] text-muted-foreground"><Bell className="h-3 w-3"/>App<Switch checked={p.in_app} onCheckedChange={v=>updatePref(key,"in_app",v)}/></label><label className="flex items-center gap-1 text-[10px] text-muted-foreground"><Mail className="h-3 w-3"/>Email<Switch checked={p.email} onCheckedChange={v=>updatePref(key,"email",v)}/></label><label className="flex items-center gap-1 text-[10px] text-muted-foreground"><Smartphone className="h-3 w-3"/>Push<Switch checked={p.push} onCheckedChange={v=>updatePref(key,"push",v)}/></label></div>})}</div><div className="mt-3 flex items-center justify-between rounded-xl border bg-background px-3 py-2.5"><div><p className="text-xs font-semibold">Este dispositivo</p><p className="text-[10px] text-muted-foreground">{pushConfigured?"Push disponível para configuração":"Push ainda não configurado"}</p></div><Button size="sm" variant="outline" className="h-8 rounded-lg text-xs" onClick={enablePush} disabled={!pushConfigured}><Smartphone className="mr-1.5 h-3.5 w-3.5"/>Activar</Button></div></section>
+ </div>;
 }
