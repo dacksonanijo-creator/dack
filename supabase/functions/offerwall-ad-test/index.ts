@@ -77,10 +77,19 @@ async function saveMetadata(endpoint: string, status: string, testedAt: string |
   const db = adminDatabaseClient();
   if (!db) return;
 
+  let enabled = enabledOverride;
+  if (enabled === undefined) {
+    const { data: current } = await db.from("offerwall_ad_provider_config")
+      .select("enabled")
+      .eq("provider", "offerwall_ad")
+      .maybeSingle();
+    enabled = Boolean(current?.enabled);
+  }
+
   const payload = {
     provider: "offerwall_ad",
     environment: "production", endpoint: endpoint || null,
-    enabled: enabledOverride ?? status === "connected",
+    enabled,
     last_test_at: testedAt,
     last_test_status: status,
     updated_at: new Date().toISOString(),
