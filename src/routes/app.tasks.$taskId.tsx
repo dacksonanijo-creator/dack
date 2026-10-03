@@ -51,9 +51,9 @@ function TaskDetailRoute() {
   const { data: taskoraData } = useQuery({
     queryKey: ["taskora-task", taskId],
     queryFn: async () => {
-      const { data: rows, error } = await (supabase as any).rpc("get_available_taskora_tasks");
+      const { data: rows, error } = await (supabase as any).rpc("get_taskora_task", { p_task_id: taskId });
       if (error) throw error;
-      return (Array.isArray(rows) ? rows : []).find((row: any) => row.id === taskId) ?? null;
+      return Array.isArray(rows) ? rows[0] ?? null : rows ?? null;
     },
     staleTime: 30_000,
     retry: 1,
@@ -119,9 +119,16 @@ function TaskoraTaskDetail({ task }: { task: any }) {
         <p className="mt-1 text-xs text-muted-foreground">A recompensa não fica disponível imediatamente. Primeiro é criada uma reserva financeira e a conclusão passa pelo Motor de Verificação TASKORA.</p>
         <textarea value={proof} onChange={(e)=>setProof(e.target.value)} rows={4} className="mt-3 w-full rounded-xl border border-border bg-background px-3 py-2 text-xs outline-none focus:border-primary" placeholder="Evidência ou código, quando a tarefa exigir." />
         {message && <p className="mt-2 text-xs text-muted-foreground">{message}</p>}
-        <button type="button" disabled={submitting} onClick={() => void submit()} className="mt-3 rounded-md bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground disabled:opacity-50">
-          {submitting ? "A submeter…" : "Submeter para verificação"}
-        </button>
+        {task.verification_status ? (
+          <div className="mt-3 rounded-xl border border-border bg-muted/30 px-3 py-2 text-xs">
+            <span className="font-semibold">Estado: {task.verification_status}</span>
+            {task.verification_reason && <p className="mt-1 text-muted-foreground">{task.verification_reason}</p>}
+          </div>
+        ) : (
+          <button type="button" disabled={submitting} onClick={() => void submit()} className="mt-3 rounded-md bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground disabled:opacity-50">
+            {submitting ? "A submeter…" : "Submeter para verificação"}
+          </button>
+        )}
       </div>
     </div>
   );
