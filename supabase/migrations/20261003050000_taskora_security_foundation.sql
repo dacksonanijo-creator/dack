@@ -389,3 +389,100 @@ create policy security_mfa_security_audit_log on public.security_audit_log as re
     from auth.mfa_factors where user_id=(select auth.uid()) and status='verified'
   )
 );
+
+
+create or replace function public.log_security_access_event(
+  p_event_type text,
+  p_success boolean,
+  p_device text default null,
+  p_browser text default null
+)
+returns uuid
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_id uuid;
+  v_failed_count integer;
+begin
+  if p_event_type not in ('login_success','login_failed','account_recovery','authentication_change','password_change','two_factor_enabled','two_factor_disabled') then
+    raise exception 'invalid security event';
+  end if;
+  if p_event_type <> 'login_failed' and auth.uid() is null then
+    raise exception 'not authenticated';
+  end if;
+
+  insert into public.security_access_events(user_id,event_type,success,device,browser)
+  values(auth.uid(),p_event_type,p_success,p_device,p_browser)
+  returning id into v_id;
+
+  if p_event_type = 'login_failed' then
+    select count(*) into v_failed_count
+    from public.security_access_events
+    where event_type='login_failed'
+      and browser is not distinct from p_browser
+      and created_at >= now() - interval '15 minutes';
+
+    if v_failed_count >= 5 then
+      insert into public.security_alerts(alert_type,severity,title,description,metadata)
+      values(
+        'repeated_login_failures',
+        'high',
+        'Várias tentativas de acesso falhadas',
+        'Foram registadas várias tentativas de login falhadas no período recente.',
+        jsonb_build_object('browser',p_browser,'window_minutes',15,'count',v_failed_count)
+      );
+    end if;
+  end if;
+
+  return v_id;
+end;
+$$;
+
+grant execute on function public.log_security_access_event(text,boolean,text,text) to anon, authenticated;
+
+create or replace function public.touch_security_session(p_session_key text, p_device text, p_browser text, p_user_agent text)
+returns uuid
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_id uuid;
+  v_existing_count integer;
+begin
+  if auth.uid() is null or not public.is_taskora_admin() then
+    raise exception 'not authorized';
+  end if;
+
+  select count(*) into v_existing_count
+  from public.security_admin_sessions
+  where user_id=auth.uid() and browser is not distinct from p_browser and revoked_at is null;
+
+  insert into public.security_admin_sessions(session_key,user_id,device,browser,user_agent)
+  values(p_session_key,auth.uid(),p_device,p_browser,p_user_agent)
+  on conflict(session_key) do update set
+    device=excluded.device,
+    browser=excluded.browser,
+    user_agent=excluded.user_agent,
+    last_activity_at=now(),
+    revoked_at=null
+  returning id into v_id;
+
+  if v_existing_count = 0 then
+    insert into public.security_alerts(alert_type,severity,user_id,title,description,metadata)
+    values(
+      'new_admin_device',
+      'medium',
+      'Novo dispositivo administrativo',
+      'Foi registada uma nova sessão administrativa neste dispositivo/navegador.',
+      jsonb_build_object('device',p_device,'browser',p_browser)
+    );
+  end if;
+
+  return v_id;
+end;
+$$;
+
+grant execute on function public.touch_security_session(text,text,text,text) to authenticated;
