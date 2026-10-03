@@ -152,7 +152,7 @@ Deno.serve(async (req) => {
 
       const { data } = await db
         .from("ayet_studios_provider_config")
-        .select("adslot_id, enabled, last_test_at, last_test_status")
+        .select("adslot_id, enabled, last_test_at, last_communication_at, last_test_status")
         .eq("provider", "ayet_studios")
         .maybeSingle();
 
@@ -164,6 +164,7 @@ Deno.serve(async (req) => {
         environment: "production",
         enabled: Boolean(data?.enabled),
         testedAt: data?.last_test_at ?? null,
+        lastCommunicationAt: data?.last_communication_at ?? null,
         apiKeyConfigured: Boolean(storedKey),
       });
     }
