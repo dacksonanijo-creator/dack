@@ -70,7 +70,7 @@ async function getStoredApiKey(): Promise<string> {
   return typeof data === "string" ? data.trim() : "";
 }
 
-async function saveMetadata(adslotId: string, status: string, testedAt: string | null, enabledOverride?: boolean) {
+async function saveMetadata(adslotId: string, status: string, testedAt: string | null, enabledOverride?: boolean, communicationAt: string | null = testedAt) {
   const db = adminDatabaseClient();
   if (!db) return;
 
@@ -88,7 +88,7 @@ async function saveMetadata(adslotId: string, status: string, testedAt: string |
     integration_type: "offerwall_surveywall", environment: "production", adslot_id: adslotId || null,
     enabled,
     last_test_at: testedAt,
-    last_communication_at: testedAt ? new Date().toISOString() : null,
+    last_communication_at: communicationAt,
     last_test_status: status,
     updated_at: new Date().toISOString(),
   };
