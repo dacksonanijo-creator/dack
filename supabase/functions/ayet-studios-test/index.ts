@@ -16,7 +16,7 @@ function json(body: Record<string, unknown>, status = 200) {
 function sanitizeError(value: unknown): string {
   const message = value instanceof Error ? value.message : String(value ?? "Erro desconhecido");
   return message
-    .replace(/(?:apiKey|api_key|key)=([^&\s]+)/gi, "$1=[REDACTED]")
+    .replace(/((?:apiKey|api_key|key)=)[^&\s]+/gi, "$1[REDACTED]")
     .replace(/Bearer\s+[A-Za-z0-9._~+/=-]+/gi, "Bearer [REDACTED]")
     .slice(0, 500);
 }
