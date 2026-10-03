@@ -86,7 +86,8 @@ begin
   where id=v_c.id returning * into v_c;
 
   update public.tasks
-  set budget_paid=budget_paid+v_c.user_amount,updated_at=now()
+  set budget_approved=greatest(0,budget_approved-v_c.user_amount),
+      budget_paid=budget_paid+v_c.user_amount,updated_at=now()
   where id=v_c.task_id;
 
   return v_c;
