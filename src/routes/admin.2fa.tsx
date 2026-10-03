@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Loader2, LockKeyhole, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,8 +9,8 @@ export const Route=createFileRoute("/admin/2fa")({
   ssr:false,
   beforeLoad:async()=>{
     const {data,error}=await supabase.auth.getUser();
-    if(error||!data.user) throw new Error("Autenticação necessária.");
-    if(!isAdminEmail(data.user.email)) throw new Error("Acesso não autorizado.");
+    if(error||!data.user) throw redirect({to:"/login"});
+    if(!isAdminEmail(data.user.email)) throw redirect({to:"/app"});
   },
   component:VerifyTwoFactor,
 });
