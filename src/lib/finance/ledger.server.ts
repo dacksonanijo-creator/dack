@@ -9,6 +9,7 @@ export type TaskConversionInput = {
   transactionId?: string | null;
   idempotencyKey: string;
   grossAmount: number;
+  distributableAmount: number;
   providerFees?: number;
   adjustments?: number;
   reversals?: number;
@@ -35,6 +36,7 @@ export async function recognizeTaskConversion(input: TaskConversionInput) {
     p_transaction_id: input.transactionId ?? null,
     p_idempotency_key: input.idempotencyKey,
     p_gross_amount: input.grossAmount,
+    p_distributable_amount: input.distributableAmount,
     p_provider_fees: input.providerFees ?? 0,
     p_adjustments: input.adjustments ?? 0,
     p_reversals: input.reversals ?? 0,
