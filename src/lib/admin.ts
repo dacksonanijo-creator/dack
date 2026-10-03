@@ -1,5 +1,6 @@
 import {
   Activity,
+  CheckCircle2,
   Banknote,
   Bell,
   Building2,
@@ -66,6 +67,12 @@ export const adminSections: AdminSection[] = [
     label: "Tarefas",
     description: "Aprovação, edição e monitorização de tarefas.",
     icon: ListChecks,
+  },
+  {
+    to: "/admin/verifications",
+    label: "Verificações",
+    description: "Motor de verificação e libertação financeira das conclusões.",
+    icon: CheckCircle2,
   },
   {
     to: "/admin/categories",
