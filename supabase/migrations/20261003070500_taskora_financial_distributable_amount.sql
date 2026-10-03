@@ -16,7 +16,7 @@ create or replace function public.recognize_task_conversion(
   p_provider_fees numeric default 0,
   p_adjustments numeric default 0,
   p_reversals numeric default 0,
-  p_distributable_amount numeric,
+  p_distributable_amount numeric default null,
   p_currency text default 'MZN',
   p_original_currency text default null,
   p_original_amount numeric default null,
@@ -92,7 +92,7 @@ begin
   end if;
 
   v_user_amount := round(v_distributable * v_rule.user_percent / 100, 2);
-  v_taskora_amount := round(v_net - v_user_amount, 2);
+  v_taskora_amount := round(v_distributable - v_user_amount, 2);
 
   if v_user_amount + v_taskora_amount <> v_net then
     raise exception 'distribution rounding mismatch';
@@ -108,7 +108,7 @@ begin
   values(
     p_task_id, p_conversion_id, p_user_id, p_provider, p_provider_transaction_id, p_transaction_id,
     p_idempotency_key, round(p_gross_amount,2), round(p_provider_fees,2), round(p_adjustments,2),
-    round(p_reversals,2), v_net, v_net, v_rule.taskora_percent, v_rule.user_percent,
+    round(p_reversals,2), v_net, v_distributable, v_rule.taskora_percent, v_rule.user_percent,
     v_taskora_amount, v_user_amount, p_currency, 'PENDING', v_rule.id,
     p_original_currency, p_original_amount, p_exchange_rate, p_converted_amount, coalesce(p_metadata,'{}'::jsonb)
   )
