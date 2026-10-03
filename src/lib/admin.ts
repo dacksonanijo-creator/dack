@@ -87,8 +87,8 @@ export const adminSections: AdminSection[] = [
   },
   {
     to: "/admin/wallet",
-    label: "Carteira da plataforma",
-    description: "Saldo global, reservas e movimentos internos.",
+    label: "Carteira TASKORA",
+    description: "Receita TASKORA, obrigações e movimentos do ledger.",
     icon: Wallet,
   },
   {
