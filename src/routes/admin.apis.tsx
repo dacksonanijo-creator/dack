@@ -7,7 +7,7 @@ import {
   EyeOff,
   KeyRound,
   Loader2,
-  Plus,
+  Power,
   Save,
   ServerCog,
   ShieldCheck,
@@ -57,7 +57,8 @@ type ConnectionStatus =
   | "authentication_error"
   | "endpoint_error"
   | "communication_error"
-  | "not_configured";
+  | "not_configured"
+  | "disabled";
 
 const statusCopy: Record<
   ConnectionStatus,
@@ -71,6 +72,7 @@ const statusCopy: Record<
   endpoint_error: { label: "Endpoint inválido", icon: CircleAlert, className: "text-destructive" },
   communication_error: { label: "Erro de comunicação", icon: WifiOff, className: "text-amber-600" },
   not_configured: { label: "Não configurado", icon: KeyRound, className: "text-muted-foreground" },
+  disabled: { label: "Desativado", icon: WifiOff, className: "text-muted-foreground" },
 };
 
 function Page() {
@@ -110,9 +112,9 @@ function Page() {
       setProviders(nextProviders);
       setInstalledIntegrations(nextCatalog);
       setSelectedProvider((current) =>
-        current && nextProviders.some((provider) => provider.provider_key === current)
+        current && nextCatalog.some((provider) => provider.provider_key === current)
           ? current
-          : nextProviders[0]?.provider_key ?? "",
+          : nextCatalog[0]?.provider_key ?? "",
       );
     }
     setLoadingProviders(false);
@@ -193,6 +195,21 @@ function Page() {
     await invoke("test_connection");
   };
 
+  const setOfferwallEnabled = async (enabled: boolean) => {
+    const { data, error } = await supabase.functions.invoke("offerwall-ad-test", {
+      body: { action: "set_enabled", enabled },
+    });
+    if (error) {
+      setStatus("communication_error");
+      setMessage("Não foi possível alterar o estado do fornecedor.");
+      return;
+    }
+    const nextStatus = (data?.status ?? (enabled ? "connected" : "disabled")) as ConnectionStatus;
+    setStatus(statusCopy[nextStatus] ? nextStatus : enabled ? "connected" : "disabled");
+    setMessage(typeof data?.message === "string" ? data.message : "Estado atualizado.");
+    void loadProviders();
+  };
+
   const invokeAyet = async (action: "save_configuration" | "test_connection") => {
     const { data, error } = await supabase.functions.invoke("ayet-studios-test", {
       body: {
@@ -241,6 +258,21 @@ function Page() {
     await invokeAyet("test_connection");
   };
 
+  const setAyetEnabled = async (enabled: boolean) => {
+    const { data, error } = await supabase.functions.invoke("ayet-studios-test", {
+      body: { action: "set_enabled", enabled },
+    });
+    if (error) {
+      setAyetStatus("communication_error");
+      setAyetMessage("Não foi possível alterar o estado do fornecedor.");
+      return;
+    }
+    const nextStatus = (data?.status ?? (enabled ? "connected" : "disabled")) as ConnectionStatus;
+    setAyetStatus(statusCopy[nextStatus] ? nextStatus : enabled ? "connected" : "disabled");
+    setAyetMessage(typeof data?.message === "string" ? data.message : "Estado atualizado.");
+    void loadProviders();
+  };
+
   const current = statusCopy[status];
   const StatusIcon = current.icon;
   const ayetCurrent = statusCopy[ayetStatus];
@@ -258,7 +290,7 @@ function Page() {
           <div className="min-w-0 flex-1">
             <label className="block text-sm font-semibold text-foreground">Fornecedor</label>
             <p className="mt-1 text-xs leading-5 text-muted-foreground">
-              A seleção contém somente fornecedores que já têm integração, credenciais guardadas e teste de conexão concluído com sucesso.
+              Selecione uma integração para abrir somente a página de configuração dela. Novos fornecedores são adicionados manualmente ao catálogo depois de a respetiva página e integração existirem.
             </p>
             <select
               value={selectedProvider}
@@ -267,32 +299,31 @@ function Page() {
               className="mt-3 w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm font-medium outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10 disabled:cursor-not-allowed disabled:opacity-60 lg:max-w-xl"
             >
               <option value="">
-                {loadingProviders ? "A carregar fornecedores…" : providers.length ? "Selecionar fornecedor" : "Nenhum fornecedor disponível"}
+                {loadingProviders ? "A carregar fornecedores…" : installedIntegrations.length ? "Selecionar fornecedor" : "Nenhuma integração registada"}
               </option>
-              {providers.map((provider) => (
-                <option key={provider.provider_key} value={provider.provider_key}>
-                  {provider.display_name}
-                </option>
-              ))}
+              {installedIntegrations.map((integration) => {
+                const provider = providers.find((item) => item.provider_key === integration.provider_key);
+                return (
+                  <option key={integration.provider_key} value={integration.provider_key}>
+                    {provider?.enabled ? "● ATIVO — " : "○ INATIVO — "}{integration.display_name}
+                  </option>
+                );
+              })}
             </select>
           </div>
 
-          <button
-            type="button"
-            onClick={() => setShowAddProvider(true)}
-            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-primary/20 bg-primary/5 px-4 py-2.5 text-sm font-semibold text-primary transition hover:bg-primary/10"
-          >
-            <Plus className="h-4 w-4" />
-            Adicionar fornecedor
-          </button>
+          <div className="flex shrink-0 items-center gap-2 rounded-xl border border-border bg-muted/20 px-3.5 py-2.5 text-xs font-medium text-muted-foreground">
+            <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
+            Ativo · <span className="h-2.5 w-2.5 rounded-full bg-muted-foreground/40" /> Inativo
+          </div>
         </div>
       </section>
 
-      {!loadingProviders && providers.length === 0 && (
+      {!loadingProviders && installedIntegrations.length === 0 && (
         <div className="rounded-2xl border border-dashed border-border bg-card p-6 text-center">
           <p className="text-sm font-semibold text-foreground">Nenhum fornecedor registado</p>
           <p className="mt-1 text-xs leading-5 text-muted-foreground">
-            Um fornecedor só aparece aqui depois de a integração correspondente existir, as credenciais serem guardadas e o teste de conexão terminar com sucesso.
+            Um fornecedor aparece na seleção quando a sua página e integração são registadas no catálogo. O estado ativo/inativo é controlado separadamente em cada página.
           </p>
         </div>
       )}
@@ -449,6 +480,22 @@ function Page() {
             >
               {status === "loading" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wifi className="h-4 w-4" />}
               Testar conexão
+            </button>
+          </div>
+
+          <div className="flex flex-col gap-3 rounded-xl border border-border/70 bg-muted/20 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm font-semibold text-foreground">Estado da integração</p>
+              <p className="mt-1 text-xs leading-5 text-muted-foreground">Ativar/desativar é separado do teste de conexão. A integração só pode ser ativada depois de um teste bem-sucedido.</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => void setOfferwallEnabled(!(providers.find((p) => p.provider_key === "offerwall_ad")?.enabled ?? false))}
+              disabled={status === "loading" || status === "saving"}
+              className={cn("inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60", providers.find((p) => p.provider_key === "offerwall_ad")?.enabled ? "border border-destructive/20 bg-destructive/5 text-destructive" : "bg-primary text-primary-foreground")}
+            >
+              <Power className="h-4 w-4" />
+              {providers.find((p) => p.provider_key === "offerwall_ad")?.enabled ? "Desativar" : "Ativar"}
             </button>
           </div>
 
@@ -697,6 +744,22 @@ function Page() {
                 >
                   {ayetStatus === "loading" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wifi className="h-4 w-4" />}
                   Testar conexão
+                </button>
+              </div>
+
+              <div className="flex flex-col gap-3 rounded-xl border border-border/70 bg-muted/20 p-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-foreground">Estado da integração</p>
+                  <p className="mt-1 text-xs leading-5 text-muted-foreground">Ativar/desativar é separado do teste de conexão. A integração só pode ser ativada depois de um teste bem-sucedido.</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => void setAyetEnabled(!(providers.find((p) => p.provider_key === "ayet_studios")?.enabled ?? false))}
+                  disabled={ayetStatus === "loading" || ayetStatus === "saving"}
+                  className={cn("inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60", providers.find((p) => p.provider_key === "ayet_studios")?.enabled ? "border border-destructive/20 bg-destructive/5 text-destructive" : "bg-primary text-primary-foreground")}
+                >
+                  <Power className="h-4 w-4" />
+                  {providers.find((p) => p.provider_key === "ayet_studios")?.enabled ? "Desativar" : "Ativar"}
                 </button>
               </div>
 
