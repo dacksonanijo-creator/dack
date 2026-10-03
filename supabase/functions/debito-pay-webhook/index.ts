@@ -93,6 +93,12 @@ Deno.serve(async (req) => {
   const reference = typeof data.reference === "string" ? data.reference : null;
   const status = typeof data.status === "string" ? data.status : event;
   const amount = typeof data.amount === "number" ? data.amount : null;
+  const providerError =
+    typeof data.error === "string"
+      ? data.error
+      : typeof payload.error === "string"
+        ? payload.error
+        : null;
   const currency = typeof data.currency === "string" ? data.currency : null;
   const timestamp = typeof payload?.timestamp === "string"
     ? payload.timestamp
@@ -116,6 +122,7 @@ Deno.serve(async (req) => {
     currency,
     event_at: timestamp,
     response: payload,
+    error: providerError,
     received_at: new Date().toISOString(),
   }).select("id").maybeSingle();
 
