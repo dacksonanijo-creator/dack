@@ -71,7 +71,7 @@ function AdminDashboard() {
           </div>
         </div>
         <div className="rounded-xl border border-border/70 bg-background p-4">
-          <p className="text-sm font-semibold text-foreground">Atividade recente</p>
+          <p className="text-sm font-semibold text-foreground">Actividade recente</p>
           <p className="mt-1 text-sm text-muted-foreground">
             Registos de aprovações, submissões e movimentos financeiros.
           </p>
