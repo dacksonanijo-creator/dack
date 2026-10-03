@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AdminPageHeader } from "@/components/taskora/admin-shell";
 import { supabase } from "@/integrations/supabase/client";
-import { AlertCircle, CheckCircle2, Clock3, Loader2, LockKeyhole, MonitorSmartphone, RefreshCw, Shield, ShieldAlert, ToggleLeft, ToggleRight, UserRound, XCircle } from "lucide-react";
+import { AlertCircle, Clock3, Loader2, LockKeyhole, MonitorSmartphone, RefreshCw, Shield, ShieldAlert, ToggleLeft, ToggleRight, UserRound } from "lucide-react";
 import { toast } from "sonner";
 
 type Rule={id:string;rule_key:string;name:string;description:string;enabled:boolean;configuration:Record<string,unknown>};
