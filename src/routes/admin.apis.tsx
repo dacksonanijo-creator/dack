@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { AdminPageHeader } from "@/components/taskora/admin-shell";
 import { Eye, EyeOff } from "lucide-react";
 
@@ -51,7 +51,7 @@ function Page() {
           <div className="mt-6 grid gap-5 md:grid-cols-2">
             <SecretField label="API Key" show={showOfferwallKey} onToggle={() => setShowOfferwallKey((value) => !value)} />
             <Field label="Endpoint da API">
-              <input className="field font-mono" type="url" placeholder="Endpoint oficial fornecido pelo Offerwall Ad" autoComplete="off" />
+              <input className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 font-mono" type="url" placeholder="Endpoint oficial fornecido pelo Offerwall Ad" autoComplete="off" />
             </Field>
           </div>
         </section>
@@ -63,18 +63,18 @@ function Page() {
           <p className="mt-1 text-sm text-muted-foreground">Campos que já existiam para o ayeT-Studios.</p>
 
           <div className="mt-6 grid gap-5 md:grid-cols-2">
-            <SecretField label="API Key" show={showAyetKey} onToggle={() => setShowAyetKey((value) => setShowAyetKey((value) => !value))} />
+            <SecretField label="API Key" show={showAyetKey} onToggle={() => setShowAyetKey((value) => !value)} />
 
             <Field label="Adslot ID">
-              <input className="field font-mono" inputMode="numeric" placeholder="Ex.: 12345" autoComplete="off" />
+              <input className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 font-mono" inputMode="numeric" placeholder="Ex.: 12345" autoComplete="off" />
             </Field>
 
             <Field label="Ambiente">
-              <input className="field" value="Produção · Live Server" readOnly />
+              <input className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10" value="Produção · Live Server" readOnly />
             </Field>
 
             <Field label="Tipo">
-              <input className="field" value="Offerwall / Surveywall API" readOnly />
+              <input className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10" value="Offerwall / Surveywall API" readOnly />
             </Field>
           </div>
         </section>
@@ -83,7 +83,7 @@ function Page() {
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <label className="space-y-1.5">
       <span className="text-sm font-medium">{label}</span>
