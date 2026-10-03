@@ -91,6 +91,7 @@ async function saveMetadata(endpoint: string, status: string, testedAt: string |
     environment: "production", endpoint: endpoint || null,
     enabled,
     last_test_at: testedAt,
+    last_communication_at: testedAt ? new Date().toISOString() : null,
     last_test_status: status,
     updated_at: new Date().toISOString(),
   };
@@ -178,7 +179,7 @@ Deno.serve(async (req) => {
       }
       const now = new Date().toISOString();
       await db.from("offerwall_ad_provider_config")
-        .upsert({ provider: "offerwall_ad", enabled, last_test_status: enabled ? "connected" : "disabled", updated_at: now }, { onConflict: "provider" });
+        .upsert({ provider: "offerwall_ad", enabled, last_test_status: data?.last_test_status ?? "not_configured", updated_at: now }, { onConflict: "provider" });
       const { data: integration } = await db.from("task_provider_integrations")
         .select("display_name, integration_type, environment")
         .eq("provider_key", "offerwall_ad")
@@ -192,7 +193,8 @@ Deno.serve(async (req) => {
           status: enabled ? "connected" : "disabled",
           enabled,
           credentials_configured: true,
-          last_test_at: data?.last_test_status === "connected" ? now : null,
+          last_test_at: data?.last_test_status === "connected" ? (await db.from("offerwall_ad_provider_config").select("last_test_at").eq("provider", "offerwall_ad").maybeSingle()).data?.last_test_at ?? null : null,
+          last_communication_at: (await db.from("offerwall_ad_provider_config").select("last_communication_at").eq("provider", "offerwall_ad").maybeSingle()).data?.last_communication_at ?? null,
           registered_at: enabled ? now : null,
           updated_at: now,
         }, { onConflict: "provider_key" });
