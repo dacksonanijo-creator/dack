@@ -73,14 +73,14 @@ async function getStoredApiKey(): Promise<string> {
   return typeof data === "string" ? data.trim() : "";
 }
 
-async function saveMetadata(endpoint: string, status: string, testedAt: string | null) {
+async function saveMetadata(endpoint: string, status: string, testedAt: string | null, enabledOverride?: boolean) {
   const db = adminDatabaseClient();
   if (!db) return;
 
   const payload = {
     provider: "offerwall_ad",
     environment: "production", endpoint: endpoint || null,
-    enabled: status === "connected",
+    enabled: enabledOverride ?? status === "connected",
     last_test_at: testedAt,
     last_test_status: status,
     updated_at: new Date().toISOString(),
@@ -135,6 +135,8 @@ Deno.serve(async (req) => {
       ? "save_configuration"
       : body?.action === "get_configuration"
         ? "get_configuration"
+        : body?.action === "set_enabled"
+        ? "set_enabled"
         : "test_connection";
 
     if (action === "get_configuration") {
@@ -151,6 +153,45 @@ Deno.serve(async (req) => {
         enabled: Boolean(data?.enabled),
         testedAt: data?.last_test_at ?? null,
         apiKeyConfigured: Boolean(storedKey || configuredKey()),
+      });
+    }
+
+    if (action === "set_enabled") {
+      const db = adminDatabaseClient();
+      if (!db) return json({ status: "communication_error", message: "Backend database indisponível." }, 500);
+      const enabled = body?.enabled === true;
+      const { data } = await db.from("offerwall_ad_provider_config")
+        .select("last_test_status")
+        .eq("provider", "offerwall_ad")
+        .maybeSingle();
+      if (enabled && data?.last_test_status !== "connected") {
+        return json({ status: "not_configured", message: "Teste a conexão com sucesso antes de ativar o fornecedor." });
+      }
+      const now = new Date().toISOString();
+      await db.from("offerwall_ad_provider_config")
+        .upsert({ provider: "offerwall_ad", enabled, updated_at: now }, { onConflict: "provider" });
+      const { data: integration } = await db.from("task_provider_integrations")
+        .select("display_name, integration_type, environment")
+        .eq("provider_key", "offerwall_ad")
+        .maybeSingle();
+      if (integration) {
+        await db.from("task_provider_registry").upsert({
+          provider_key: "offerwall_ad",
+          display_name: integration.display_name,
+          integration_type: integration.integration_type,
+          environment: integration.environment,
+          status: enabled ? "connected" : "disabled",
+          enabled,
+          credentials_configured: true,
+          last_test_at: data?.last_test_status === "connected" ? now : null,
+          registered_at: enabled ? now : null,
+          updated_at: now,
+        }, { onConflict: "provider_key" });
+      }
+      return json({
+        status: enabled ? "connected" : "disabled",
+        enabled,
+        message: enabled ? "Offerwall Ad ativado." : "Offerwall Ad desativado.",
       });
     }
 
