@@ -442,10 +442,21 @@ function Page() {
         <div className="space-y-6 px-5 py-6 sm:px-6">
           {!showAyetConfiguration && (
             <div className="rounded-xl border border-border bg-background p-5">
-              <p className="text-sm font-semibold text-foreground">Configuração do ayeT-Studios</p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                API Key: {ayetApiKeyConfigured ? "Configurada com segurança no backend" : "Não configurada"} · Adslot ID: {ayetAdslotId || "Não definido"} · Ambiente: Produção
-              </p>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-foreground">Configuração do ayeT-Studios</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    API Key: {ayetApiKeyConfigured ? "Configurada com segurança no backend" : "Não configurada"} · Adslot ID: {ayetAdslotId || "Não definido"} · Ambiente: Produção
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowAyetConfiguration(true)}
+                  className="rounded-xl border border-primary/20 bg-primary/5 px-3.5 py-2 text-xs font-semibold text-primary transition hover:bg-primary/10"
+                >
+                  Configurar
+                </button>
+              </div>
             </div>
           )}
 
@@ -460,10 +471,10 @@ function Page() {
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
-                      onClick={() => setShowAyetConfiguration((visible) => !visible)}
+                      onClick={() => setShowAyetConfiguration(false)}
                       className="rounded-xl border border-primary/20 bg-primary/5 px-3.5 py-2 text-xs font-semibold text-primary transition hover:bg-primary/10"
                     >
-                      {showAyetConfiguration ? "Fechar configuração" : "Configurar"}
+                      Fechar configuração
                     </button>
                     <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-600">
                       <ShieldCheck className="h-4 w-4" />
