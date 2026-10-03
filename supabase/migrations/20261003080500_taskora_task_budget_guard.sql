@@ -14,11 +14,11 @@ begin
     end;
   end if;
 
-  if new.reward > 0 and new.budget_total is null then
+  if tg_op = 'INSERT' and new.reward > 0 and new.budget_total is null then
     raise exception 'budget_total is required for remunerated tasks';
   end if;
 
-  if new.budget_total is not null and new.budget_total < new.reward * greatest(new.slots,1) then
+  if new.budget_total is not null and (tg_op = 'INSERT' or new.reward <> old.reward or new.slots <> old.slots) and new.budget_total < new.reward * greatest(new.slots,1) then
     raise exception 'task budget is below the maximum planned reward';
   end if;
 
@@ -26,7 +26,7 @@ begin
     raise exception 'task budget counters cannot be negative';
   end if;
 
-  if new.budget_reserved + new.budget_approved + new.budget_paid > new.budget_total then
+  if new.budget_total is not null and new.budget_reserved + new.budget_approved + new.budget_paid > new.budget_total then
     raise exception 'task budget allocation exceeds budget_total';
   end if;
 
