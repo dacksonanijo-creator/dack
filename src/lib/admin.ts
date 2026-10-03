@@ -86,15 +86,15 @@ export const adminSections: AdminSection[] = [
     icon: Banknote,
   },
   {
-    to: "/admin/wallet",
-    label: "Carteira TASKORA",
-    description: "Receita TASKORA, obrigações e movimentos do ledger.",
+    to: "/admin/finance",
+    label: "Financeiro",
+    description: "Ledger, distribuição, receita e obrigações financeiras.",
     icon: Wallet,
   },
   {
-    to: "/admin/finance/distribution",
-    label: "Regras de distribuição",
-    description: "Percentagem TASKORA e distribuição das novas conversões.",
+    to: "/admin/wallet",
+    label: "Carteira TASKORA",
+    description: "Receita TASKORA, obrigações e movimentos do ledger.",
     icon: Wallet,
   },
   {
