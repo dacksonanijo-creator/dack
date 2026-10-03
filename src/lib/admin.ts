@@ -92,6 +92,12 @@ export const adminSections: AdminSection[] = [
     icon: Wallet,
   },
   {
+    to: "/admin/finance/distribution",
+    label: "Regras de distribuição",
+    description: "Percentagem TASKORA e distribuição das novas conversões.",
+    icon: Wallet,
+  },
+  {
     to: "/admin/apis",
     label: "APIs de tarefas",
     description: "Integrações com fornecedores externos de tarefas.",
