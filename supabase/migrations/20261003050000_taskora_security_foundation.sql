@@ -258,3 +258,32 @@ end;
 $$;
 
 grant execute on function public.write_security_audit(text,text,text,text,text,jsonb) to authenticated;
+
+
+create or replace function public.log_security_access_event(
+  p_event_type text,
+  p_success boolean,
+  p_device text default null,
+  p_browser text default null
+)
+returns uuid
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare v_id uuid;
+begin
+  if p_event_type not in ('login_success','login_failed','account_recovery','authentication_change','password_change','two_factor_enabled','two_factor_disabled') then
+    raise exception 'invalid security event';
+  end if;
+  if p_event_type <> 'login_failed' and auth.uid() is null then
+    raise exception 'not authenticated';
+  end if;
+  insert into public.security_access_events(user_id,event_type,success,device,browser)
+  values(auth.uid(),p_event_type,p_success,p_device,p_browser)
+  returning id into v_id;
+  return v_id;
+end;
+$$;
+
+grant execute on function public.log_security_access_event(text,boolean,text,text) to anon, authenticated;
