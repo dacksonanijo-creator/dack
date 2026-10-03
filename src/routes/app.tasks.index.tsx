@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Clock3, RefreshCw, Search, SearchX, WifiOff } from "lucide-react";
 import { listExternalTasks } from "@/lib/tasks/tasks.functions";
 import type { UnifiedTask } from "@/lib/tasks/types";
@@ -71,13 +71,13 @@ function TaskList() {
 
   const feedTasks = useMemo(() => data?.tasks ?? [], [data]);
 
-  useState(() => {
+  useEffect(() => {
     void (async () => {
       const { data: realTasks } = await (supabase as any).rpc("get_available_taskora_tasks");
       setTaskoraTasks(Array.isArray(realTasks) ? realTasks : []);
       setTaskoraLoading(false);
     })();
-  });
+  }, []);
 
   const categories = useMemo(
     () => ["all", ...Array.from(new Set(feedTasks.map((task) => task.category).filter(Boolean) as string[]))],
