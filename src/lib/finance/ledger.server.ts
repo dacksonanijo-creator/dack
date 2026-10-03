@@ -59,7 +59,7 @@ export async function makeTaskConversionAvailable(conversionId: string) {
 }
 
 export async function reverseTaskConversion(conversionId: string, reason: string) {
-  const { data, error } = await supabaseAdmin.rpc("reverse_task_conversion", {
+  const { data, error } = await (supabaseAdmin as any).rpc("reverse_task_conversion", {
     p_conversion_id: conversionId,
     p_reason: reason,
   });
