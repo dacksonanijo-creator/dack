@@ -35,6 +35,9 @@ function Page(){
   const [mfaBusy,setMfaBusy]=useState(false);
   const [mfaSetup,setMfaSetup]=useState<{id:string;qr:string;secret:string}|null>(null);
   const [mfaCode,setMfaCode]=useState("");
+  const [accessUserFilter,setAccessUserFilter]=useState("");
+  const [accessTypeFilter,setAccessTypeFilter]=useState("all");
+  const [accessDateFilter,setAccessDateFilter]=useState("");
 
   const load=useCallback(async()=>{
     setLoading(true);
@@ -70,6 +73,12 @@ function Page(){
   useEffect(()=>{void load();void loadMfa();},[load,loadMfa]);
 
   const activeMfa=useMemo(()=>mfa.filter(x=>x.factor_type==="totp"&&x.status==="verified"),[mfa]);
+  const filteredEvents=useMemo(()=>events.filter(e=>{
+    const userOk=!accessUserFilter||e.user_id?.toLowerCase().includes(accessUserFilter.toLowerCase());
+    const typeOk=accessTypeFilter==="all"||e.event_type===accessTypeFilter;
+    const dateOk=!accessDateFilter||e.created_at.slice(0,10)===accessDateFilter;
+    return userOk&&typeOk&&dateOk;
+  }),[events,accessUserFilter,accessTypeFilter,accessDateFilter]);
 
   async function saveRuleConfig(rule:Rule, configuration:Record<string,unknown>){
     setBusy(rule.id+"-config");
@@ -180,7 +189,16 @@ function Page(){
     </Section>
 
     <Section title="Tentativas de acesso" icon={<LockKeyhole className="h-5 w-5"/>} description="Login, recuperação e alterações de autenticação registados pelo sistema.">
-      {events.length===0?<Empty text="Nenhum evento de acesso registado."/>:<div className="overflow-x-auto"><table className="w-full min-w-[720px] text-sm"><thead><tr className="border-b border-border text-left text-xs text-muted-foreground"><th className="px-2 py-2">Data/hora</th><th className="px-2 py-2">Utilizador</th><th className="px-2 py-2">Evento</th><th className="px-2 py-2">Dispositivo</th><th className="px-2 py-2">Navegador</th><th className="px-2 py-2">Estado</th></tr></thead><tbody>{events.map(e=><tr key={e.id} className="border-b border-border/60"><td className="px-2 py-2.5">{formatDate(e.created_at)}</td><td className="px-2 py-2.5">{e.user_id??"—"}</td><td className="px-2 py-2.5">{eventLabel(e.event_type)}</td><td className="px-2 py-2.5">{e.device??"—"}</td><td className="px-2 py-2.5">{e.browser??"—"}</td><td className="px-2 py-2.5">{e.success?"Sucesso":"Falhado"}</td></tr>)}</tbody></table></div>}
+      {events.length===0?<Empty text="Nenhum evento de acesso registado."/>:<div>
+        <div className="mb-4 grid gap-2 md:grid-cols-3">
+          <input value={accessUserFilter} onChange={e=>setAccessUserFilter(e.target.value)} placeholder="Filtrar por utilizador" className="h-10 rounded-lg border border-border bg-background px-3 text-sm"/>
+          <select value={accessTypeFilter} onChange={e=>setAccessTypeFilter(e.target.value)} className="h-10 rounded-lg border border-border bg-background px-3 text-sm">
+            <option value="all">Todos os tipos</option><option value="login_success">Login bem-sucedido</option><option value="login_failed">Login falhado</option><option value="account_recovery">Recuperação de conta</option><option value="authentication_change">Alteração de autenticação</option><option value="password_change">Alteração de palavra-passe</option><option value="two_factor_enabled">2FA activado</option><option value="two_factor_disabled">2FA desactivado</option>
+          </select>
+          <input type="date" value={accessDateFilter} onChange={e=>setAccessDateFilter(e.target.value)} className="h-10 rounded-lg border border-border bg-background px-3 text-sm"/>
+        </div>
+        {filteredEvents.length===0?<Empty text="Nenhum evento corresponde aos filtros actuais."/>:<div className="overflow-x-auto"><table className="w-full min-w-[720px] text-sm"><thead><tr className="border-b border-border text-left text-xs text-muted-foreground"><th className="px-2 py-2">Data/hora</th><th className="px-2 py-2">Utilizador</th><th className="px-2 py-2">Evento</th><th className="px-2 py-2">Dispositivo</th><th className="px-2 py-2">Navegador</th><th className="px-2 py-2">Estado</th></tr></thead><tbody>{filteredEvents.map(e=><tr key={e.id} className="border-b border-border/60"><td className="px-2 py-2.5">{formatDate(e.created_at)}</td><td className="px-2 py-2.5">{e.user_id??"—"}</td><td className="px-2 py-2.5">{eventLabel(e.event_type)}</td><td className="px-2 py-2.5">{e.device??"—"}</td><td className="px-2 py-2.5">{e.browser??"—"}</td><td className="px-2 py-2.5">{e.success?"Sucesso":"Falhado"}</td></tr>)}</tbody></table></div>}
+      </div>}
     </Section>
 
     <Section title="Autenticação de dois fatores (2FA)" icon={<LockKeyhole className="h-5 w-5"/>} description="TOTP para a conta administrativa actualmente autenticada.">
