@@ -169,6 +169,10 @@ function Page() {
     }
     if (typeof data?.apiKeyConfigured === "boolean") {
       setAyetApiKeyConfigured(data.apiKeyConfigured);
+      if (action === "save_configuration" && data.apiKeyConfigured) {
+        setAyetApiKey("");
+        setShowAyetApiKey(false);
+      }
     }
   };
 
@@ -193,7 +197,7 @@ function Page() {
     <div className="space-y-6">
       <AdminPageHeader
         title="APIs de tarefas"
-        description="Configure e teste fornecedores externos de tarefas. O primeiro fornecedor disponível é o Offerwall Ad."
+        description="Configure e teste fornecedores externos de tarefas, mantendo cada integração isolada."
       />
 
       <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
