@@ -337,7 +337,7 @@ function ProviderCard(props: {
         </div>
 
         <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <InfoItem label="Estado técnico" value={status.label} icon={<StatusIcon kind={status.kind} />} />
+          <InfoItem label="Estado técnico" value={technicalLabel(state.status)} icon={<StatusIcon kind={technicalKind(state.status)} />} />
           <InfoItem label="Estado administrativo" value={state.enabled ? "Activada" : "Desactivada"} icon={<PauseCircle className="h-4 w-4" />} />
           <InfoItem label="Última verificação" value={formatDate(state.testedAt)} icon={<Clock3 className="h-4 w-4" />} />
           <InfoItem label="Última comunicação" value={formatDate(state.lastCommunicationAt)} icon={<Wifi className="h-4 w-4" />} />
@@ -420,7 +420,7 @@ function normalizeState(provider: ProviderKey, data: any): ProviderState {
   return {
     provider,
     enabled: Boolean(data?.enabled),
-    status: data?.enabled ? technicalStatus : technicalStatus === "connected" ? "disabled" : "not_configured",
+    status: technicalStatus,
     credentialsConfigured: configured,
     testedAt: data?.testedAt ?? null,
     lastCommunicationAt: data?.lastCommunicationAt ?? null,
@@ -440,11 +440,25 @@ async function invoke(functionName: string, body: Record<string, unknown>) {
 }
 
 function statusPresentation(state: ProviderState) {
-  if (state.enabled && state.status === "connected") return { kind: "connected" as const, label: "Activo e operacional", description: "Credenciais válidas e último teste bem-sucedido." };
-  if (state.enabled && state.status === "attention") return { kind: "attention" as const, label: "Activo, mas com atenção", description: "A integração está activa, mas requer atenção técnica." };
-  if (state.enabled && state.status === "error") return { kind: "error" as const, label: "Erro de conexão", description: "A integração está activa, mas o último teste/comunicação apresentou erro." };
-  if (!state.enabled && state.status === "disabled") return { kind: "disabled" as const, label: "Desactivado", description: "A integração está configurada, mas não está a ser utilizada." };
+  if (!state.enabled) return { kind: "disabled" as const, label: "Desactivado", description: "A utilização da integração está desactivada. A configuração e o último estado técnico são preservados." };
+  if (state.status === "connected") return { kind: "connected" as const, label: "Activo e operacional", description: "Credenciais válidas e último teste bem-sucedido." };
+  if (state.status === "attention") return { kind: "attention" as const, label: "Activo, mas com atenção", description: "A integração está activa, mas requer atenção técnica." };
+  if (state.status === "error") return { kind: "error" as const, label: "Erro de conexão", description: "A integração está activa, mas o último teste/comunicação apresentou erro." };
   return { kind: "not_configured" as const, label: "Não configurado", description: "Credenciais/configuração ainda não estão completas." };
+}
+
+function technicalLabel(status: TechnicalStatus) {
+  if (status === "connected") return "Operacional";
+  if (status === "attention") return "Activo, mas com atenção";
+  if (status === "error") return "Erro de conexão";
+  return "Não configurado";
+}
+
+function technicalKind(status: TechnicalStatus) {
+  if (status === "connected") return "connected" as const;
+  if (status === "attention") return "attention" as const;
+  if (status === "error") return "error" as const;
+  return "not_configured" as const;
 }
 
 function StatusBadge({ kind, label }: { kind: "connected" | "attention" | "error" | "disabled" | "not_configured"; label: string }) {
