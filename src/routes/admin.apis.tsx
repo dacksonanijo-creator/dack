@@ -453,10 +453,19 @@ function Page() {
                     <p className="text-sm font-semibold text-foreground">Configurar fornecedor</p>
                     <p className="text-xs text-muted-foreground">ayeT-Studios · Offerwall / Surveywall API · Ambiente de produção</p>
                   </div>
-                  <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-600">
-                    <ShieldCheck className="h-4 w-4" />
-                    Área administrativa protegida
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowAyetConfiguration((visible) => !visible)}
+                      className="rounded-xl border border-primary/20 bg-primary/5 px-3.5 py-2 text-xs font-semibold text-primary transition hover:bg-primary/10"
+                    >
+                      {showAyetConfiguration ? "Fechar configuração" : "Configurar"}
+                    </button>
+                    <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-600">
+                      <ShieldCheck className="h-4 w-4" />
+                      Área administrativa protegida
+                    </span>
+                  </div>
                 </div>
               </div>
 
