@@ -5,6 +5,9 @@ import { toast } from "sonner";
 import { AuthLayout, Field } from "@/components/taskora/auth-layout";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+// Security tables/functions are not yet in the generated types.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const db = supabase as any;
 import { authErrorMessage, emailRe } from "@/lib/auth-errors";
 import { useT } from "@/i18n";
 import { passwordMeetsPolicy } from "@/lib/password-policy";
@@ -102,7 +105,7 @@ function Login() {
       }
 
       if (err) {
-        void supabase.rpc("log_security_access_event", {
+        void db.rpc("log_security_access_event", {
           p_event_type: "login_failed",
           p_success: false,
           p_device: /Mobi|Android|iPhone/i.test(navigator.userAgent) ? "Dispositivo móvel" : "Computador",
@@ -131,7 +134,7 @@ function Login() {
       }
 
       void passwordMeetsPolicy;
-      void supabase.rpc("log_security_access_event", {
+      void db.rpc("log_security_access_event", {
         p_event_type: "login_success",
         p_success: true,
         p_device: /Mobi|Android|iPhone/i.test(navigator.userAgent) ? "Dispositivo móvel" : "Computador",

@@ -2,6 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AdminPageHeader } from "@/components/taskora/admin-shell";
 import { supabase } from "@/integrations/supabase/client";
+// Security tables/functions are not yet in the generated types.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const db = supabase as any;
 import { AlertCircle, Clock3, Loader2, LockKeyhole, MonitorSmartphone, RefreshCw, Shield, ShieldAlert, ToggleLeft, ToggleRight, UserRound } from "lucide-react";
 import { toast } from "sonner";
 
@@ -43,12 +46,12 @@ function Page(){
     setLoading(true);
     try{
       const [r1,r2,r3,r4,r5,r6]=await Promise.all([
-        supabase.from("security_fraud_rules").select("id,rule_key,name,description,enabled,configuration").order("created_at"),
-        supabase.from("security_suspicious_accounts").select("id,user_id,reason,status,created_at,reviewed_at").in("status",["flagged","reviewed","blocked"]).order("created_at",{ascending:false}).limit(50),
-        supabase.from("security_access_events").select("id,user_id,event_type,success,device,browser,created_at").order("created_at",{ascending:false}).limit(50),
-        supabase.from("security_alerts").select("id,alert_type,severity,title,description,status,created_at").in("status",["open","acknowledged"]).order("created_at",{ascending:false}).limit(50),
-        supabase.from("security_audit_log").select("id,admin_user_id,action,area,resource_type,resource_id,result,created_at").order("created_at",{ascending:false}).limit(50),
-        supabase.from("security_admin_sessions").select("id,user_id,device,browser,created_at,last_activity_at,revoked_at").is("revoked_at",null).order("last_activity_at",{ascending:false}).limit(50),
+        db.from("security_fraud_rules").select("id,rule_key,name,description,enabled,configuration").order("created_at"),
+        db.from("security_suspicious_accounts").select("id,user_id,reason,status,created_at,reviewed_at").in("status",["flagged","reviewed","blocked"]).order("created_at",{ascending:false}).limit(50),
+        db.from("security_access_events").select("id,user_id,event_type,success,device,browser,created_at").order("created_at",{ascending:false}).limit(50),
+        db.from("security_alerts").select("id,alert_type,severity,title,description,status,created_at").in("status",["open","acknowledged"]).order("created_at",{ascending:false}).limit(50),
+        db.from("security_audit_log").select("id,admin_user_id,action,area,resource_type,resource_id,result,created_at").order("created_at",{ascending:false}).limit(50),
+        db.from("security_admin_sessions").select("id,user_id,device,browser,created_at,last_activity_at,revoked_at").is("revoked_at",null).order("last_activity_at",{ascending:false}).limit(50),
       ]);
       const failed=[r1,r2,r3,r4,r5,r6].find(x=>x.error);
       if(failed?.error) throw failed.error;
@@ -83,9 +86,9 @@ function Page(){
   async function saveRuleConfig(rule:Rule, configuration:Record<string,unknown>){
     setBusy(rule.id+"-config");
     try{
-      const {error}=await supabase.from("security_fraud_rules").update({configuration,updated_by:(await supabase.auth.getUser()).data.user?.id??null}).eq("id",rule.id);
+      const {error}=await db.from("security_fraud_rules").update({configuration,updated_by:(await supabase.auth.getUser()).data.user?.id??null}).eq("id",rule.id);
       if(error) throw error;
-      await supabase.rpc("write_security_audit",{p_action:"alterou configuração de regra anti-fraude",p_area:"Segurança",p_resource_type:"fraud_rule",p_resource_id:rule.id,p_metadata:{rule_key:rule.rule_key}});
+      await db.rpc("write_security_audit",{p_action:"alterou configuração de regra anti-fraude",p_area:"Segurança",p_resource_type:"fraud_rule",p_resource_id:rule.id,p_metadata:{rule_key:rule.rule_key}});
       setRules(x=>x.map(r=>r.id===rule.id?{...r,configuration}:r));
       toast.success("Configuração guardada.");
     }catch(e){toast.error(e instanceof Error?e.message:"Não foi possível guardar a configuração.");}
@@ -96,9 +99,9 @@ function Page(){
     setBusy(rule.id);
     try{
       const user=(await supabase.auth.getUser()).data.user;
-      const {error}=await supabase.from("security_fraud_rules").update({enabled:!rule.enabled,updated_by:user?.id??null}).eq("id",rule.id);
+      const {error}=await db.from("security_fraud_rules").update({enabled:!rule.enabled,updated_by:user?.id??null}).eq("id",rule.id);
       if(error) throw error;
-      await supabase.rpc("write_security_audit",{p_action:rule.enabled?"desactivou regra anti-fraude":"activou regra anti-fraude",p_area:"Segurança",p_resource_type:"fraud_rule",p_resource_id:rule.id,p_metadata:{rule_key:rule.rule_key}});
+      await db.rpc("write_security_audit",{p_action:rule.enabled?"desactivou regra anti-fraude":"activou regra anti-fraude",p_area:"Segurança",p_resource_type:"fraud_rule",p_resource_id:rule.id,p_metadata:{rule_key:rule.rule_key}});
       setRules(x=>x.map(r=>r.id===rule.id?{...r,enabled:!rule.enabled}:r));
     }catch(e){toast.error(e instanceof Error?e.message:"Não foi possível alterar a regra.");}
     finally{setBusy(null);}
@@ -108,9 +111,9 @@ function Page(){
     setBusy(account.id);
     try{
       const user=(await supabase.auth.getUser()).data.user;
-      const {error}=await supabase.from("security_suspicious_accounts").update({status,reviewed_by:user?.id??null,reviewed_at:new Date().toISOString()}).eq("id",account.id);
+      const {error}=await db.from("security_suspicious_accounts").update({status,reviewed_by:user?.id??null,reviewed_at:new Date().toISOString()}).eq("id",account.id);
       if(error) throw error;
-      await supabase.rpc("write_security_audit",{p_action:status==="cleared"?"removeu sinalização de conta suspeita":"marcou conta suspeita como analisada",p_area:"Segurança",p_resource_type:"user",p_resource_id:account.user_id});
+      await db.rpc("write_security_audit",{p_action:status==="cleared"?"removeu sinalização de conta suspeita":"marcou conta suspeita como analisada",p_area:"Segurança",p_resource_type:"user",p_resource_id:account.user_id});
       await load();
     }catch(e){toast.error(e instanceof Error?e.message:"Não foi possível actualizar a conta.");}
     finally{setBusy(null);}
@@ -119,9 +122,9 @@ function Page(){
   async function revokeSession(session:Session){
     setBusy(session.id);
     try{
-      const {error}=await supabase.rpc("revoke_security_session",{p_session_id:session.id});
+      const {error}=await db.rpc("revoke_security_session",{p_session_id:session.id});
       if(error) throw error;
-      await supabase.rpc("write_security_audit",{p_action:"terminou sessão administrativa",p_area:"Segurança",p_resource_type:"admin_session",p_resource_id:session.id});
+      await db.rpc("write_security_audit",{p_action:"terminou sessão administrativa",p_area:"Segurança",p_resource_type:"admin_session",p_resource_id:session.id});
       await load();
     }catch(e){toast.error(e instanceof Error?e.message:"Não foi possível terminar a sessão.");}
     finally{setBusy(null);}
@@ -147,7 +150,7 @@ function Page(){
       if(challenge.error) throw challenge.error;
       const verified=await supabase.auth.mfa.verify({factorId:mfaSetup.id,challengeId:challenge.data.id,code:mfaCode});
       if(verified.error) throw verified.error;
-      await supabase.rpc("write_security_audit",{p_action:"activou 2FA",p_area:"Segurança",p_resource_type:"admin_account"});
+      await db.rpc("write_security_audit",{p_action:"activou 2FA",p_area:"Segurança",p_resource_type:"admin_account"});
       toast.success("2FA activado com sucesso.");
       setMfaSetup(null);
       setMfaCode("");
@@ -163,7 +166,7 @@ function Page(){
       if(aal.data.currentLevel!=="aal2") throw new Error("Para desactivar o 2FA, conclui primeiro uma autenticação de nível 2.");
       const {error}=await supabase.auth.mfa.unenroll({factorId:id});
       if(error) throw error;
-      await supabase.rpc("write_security_audit",{p_action:"desactivou 2FA",p_area:"Segurança",p_resource_type:"admin_account"});
+      await db.rpc("write_security_audit",{p_action:"desactivou 2FA",p_area:"Segurança",p_resource_type:"admin_account"});
       toast.success("2FA desactivado.");
       await loadMfa();
     }catch(e){toast.error(e instanceof Error?e.message:"Não foi possível desactivar o 2FA.");}
