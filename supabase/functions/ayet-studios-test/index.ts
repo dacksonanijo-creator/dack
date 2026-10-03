@@ -107,7 +107,7 @@ async function saveMetadata(adslotId: string, status: string, testedAt: string |
       display_name: integration.display_name,
       integration_type: integration.integration_type,
       environment: integration.environment,
-      status: status === "connected" ? "connected" : status === "disabled" ? "disabled" : status === "not_configured" ? "not_configured" : "error",
+      status: status === "connected" ? "connected" : status === "attention" ? "attention" : status === "disabled" ? "disabled" : status === "not_configured" ? "not_configured" : "error",
       enabled,
       credentials_configured: true,
       last_test_at: testedAt,
