@@ -106,4 +106,4 @@ end;
 $$;
 
 revoke all on function public.register_provider_task_conversion(uuid,uuid,text,text,text,text,boolean,numeric,numeric,numeric,numeric,text,text,text,jsonb) from public, anon, authenticated;
-grant execute on function public.register_provider_task_conversion(uuid,uuid,text,text,text,text,numeric,numeric,numeric,numeric,text,text,text,jsonb) to service_role;
+grant execute on function public.register_provider_task_conversion(uuid,uuid,text,text,text,text,boolean,numeric,numeric,numeric,numeric,text,text,text,jsonb) to service_role;
