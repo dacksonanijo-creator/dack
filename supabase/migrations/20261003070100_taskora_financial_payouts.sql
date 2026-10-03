@@ -37,6 +37,8 @@ create policy financial_payout_reservations_owner_or_admin
 on public.financial_payout_reservations for select to authenticated
 using (public.is_taskora_admin() or user_id = auth.uid());
 
+drop function if exists public.get_taskora_financial_wallet();
+
 create or replace function public.get_taskora_financial_wallet()
 returns table(
   currency text,
