@@ -34,6 +34,7 @@ import { Route as AppHelpRouteImport } from './routes/app.help'
 import { Route as AppActivityRouteImport } from './routes/app.activity'
 import { Route as AdminWithdrawalsRouteImport } from './routes/admin.withdrawals'
 import { Route as AdminWalletRouteImport } from './routes/admin.wallet'
+import { Route as AdminVerificationsRouteImport } from './routes/admin.verifications'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminTasksRouteImport } from './routes/admin.tasks'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
@@ -43,12 +44,16 @@ import { Route as AdminPaymentsRouteImport } from './routes/admin.payments'
 import { Route as AdminPaymentMethodsRouteImport } from './routes/admin.payment-methods'
 import { Route as AdminNotificationsRouteImport } from './routes/admin.notifications'
 import { Route as AdminLogsRouteImport } from './routes/admin.logs'
+import { Route as AdminFinanceRouteImport } from './routes/admin.finance'
 import { Route as AdminCompaniesRouteImport } from './routes/admin.companies'
 import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
 import { Route as AdminBrandingRouteImport } from './routes/admin.branding'
 import { Route as AdminApisRouteImport } from './routes/admin.apis'
+import { Route as Admin2faRouteImport } from './routes/admin.2fa'
 import { Route as AppTasksIndexRouteImport } from './routes/app.tasks.index'
 import { Route as AppTasksTaskIdRouteImport } from './routes/app.tasks.$taskId'
+import { Route as AdminTasksNewRouteImport } from './routes/admin.tasks.new'
+import { Route as AdminFinanceDistributionRouteImport } from './routes/admin.finance.distribution'
 import { Route as ApiPublicPaymentsMpesaCallbackRouteImport } from './routes/api/public/payments/mpesa/callback'
 
 const WelcomeRoute = WelcomeRouteImport.update({
@@ -176,6 +181,11 @@ const AdminWalletRoute = AdminWalletRouteImport.update({
   path: '/wallet',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminVerificationsRoute = AdminVerificationsRouteImport.update({
+  id: '/verifications',
+  path: '/verifications',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminUsersRoute = AdminUsersRouteImport.update({
   id: '/users',
   path: '/users',
@@ -221,6 +231,11 @@ const AdminLogsRoute = AdminLogsRouteImport.update({
   path: '/logs',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminFinanceRoute = AdminFinanceRouteImport.update({
+  id: '/finance',
+  path: '/finance',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminCompaniesRoute = AdminCompaniesRouteImport.update({
   id: '/companies',
   path: '/companies',
@@ -241,6 +256,11 @@ const AdminApisRoute = AdminApisRouteImport.update({
   path: '/apis',
   getParentRoute: () => AdminRoute,
 } as any)
+const Admin2faRoute = Admin2faRouteImport.update({
+  id: '/2fa',
+  path: '/2fa',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AppTasksIndexRoute = AppTasksIndexRouteImport.update({
   id: '/tasks/',
   path: '/tasks/',
@@ -251,6 +271,17 @@ const AppTasksTaskIdRoute = AppTasksTaskIdRouteImport.update({
   path: '/tasks/$taskId',
   getParentRoute: () => AppRoute,
 } as any)
+const AdminTasksNewRoute = AdminTasksNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => AdminTasksRoute,
+} as any)
+const AdminFinanceDistributionRoute =
+  AdminFinanceDistributionRouteImport.update({
+    id: '/distribution',
+    path: '/distribution',
+    getParentRoute: () => AdminFinanceRoute,
+  } as any)
 const ApiPublicPaymentsMpesaCallbackRoute =
   ApiPublicPaymentsMpesaCallbackRouteImport.update({
     id: '/api/public/payments/mpesa/callback',
@@ -270,10 +301,12 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/terms': typeof TermsRoute
   '/welcome': typeof WelcomeRoute
+  '/admin/2fa': typeof Admin2faRoute
   '/admin/apis': typeof AdminApisRoute
   '/admin/branding': typeof AdminBrandingRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/companies': typeof AdminCompaniesRoute
+  '/admin/finance': typeof AdminFinanceRouteWithChildren
   '/admin/logs': typeof AdminLogsRoute
   '/admin/notifications': typeof AdminNotificationsRoute
   '/admin/payment-methods': typeof AdminPaymentMethodsRoute
@@ -281,8 +314,9 @@ export interface FileRoutesByFullPath {
   '/admin/reports': typeof AdminReportsRoute
   '/admin/security': typeof AdminSecurityRoute
   '/admin/settings': typeof AdminSettingsRoute
-  '/admin/tasks': typeof AdminTasksRoute
+  '/admin/tasks': typeof AdminTasksRouteWithChildren
   '/admin/users': typeof AdminUsersRoute
+  '/admin/verifications': typeof AdminVerificationsRoute
   '/admin/wallet': typeof AdminWalletRoute
   '/admin/withdrawals': typeof AdminWithdrawalsRoute
   '/app/activity': typeof AppActivityRoute
@@ -297,6 +331,8 @@ export interface FileRoutesByFullPath {
   '/app/withdrawals': typeof AppWithdrawalsRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
+  '/admin/finance/distribution': typeof AdminFinanceDistributionRoute
+  '/admin/tasks/new': typeof AdminTasksNewRoute
   '/app/tasks/$taskId': typeof AppTasksTaskIdRoute
   '/app/tasks/': typeof AppTasksIndexRoute
   '/api/public/payments/mpesa/callback': typeof ApiPublicPaymentsMpesaCallbackRoute
@@ -311,10 +347,12 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/terms': typeof TermsRoute
   '/welcome': typeof WelcomeRoute
+  '/admin/2fa': typeof Admin2faRoute
   '/admin/apis': typeof AdminApisRoute
   '/admin/branding': typeof AdminBrandingRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/companies': typeof AdminCompaniesRoute
+  '/admin/finance': typeof AdminFinanceRouteWithChildren
   '/admin/logs': typeof AdminLogsRoute
   '/admin/notifications': typeof AdminNotificationsRoute
   '/admin/payment-methods': typeof AdminPaymentMethodsRoute
@@ -322,8 +360,9 @@ export interface FileRoutesByTo {
   '/admin/reports': typeof AdminReportsRoute
   '/admin/security': typeof AdminSecurityRoute
   '/admin/settings': typeof AdminSettingsRoute
-  '/admin/tasks': typeof AdminTasksRoute
+  '/admin/tasks': typeof AdminTasksRouteWithChildren
   '/admin/users': typeof AdminUsersRoute
+  '/admin/verifications': typeof AdminVerificationsRoute
   '/admin/wallet': typeof AdminWalletRoute
   '/admin/withdrawals': typeof AdminWithdrawalsRoute
   '/app/activity': typeof AppActivityRoute
@@ -338,6 +377,8 @@ export interface FileRoutesByTo {
   '/app/withdrawals': typeof AppWithdrawalsRoute
   '/admin': typeof AdminIndexRoute
   '/app': typeof AppIndexRoute
+  '/admin/finance/distribution': typeof AdminFinanceDistributionRoute
+  '/admin/tasks/new': typeof AdminTasksNewRoute
   '/app/tasks/$taskId': typeof AppTasksTaskIdRoute
   '/app/tasks': typeof AppTasksIndexRoute
   '/api/public/payments/mpesa/callback': typeof ApiPublicPaymentsMpesaCallbackRoute
@@ -355,10 +396,12 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/terms': typeof TermsRoute
   '/welcome': typeof WelcomeRoute
+  '/admin/2fa': typeof Admin2faRoute
   '/admin/apis': typeof AdminApisRoute
   '/admin/branding': typeof AdminBrandingRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/companies': typeof AdminCompaniesRoute
+  '/admin/finance': typeof AdminFinanceRouteWithChildren
   '/admin/logs': typeof AdminLogsRoute
   '/admin/notifications': typeof AdminNotificationsRoute
   '/admin/payment-methods': typeof AdminPaymentMethodsRoute
@@ -366,8 +409,9 @@ export interface FileRoutesById {
   '/admin/reports': typeof AdminReportsRoute
   '/admin/security': typeof AdminSecurityRoute
   '/admin/settings': typeof AdminSettingsRoute
-  '/admin/tasks': typeof AdminTasksRoute
+  '/admin/tasks': typeof AdminTasksRouteWithChildren
   '/admin/users': typeof AdminUsersRoute
+  '/admin/verifications': typeof AdminVerificationsRoute
   '/admin/wallet': typeof AdminWalletRoute
   '/admin/withdrawals': typeof AdminWithdrawalsRoute
   '/app/activity': typeof AppActivityRoute
@@ -382,6 +426,8 @@ export interface FileRoutesById {
   '/app/withdrawals': typeof AppWithdrawalsRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
+  '/admin/finance/distribution': typeof AdminFinanceDistributionRoute
+  '/admin/tasks/new': typeof AdminTasksNewRoute
   '/app/tasks/$taskId': typeof AppTasksTaskIdRoute
   '/app/tasks/': typeof AppTasksIndexRoute
   '/api/public/payments/mpesa/callback': typeof ApiPublicPaymentsMpesaCallbackRoute
@@ -400,10 +446,12 @@ export interface FileRouteTypes {
     | '/signup'
     | '/terms'
     | '/welcome'
+    | '/admin/2fa'
     | '/admin/apis'
     | '/admin/branding'
     | '/admin/categories'
     | '/admin/companies'
+    | '/admin/finance'
     | '/admin/logs'
     | '/admin/notifications'
     | '/admin/payment-methods'
@@ -413,6 +461,7 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/tasks'
     | '/admin/users'
+    | '/admin/verifications'
     | '/admin/wallet'
     | '/admin/withdrawals'
     | '/app/activity'
@@ -427,6 +476,8 @@ export interface FileRouteTypes {
     | '/app/withdrawals'
     | '/admin/'
     | '/app/'
+    | '/admin/finance/distribution'
+    | '/admin/tasks/new'
     | '/app/tasks/$taskId'
     | '/app/tasks/'
     | '/api/public/payments/mpesa/callback'
@@ -441,10 +492,12 @@ export interface FileRouteTypes {
     | '/signup'
     | '/terms'
     | '/welcome'
+    | '/admin/2fa'
     | '/admin/apis'
     | '/admin/branding'
     | '/admin/categories'
     | '/admin/companies'
+    | '/admin/finance'
     | '/admin/logs'
     | '/admin/notifications'
     | '/admin/payment-methods'
@@ -454,6 +507,7 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/tasks'
     | '/admin/users'
+    | '/admin/verifications'
     | '/admin/wallet'
     | '/admin/withdrawals'
     | '/app/activity'
@@ -468,6 +522,8 @@ export interface FileRouteTypes {
     | '/app/withdrawals'
     | '/admin'
     | '/app'
+    | '/admin/finance/distribution'
+    | '/admin/tasks/new'
     | '/app/tasks/$taskId'
     | '/app/tasks'
     | '/api/public/payments/mpesa/callback'
@@ -484,10 +540,12 @@ export interface FileRouteTypes {
     | '/signup'
     | '/terms'
     | '/welcome'
+    | '/admin/2fa'
     | '/admin/apis'
     | '/admin/branding'
     | '/admin/categories'
     | '/admin/companies'
+    | '/admin/finance'
     | '/admin/logs'
     | '/admin/notifications'
     | '/admin/payment-methods'
@@ -497,6 +555,7 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/tasks'
     | '/admin/users'
+    | '/admin/verifications'
     | '/admin/wallet'
     | '/admin/withdrawals'
     | '/app/activity'
@@ -511,6 +570,8 @@ export interface FileRouteTypes {
     | '/app/withdrawals'
     | '/admin/'
     | '/app/'
+    | '/admin/finance/distribution'
+    | '/admin/tasks/new'
     | '/app/tasks/$taskId'
     | '/app/tasks/'
     | '/api/public/payments/mpesa/callback'
@@ -708,6 +769,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminWalletRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/verifications': {
+      id: '/admin/verifications'
+      path: '/verifications'
+      fullPath: '/admin/verifications'
+      preLoaderRoute: typeof AdminVerificationsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/users': {
       id: '/admin/users'
       path: '/users'
@@ -771,6 +839,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLogsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/finance': {
+      id: '/admin/finance'
+      path: '/finance'
+      fullPath: '/admin/finance'
+      preLoaderRoute: typeof AdminFinanceRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/companies': {
       id: '/admin/companies'
       path: '/companies'
@@ -799,6 +874,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminApisRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/2fa': {
+      id: '/admin/2fa'
+      path: '/2fa'
+      fullPath: '/admin/2fa'
+      preLoaderRoute: typeof Admin2faRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/app/tasks/': {
       id: '/app/tasks/'
       path: '/tasks'
@@ -813,6 +895,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppTasksTaskIdRouteImport
       parentRoute: typeof AppRoute
     }
+    '/admin/tasks/new': {
+      id: '/admin/tasks/new'
+      path: '/new'
+      fullPath: '/admin/tasks/new'
+      preLoaderRoute: typeof AdminTasksNewRouteImport
+      parentRoute: typeof AdminTasksRoute
+    }
+    '/admin/finance/distribution': {
+      id: '/admin/finance/distribution'
+      path: '/distribution'
+      fullPath: '/admin/finance/distribution'
+      preLoaderRoute: typeof AdminFinanceDistributionRouteImport
+      parentRoute: typeof AdminFinanceRoute
+    }
     '/api/public/payments/mpesa/callback': {
       id: '/api/public/payments/mpesa/callback'
       path: '/api/public/payments/mpesa/callback'
@@ -823,11 +919,37 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AdminFinanceRouteChildren {
+  AdminFinanceDistributionRoute: typeof AdminFinanceDistributionRoute
+}
+
+const AdminFinanceRouteChildren: AdminFinanceRouteChildren = {
+  AdminFinanceDistributionRoute: AdminFinanceDistributionRoute,
+}
+
+const AdminFinanceRouteWithChildren = AdminFinanceRoute._addFileChildren(
+  AdminFinanceRouteChildren,
+)
+
+interface AdminTasksRouteChildren {
+  AdminTasksNewRoute: typeof AdminTasksNewRoute
+}
+
+const AdminTasksRouteChildren: AdminTasksRouteChildren = {
+  AdminTasksNewRoute: AdminTasksNewRoute,
+}
+
+const AdminTasksRouteWithChildren = AdminTasksRoute._addFileChildren(
+  AdminTasksRouteChildren,
+)
+
 interface AdminRouteChildren {
+  Admin2faRoute: typeof Admin2faRoute
   AdminApisRoute: typeof AdminApisRoute
   AdminBrandingRoute: typeof AdminBrandingRoute
   AdminCategoriesRoute: typeof AdminCategoriesRoute
   AdminCompaniesRoute: typeof AdminCompaniesRoute
+  AdminFinanceRoute: typeof AdminFinanceRouteWithChildren
   AdminLogsRoute: typeof AdminLogsRoute
   AdminNotificationsRoute: typeof AdminNotificationsRoute
   AdminPaymentMethodsRoute: typeof AdminPaymentMethodsRoute
@@ -835,18 +957,21 @@ interface AdminRouteChildren {
   AdminReportsRoute: typeof AdminReportsRoute
   AdminSecurityRoute: typeof AdminSecurityRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
-  AdminTasksRoute: typeof AdminTasksRoute
+  AdminTasksRoute: typeof AdminTasksRouteWithChildren
   AdminUsersRoute: typeof AdminUsersRoute
+  AdminVerificationsRoute: typeof AdminVerificationsRoute
   AdminWalletRoute: typeof AdminWalletRoute
   AdminWithdrawalsRoute: typeof AdminWithdrawalsRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  Admin2faRoute: Admin2faRoute,
   AdminApisRoute: AdminApisRoute,
   AdminBrandingRoute: AdminBrandingRoute,
   AdminCategoriesRoute: AdminCategoriesRoute,
   AdminCompaniesRoute: AdminCompaniesRoute,
+  AdminFinanceRoute: AdminFinanceRouteWithChildren,
   AdminLogsRoute: AdminLogsRoute,
   AdminNotificationsRoute: AdminNotificationsRoute,
   AdminPaymentMethodsRoute: AdminPaymentMethodsRoute,
@@ -854,8 +979,9 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminReportsRoute: AdminReportsRoute,
   AdminSecurityRoute: AdminSecurityRoute,
   AdminSettingsRoute: AdminSettingsRoute,
-  AdminTasksRoute: AdminTasksRoute,
+  AdminTasksRoute: AdminTasksRouteWithChildren,
   AdminUsersRoute: AdminUsersRoute,
+  AdminVerificationsRoute: AdminVerificationsRoute,
   AdminWalletRoute: AdminWalletRoute,
   AdminWithdrawalsRoute: AdminWithdrawalsRoute,
   AdminIndexRoute: AdminIndexRoute,

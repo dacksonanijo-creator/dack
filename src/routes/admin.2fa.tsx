@@ -2,6 +2,9 @@ import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Loader2, LockKeyhole, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+// Security tables/functions are not yet in the generated types.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const db = supabase as any;
 import { isAdminEmail } from "@/lib/admin";
 import { toast } from "sonner";
 
@@ -43,7 +46,7 @@ function VerifyTwoFactor(){
       if(challenge.error) throw challenge.error;
       const result=await supabase.auth.mfa.verify({factorId,challengeId:challenge.data.id,code});
       if(result.error) throw result.error;
-      await supabase.rpc("write_security_audit",{p_action:"concluiu autenticação 2FA",p_area:"Segurança",p_resource_type:"admin_session"});
+      await db.rpc("write_security_audit",{p_action:"concluiu autenticação 2FA",p_area:"Segurança",p_resource_type:"admin_session"});
       await navigate({to:"/admin",replace:true});
     }catch(e){toast.error(e instanceof Error?e.message:"Código 2FA inválido.");}
     finally{setBusy(false);}

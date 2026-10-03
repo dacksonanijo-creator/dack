@@ -12,6 +12,7 @@ import {
   Server,
   Wifi,
   XCircle,
+  Activity,
 } from "lucide-react";
 
 type ProviderKey = "offerwall_ad" | "ayet_studios";
