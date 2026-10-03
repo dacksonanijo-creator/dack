@@ -8,6 +8,7 @@ import type { UnifiedTask } from "@/lib/tasks/types";
 import { useStateLabels, useTaskStates, type TaskState } from "@/components/taskora/task-state";
 import { useT } from "@/i18n";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/app/tasks/")({
   head: () => ({
@@ -54,6 +55,11 @@ function TaskList() {
   const [category, setCategory] = useState("all");
   const [query, setQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
+  const [taskoraTasks, setTaskoraTasks] = useState<Array<{
+    id: string; title: string; description: string; category: string; reward: number; currency: string;
+    slots: number; slots_filled: number; deadline: string | null; origin: string; verification_method: string;
+  }>>([]);
+  const [taskoraLoading, setTaskoraLoading] = useState(true);
 
   const fetchTasks = useServerFn(listExternalTasks);
   const { data, isPending, isError, isFetching, refetch } = useQuery({
@@ -64,6 +70,14 @@ function TaskList() {
   });
 
   const feedTasks = useMemo(() => data?.tasks ?? [], [data]);
+
+  useState(() => {
+    void (async () => {
+      const { data: realTasks } = await (supabase as any).rpc("get_available_taskora_tasks");
+      setTaskoraTasks(Array.isArray(realTasks) ? realTasks : []);
+      setTaskoraLoading(false);
+    })();
+  });
 
   const categories = useMemo(
     () => ["all", ...Array.from(new Set(feedTasks.map((task) => task.category).filter(Boolean) as string[]))],
@@ -171,6 +185,40 @@ function TaskList() {
             </button>
           ))}
         </div>
+
+        {/* Tarefas TASKORA verificáveis */}
+        {!taskoraLoading && taskoraTasks.length > 0 && (
+          <section className="space-y-2">
+            <div className="flex items-center justify-between">
+              <h2 className="text-[13px] font-semibold text-task-title">Tarefas TASKORA</h2>
+              <span className="text-[10px] text-task-muted">Verificação + ledger</span>
+            </div>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {taskoraTasks
+                .filter((task) => category === "all" || task.category === category)
+                .filter((task) => task.title.toLowerCase().includes(query.trim().toLowerCase()))
+                .map((task) => (
+                  <article key={task.id} className="rounded-xl border border-task-border bg-task-card p-3">
+                    <div className="flex gap-3">
+                      <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-primary/10 text-[11px] font-bold text-primary">TK</div>
+                      <div className="min-w-0 flex-1">
+                        <div className="text-[10px] uppercase tracking-wide text-task-muted">{task.category}</div>
+                        <h2 className="mt-0.5 truncate font-display text-[13px] font-semibold text-task-title">{task.title}</h2>
+                        <p className="mt-0.5 line-clamp-2 text-[11px] leading-snug text-task-muted">{task.description}</p>
+                      </div>
+                    </div>
+                    <div className="mt-2.5 flex items-center gap-3 text-[11px] text-task-muted">
+                      <span className="font-semibold text-task-accent">{task.reward.toFixed(2)} {task.currency}</span>
+                      <span>{task.slots - task.slots_filled} vagas</span>
+                      <Link to="/app/tasks/$taskId" params={{ taskId: task.id }} className="ml-auto rounded-full border border-primary px-2.5 py-1 text-[11px] font-medium text-primary hover:bg-primary/10">
+                        Ver tarefa
+                      </Link>
+                    </div>
+                  </article>
+                ))}
+            </div>
+          </section>
+        )}
 
         {/* Content states */}
         {loading ? (
