@@ -1,13 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import {
-  MAX_WITHDRAWAL_USD,
-  MIN_WITHDRAWAL_USD,
-  PAYOUT_RATES,
-  type RequestWithdrawalResult,
-  type WithdrawalDTO,
-} from "./types";
+import { MAX_WITHDRAWAL_USD, MIN_WITHDRAWAL_USD, PAYOUT_RATES, type RequestWithdrawalResult, type WithdrawalDTO } from "./types";
 
 type Row = {
   id: string; reference: string | null; method: string; amount: number; currency: string;
@@ -18,22 +12,15 @@ const toDTO = (r: Row): WithdrawalDTO => ({
   status: r.status as WithdrawalDTO["status"], createdAt: r.created_at, failureReason: r.failure_reason,
 });
 
-async function processWithdrawal(id: string, mode: "send" | "query") {
-  const { processWithdrawal: run } = await import("./processor.server");
-  return run(id, mode);
-}
-
 export const requestWithdrawal = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) =>
-    z.object({
-      method: z.enum(["mpesa"]),
-      amountUsd: z.number().min(MIN_WITHDRAWAL_USD).max(MAX_WITHDRAWAL_USD),
-      account: z.string().trim().min(9).max(20),
-      accountHolder: z.string().trim().max(100).optional(),
-      idempotencyKey: z.string().uuid(),
-    }).parse(i),
-  )
+  .inputValidator((i: unknown) => z.object({
+    method: z.enum(["mpesa"]),
+    amountUsd: z.number().min(MIN_WITHDRAWAL_USD).max(MAX_WITHDRAWAL_USD),
+    account: z.string().trim().min(9).max(20),
+    accountHolder: z.string().trim().min(2).max(100).optional(),
+    idempotencyKey: z.string().uuid(),
+  }).parse(i))
   .handler(async ({ data, context }): Promise<RequestWithdrawalResult> => {
     const { getPayoutProvider } = await import("./registry.server");
     const provider = getPayoutProvider(data.method);
@@ -49,42 +36,42 @@ export const requestWithdrawal = createServerFn({ method: "POST" })
       _account_holder: data.accountHolder || "—",
       _account_number: msisdn,
       _idempotency_key: data.idempotencyKey,
-      _min_amount: MIN_WITHDRAWAL_USD * rate,
-      _max_amount: MAX_WITHDRAWAL_USD * rate,
+      _min_amount: null,
+      _max_amount: null,
     });
     if (error || !row) {
       const m = error?.message ?? "";
-      const known = ["insufficient_balance", "withdrawal_in_progress", "invalid_amount", "wallet_not_found"].find((k) => m.includes(k));
+      const known = [
+        "insufficient_ledger_balance","withdrawal_in_progress","invalid_amount",
+        "withdrawal_method_not_configured","daily_withdrawal_limit",
+        "weekly_withdrawal_limit","monthly_withdrawal_limit","withdrawal_request_limit",
+        "invalid_account","invalid_account_holder","profile_not_found",
+      ].find((k) => m.includes(k));
       return { ok: false, error: known ?? "request_failed" };
     }
-    const r = row as unknown as Row;
-    if (r.status === "pending") await processWithdrawal(r.id, "send");
-
-    const { data: fresh } = await context.supabase.from("withdrawals").select("*").eq("id", r.id).single();
-    return { ok: true, withdrawal: toDTO((fresh ?? r) as unknown as Row) };
+    return { ok: true, withdrawal: toDTO(row as unknown as Row) };
   });
 
 export const getMyPayouts = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const [{ data: wallet }, { data: rows }] = await Promise.all([
-      context.supabase.from("wallets").select("available_balance, pending_balance, currency").eq("user_id", context.userId).maybeSingle(),
-      context.supabase.from("withdrawals").select("*").eq("user_id", context.userId).order("created_at", { ascending: false }).limit(50),
+    const [{ data: summary }, { data: rows }] = await Promise.all([
+      context.supabase.rpc("get_my_withdrawal_summary"),
+      context.supabase.from("withdrawals").select("id,reference,method,amount,currency,status,created_at,failure_reason").eq("user_id", context.userId).order("created_at", { ascending: false }).limit(50),
     ]);
+    const s = Array.isArray(summary) ? summary[0] : summary;
     return {
-      available: Number(wallet?.available_balance ?? 0),
-      pending: Number(wallet?.pending_balance ?? 0),
-      currency: wallet?.currency ?? "MZN",
+      available: Number(s?.available ?? 0),
+      reserved: Number(s?.reserved ?? 0),
+      pending: Number(s?.reserved ?? 0),
+      currency: s?.currency ?? "MZN",
       withdrawals: (rows ?? []).map((r) => toDTO(r as unknown as Row)),
     };
   });
 
-/** Consulta o estado de levantamentos "em processamento" do próprio utilizador. */
 export const refreshMyPayouts = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data } = await context.supabase.from("withdrawals").select("id")
-      .eq("user_id", context.userId).eq("status", "processing" as never);
-    for (const r of data ?? []) await processWithdrawal(r.id, "query");
+    const { data } = await context.supabase.from("withdrawals").select("id").eq("user_id", context.userId).eq("status", "processing" as never);
     return { checked: data?.length ?? 0 };
   });
