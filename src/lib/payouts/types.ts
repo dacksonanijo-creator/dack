@@ -1,11 +1,13 @@
-/** Métodos de levantamento. Adicionar aqui: "emola", "airtel", "pix", ... */
+/** Métodos de levantamento realmente suportados pelo backend. */
 export type PayoutMethod = "mpesa";
 
 export const PAYOUT_RATES = { USD_TO_MZN: 70 } as const;
 export const MIN_WITHDRAWAL_USD = 3;
 export const MAX_WITHDRAWAL_USD = 1000;
 
-export type WithdrawalStatus = "pending" | "processing" | "paid" | "failed" | "approved" | "rejected";
+export type WithdrawalStatus =
+  | "pending" | "review" | "approved" | "processing" | "paid"
+  | "failed" | "rejected" | "cancelled" | "reversed";
 
 export interface WithdrawalDTO {
   id: string;
