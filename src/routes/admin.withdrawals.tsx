@@ -64,23 +64,31 @@ function Page() {
   const load=useCallback(async()=>{
     setError(null);
     try {
-      const [r,rr,rc]=await Promise.all([
+      const [r,s,rr,rc]=await Promise.all([
         listFn({data:{status:status||null,search}}),
+        summaryFn(),
         rulesFn(),
         reconFn(),
       ]);
-      setRows(r as WithdrawalRow[]);\n      const summaryMap:Record<string,{count:number;amount:number}>={};\n      for(const item of (rr as any[])) summaryMap[item.status]={count:Number(item.count),amount:Number(item.amount)};\n      setSummary(summaryMap);\n      setRules((await rulesFn()) as Rule[]); setRecon(rc as Reconciliation[]);
+      setRows(r as WithdrawalRow[]);
+      const summaryMap:Record<string,{count:number;amount:number}>={};
+      for(const item of (s as any[])) summaryMap[item.status]={count:Number(item.count),amount:Number(item.amount)};
+      setSummary(summaryMap);
+      setRules(rr as Rule[]);
+      setRecon(rc as Reconciliation[]);
       setSelected([]);
     } catch(e){setError(e instanceof Error?e.message:"Não foi possível carregar os saques.");}
   },[listFn,summaryFn,rulesFn,reconFn,status,search]);
 
   useEffect(()=>{void load();},[load]);
 
-  const counts=useMemo(()=>{
-    const c:Record<string,number>={pending:0,processing:0,paid:0,failed:0,rejected:0};
-    for(const r of rows) if(r.status in c)c[r.status]++;
-    return c;
-  },[rows]);
+  const counts=useMemo(()=>({
+    pending:summary.pending?.count??0,
+    processing:summary.processing?.count??0,
+    paid:summary.paid?.count??0,
+    failed:summary.failed?.count??0,
+    rejected:summary.rejected?.count??0,
+  }),[summary]);
 
   const eligible=rows.filter(r=>r.status==="approved");
   const selectedRows=rows.filter(r=>selected.includes(r.id));
