@@ -36,7 +36,8 @@ const STATUS_LABEL: Record<string,string> = {
 };
 
 function Page() {
-  const listFn=useServerFn(listAdminWithdrawals);\n  const summaryFn=useServerFn(getAdminWithdrawalSummary);
+  const listFn=useServerFn(listAdminWithdrawals);
+  const summaryFn=useServerFn(getAdminWithdrawalSummary);
   const approveFn=useServerFn(approveAdminWithdrawal);
   const rejectFn=useServerFn(rejectAdminWithdrawal);
   const reviewFn=useServerFn(reviewAdminWithdrawal);
@@ -48,7 +49,8 @@ function Page() {
 
   const [rows,setRows]=useState<WithdrawalRow[]>([]);
   const [rules,setRules]=useState<Rule[]>([]);
-  const [recon,setRecon]=useState<Reconciliation[]>([]);\n  const [summary,setSummary]=useState<Record<string,{count:number;amount:number}>>({});
+  const [recon,setRecon]=useState<Reconciliation[]>([]);
+  const [summary,setSummary]=useState<Record<string,{count:number;amount:number}>>({});
   const [status,setStatus]=useState("pending");
   const [search,setSearch]=useState("");
   const [selected,setSelected]=useState<string[]>([]);
@@ -57,7 +59,9 @@ function Page() {
   const [message,setMessage]=useState<string|null>(null);
   const [reason,setReason]=useState("");
   const [reasonMode,setReasonMode]=useState<"reject"|"review"|"cancel"|null>(null);
-  const [reasonId,setReasonId]=useState<string|null>(null);\n  const [reverseId,setReverseId]=useState<string|null>(null);\n  const [reverseTx,setReverseTx]=useState("");
+  const [reasonId,setReasonId]=useState<string|null>(null);
+  const [reverseId,setReverseId]=useState<string|null>(null);
+  const [reverseTx,setReverseTx]=useState("");
   const [showRules,setShowRules]=useState(false);
   const [showRecon,setShowRecon]=useState(false);
 
@@ -177,7 +181,9 @@ function Page() {
             {r.status==="pending"&&<><button disabled={busy===r.id} onClick={()=>void act(r.id,()=>approveFn({data:{id:r.id}}),"Pedido aprovado.")} className="rounded-lg bg-primary px-2.5 py-1.5 text-xs font-semibold text-primary-foreground">Aprovar</button><button onClick={()=>requestReason(r.id,"reject")} className="rounded-lg border border-border px-2.5 py-1.5 text-xs">Rejeitar</button><button onClick={()=>requestReason(r.id,"review")} className="rounded-lg border border-border px-2.5 py-1.5 text-xs">Review</button></>}
             {r.status==="approved"&&<button disabled={busy===r.id} onClick={()=>void processOne(r.id)} className="rounded-lg bg-primary px-2.5 py-1.5 text-xs font-semibold text-primary-foreground">Processar</button>}
             {r.status==="processing"&&<button disabled={busy===r.id} onClick={()=>void act(r.id,()=>processFn({data:{id:r.id,mode:"query"}}),"Consulta enviada ao provedor.")} className="rounded-lg border border-border px-2.5 py-1.5 text-xs">Consultar</button>}
-            {r.status==="failed"&&<button disabled={busy===r.id} onClick={()=>void act(r.id,()=>retryFn({data:{id:r.id}}),"Retry preparado; pedido voltou para APPROVED.")} className="rounded-lg border border-border px-2.5 py-1.5 text-xs">Retry</button>}\n            {(r.status==="pending"||r.status==="approved"||r.status==="review")&&<button onClick={()=>requestReason(r.id,"cancel")} className="rounded-lg border border-border px-2.5 py-1.5 text-xs">Cancelar</button>}\n            {r.status==="paid"&&<button onClick={()=>{setReverseId(r.id);setReverseTx(r.transaction_id||"");setReason("")}} className="rounded-lg border border-destructive/30 px-2.5 py-1.5 text-xs text-destructive">Reverter</button>}
+            {r.status==="failed"&&<button disabled={busy===r.id} onClick={()=>void act(r.id,()=>retryFn({data:{id:r.id}}),"Retry preparado; pedido voltou para APPROVED.")} className="rounded-lg border border-border px-2.5 py-1.5 text-xs">Retry</button>}
+            {(r.status==="pending"||r.status==="approved"||r.status==="review")&&<button onClick={()=>requestReason(r.id,"cancel")} className="rounded-lg border border-border px-2.5 py-1.5 text-xs">Cancelar</button>}
+            {r.status==="paid"&&<button onClick={()=>{setReverseId(r.id);setReverseTx(r.transaction_id||"");setReason("")}} className="rounded-lg border border-destructive/30 px-2.5 py-1.5 text-xs text-destructive">Reverter</button>}
           </div></td>
         </tr>)}</tbody>
       </table></div>}
