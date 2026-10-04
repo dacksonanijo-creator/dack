@@ -73,5 +73,11 @@ export const refreshMyPayouts = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { data } = await context.supabase.from("withdrawals").select("id").eq("user_id", context.userId).eq("status", "processing" as never);
-    return { checked: data?.length ?? 0 };
+    const { processWithdrawal } = await import("./processor.server");
+    let checked = 0;
+    for (const row of data ?? []) {
+      await processWithdrawal(row.id, "query");
+      checked++;
+    }
+    return { checked };
   });
