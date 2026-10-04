@@ -9,7 +9,7 @@ as $$
       coalesce(sum(case when l.direction='CREDIT' then l.amount else -l.amount end),0) amount
     from public.financial_accounts fa
     left join public.financial_ledger_lines l on l.account_id=fa.id
-    left join public.financial_journal_entries j on j.id=l.journal_entry_id and j.status in ('POSTED','REVERSED')
+    join public.financial_journal_entries j on j.id=l.journal_entry_id and j.status in ('POSTED','REVERSED')
     where fa.user_id=auth.uid() and fa.account_type='user_available_liability'
     group by fa.currency
   ), r as (
