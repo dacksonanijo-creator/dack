@@ -112,6 +112,7 @@ begin
  if auth.role()<>'service_role' and auth.uid() is distinct from p_user_id then raise exception 'forbidden'; end if;
  if p_amount is null or p_amount<=0 then raise exception 'invalid payout amount'; end if;
  if p_idempotency_key is null or length(trim(p_idempotency_key))<8 then raise exception 'invalid idempotency key'; end if;
+ if p_withdrawal_id is not null and not exists(select 1 from public.withdrawals where id=p_withdrawal_id and user_id=p_user_id) and auth.role()<>'service_role' then raise exception 'forbidden'; end if;
  perform pg_advisory_xact_lock(hashtextextended('withdrawal-user:'||p_user_id::text,0));
  select * into v_existing from public.financial_payout_reservations
  where idempotency_key=p_idempotency_key or (p_withdrawal_id is not null and withdrawal_id=p_withdrawal_id) limit 1;
