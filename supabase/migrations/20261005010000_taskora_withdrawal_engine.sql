@@ -209,7 +209,7 @@ begin
  v_reservation:=public.reserve_user_funds(v_uid,v_row.amount,v_row.currency,'withdrawal:'||v_row.id::text,v_row.id);
  insert into public.withdrawal_audit_log(withdrawal_id,actor_id,action,to_status,amount,currency,provider,reference,metadata)
  values(v_row.id,v_uid,'REQUESTED','pending',v_row.amount,v_row.currency,v_row.provider,v_row.reference,jsonb_build_object('reservation_id',v_reservation.id,'rule_id',v_rule.id));
- perform public.create_taskora_notification(v_uid,'withdrawal_created','Pedido de levantamento recebido','O seu pedido de levantamento foi recebido e aguarda análise.','important','/app/withdrawals',jsonb_build_object('withdrawal_id',v_row.id,'reference',v_row.reference),'withdrawal:'||v_row.id::text||':created','withdrawal','withdrawal_created');
+ perform public.create_taskora_notification(v_uid,'withdrawal_created','Pedido de levantamento recebido','O seu pedido de levantamento foi recebido e aguarda análise.','important','/app/withdrawals',jsonb_build_object('withdrawal_id',v_row.id,'reference',v_row.reference),'withdrawal:'||v_row.id::text||':created','withdrawal');
  return v_row;
 end;
 $$;
@@ -247,7 +247,7 @@ begin
  if exists(select 1 from auth.users u where u.id=v_w.user_id and (u.deleted_at is not null or (u.banned_until is not null and u.banned_until>now()))) then raise exception 'account_not_active'; end if;
  update public.withdrawals set status='approved',approved_at=now(),reviewer_id=v_uid,updated_at=now() where id=v_w.id returning * into v_w;
  insert into public.withdrawal_audit_log(withdrawal_id,actor_id,action,from_status,to_status,amount,currency,provider,reference) values(v_w.id,v_uid,'APPROVED','pending','approved',v_w.amount,v_w.currency,v_w.provider,v_w.reference);
- perform public.create_taskora_notification(v_w.user_id,'withdrawal_approved','Pedido de levantamento aprovado','O seu pedido de levantamento foi aprovado e será processado.','important','/app/withdrawals',jsonb_build_object('withdrawal_id',v_w.id,'reference',v_w.reference),'withdrawal:'||v_w.id::text||':approved','withdrawal','withdrawal_approved');
+ perform public.create_taskora_notification(v_w.user_id,'withdrawal_approved','Pedido de levantamento aprovado','O seu pedido de levantamento foi aprovado e será processado.','important','/app/withdrawals',jsonb_build_object('withdrawal_id',v_w.id,'reference',v_w.reference),'withdrawal:'||v_w.id::text||':approved','withdrawal');
  return v_w;
 end;
 $$;
@@ -269,7 +269,7 @@ begin
  if v_r.id is not null and v_r.status='RESERVED' then perform public.finalize_user_payout(v_r.id,false,null); end if;
  update public.withdrawals set status='rejected',rejection_reason=left(trim(p_reason),1000),rejected_at=now(),reviewer_id=v_uid,processed_at=now(),updated_at=now() where id=v_w.id returning * into v_w;
  insert into public.withdrawal_audit_log(withdrawal_id,actor_id,action,from_status,to_status,amount,currency,provider,reference,reason) values(v_w.id,v_uid,'REJECTED',v_from,'rejected',v_w.amount,v_w.currency,v_w.provider,v_w.reference,p_reason);
- perform public.create_taskora_notification(v_w.user_id,'withdrawal_rejected','Pedido de levantamento rejeitado','O seu pedido de levantamento foi rejeitado: '||left(trim(p_reason),500),'important','/app/withdrawals',jsonb_build_object('withdrawal_id',v_w.id,'reference',v_w.reference,'reason',p_reason),'withdrawal:'||v_w.id::text||':rejected','withdrawal','withdrawal_rejected');
+ perform public.create_taskora_notification(v_w.user_id,'withdrawal_rejected','Pedido de levantamento rejeitado','O seu pedido de levantamento foi rejeitado: '||left(trim(p_reason),500),'important','/app/withdrawals',jsonb_build_object('withdrawal_id',v_w.id,'reference',v_w.reference,'reason',p_reason),'withdrawal:'||v_w.id::text||':rejected','withdrawal');
  return v_w;
 end;
 $$;
@@ -307,7 +307,7 @@ begin
  if v_r.id is null or v_r.status<>'RESERVED' then raise exception 'withdrawal_reservation_missing'; end if;
  update public.withdrawals set status='processing',environment=_environment,updated_at=now() where id=_id;
  insert into public.withdrawal_audit_log(withdrawal_id,actor_id,action,from_status,to_status,amount,currency,provider,reference) values(v_w.id,null,'PROCESSING','approved','processing',v_w.amount,v_w.currency,v_w.provider,v_w.reference);
- perform public.create_taskora_notification(v_w.user_id,'withdrawal_processing','Levantamento em processamento','O seu levantamento está a ser processado.','important','/app/withdrawals',jsonb_build_object('withdrawal_id',v_w.id,'reference',v_w.reference),'withdrawal:'||v_w.id::text||':processing','withdrawal','withdrawal_processing');
+ perform public.create_taskora_notification(v_w.user_id,'withdrawal_processing','Levantamento em processamento','O seu levantamento está a ser processado.','important','/app/withdrawals',jsonb_build_object('withdrawal_id',v_w.id,'reference',v_w.reference),'withdrawal:'||v_w.id::text||':processing','withdrawal');
  return true;
 end;
 $$;
@@ -338,7 +338,7 @@ begin
  end if;
  insert into public.withdrawal_audit_log(withdrawal_id,actor_id,action,from_status,to_status,amount,currency,provider,reference,reason,metadata)
  values(v_w.id,null,case when _success then 'PAID' else 'FAILED' end,v_old,v_w.status::text,v_w.amount,v_w.currency,v_w.provider,v_w.reference,_reason,jsonb_build_object('transaction_id',_transaction_id,'conversation_id',_conversation_id,'response_code',_response_code));
- perform public.create_taskora_notification(v_w.user_id,case when _success then 'withdrawal_paid' else 'withdrawal_failed' end,case when _success then 'Levantamento concluído' else 'Levantamento falhou' end,case when _success then 'O seu levantamento foi concluído.' else 'O seu levantamento não pôde ser concluído. O pedido será analisado.' end,'important','/app/withdrawals',jsonb_build_object('withdrawal_id',v_w.id,'reference',v_w.reference,'transaction_id',_transaction_id,'reason',_reason),'withdrawal:'||v_w.id::text||':'||case when _success then 'paid' else 'failed' end,'withdrawal',case when _success then 'withdrawal_paid' else 'withdrawal_failed' end);
+ perform public.create_taskora_notification(v_w.user_id,case when _success then 'withdrawal_paid' else 'withdrawal_failed' end,case when _success then 'Levantamento concluído' else 'Levantamento falhou' end,case when _success then 'O seu levantamento foi concluído.' else 'O seu levantamento não pôde ser concluído. O pedido será analisado.' end,'important','/app/withdrawals',jsonb_build_object('withdrawal_id',v_w.id,'reference',v_w.reference,'transaction_id',_transaction_id,'reason',_reason),'withdrawal:'||v_w.id::text||':'||case when _success then 'paid' else 'failed' end,'withdrawal');
  return v_w;
 end;
 $$;
