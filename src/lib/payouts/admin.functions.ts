@@ -7,6 +7,15 @@ const adminGate = async (context: any) => {
   if (error || !data) throw new Error("Forbidden");
 };
 
+export const getAdminWithdrawalSummary = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await adminGate(context);
+    const { data, error } = await context.supabase.rpc("get_admin_withdrawal_summary");
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  });
+
 export const listAdminWithdrawals = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) => z.object({
