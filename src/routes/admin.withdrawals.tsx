@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { AdminPageHeader } from "@/components/taskora/admin-shell";
 import {
-  approveAdminWithdrawal, cancelAdminWithdrawal, getAdminWithdrawalReconciliation, getAdminWithdrawalRules,
+  approveAdminWithdrawal, cancelAdminWithdrawal, getAdminWithdrawalReconciliation, getAdminWithdrawalRules, getAdminWithdrawalSummary,
   listAdminWithdrawals, processAdminWithdrawal, rejectAdminWithdrawal,
   retryAdminWithdrawal, reverseAdminWithdrawal, reviewAdminWithdrawal, saveAdminWithdrawalRule,
 } from "@/lib/payouts/admin.functions";
@@ -36,7 +36,7 @@ const STATUS_LABEL: Record<string,string> = {
 };
 
 function Page() {
-  const listFn=useServerFn(listAdminWithdrawals);
+  const listFn=useServerFn(listAdminWithdrawals);\n  const summaryFn=useServerFn(getAdminWithdrawalSummary);
   const approveFn=useServerFn(approveAdminWithdrawal);
   const rejectFn=useServerFn(rejectAdminWithdrawal);
   const reviewFn=useServerFn(reviewAdminWithdrawal);
@@ -48,7 +48,7 @@ function Page() {
 
   const [rows,setRows]=useState<WithdrawalRow[]>([]);
   const [rules,setRules]=useState<Rule[]>([]);
-  const [recon,setRecon]=useState<Reconciliation[]>([]);
+  const [recon,setRecon]=useState<Reconciliation[]>([]);\n  const [summary,setSummary]=useState<Record<string,{count:number;amount:number}>>({});
   const [status,setStatus]=useState("pending");
   const [search,setSearch]=useState("");
   const [selected,setSelected]=useState<string[]>([]);
@@ -69,10 +69,10 @@ function Page() {
         rulesFn(),
         reconFn(),
       ]);
-      setRows(r as WithdrawalRow[]); setRules(rr as Rule[]); setRecon(rc as Reconciliation[]);
+      setRows(r as WithdrawalRow[]);\n      const summaryMap:Record<string,{count:number;amount:number}>={};\n      for(const item of (rr as any[])) summaryMap[item.status]={count:Number(item.count),amount:Number(item.amount)};\n      setSummary(summaryMap);\n      setRules((await rulesFn()) as Rule[]); setRecon(rc as Reconciliation[]);
       setSelected([]);
     } catch(e){setError(e instanceof Error?e.message:"Não foi possível carregar os saques.");}
-  },[listFn,rulesFn,reconFn,status,search]);
+  },[listFn,summaryFn,rulesFn,reconFn,status,search]);
 
   useEffect(()=>{void load();},[load]);
 
