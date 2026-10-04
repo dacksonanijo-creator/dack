@@ -3,9 +3,9 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { AdminPageHeader } from "@/components/taskora/admin-shell";
 import {
-  approveAdminWithdrawal, getAdminWithdrawalReconciliation, getAdminWithdrawalRules,
+  approveAdminWithdrawal, cancelAdminWithdrawal, getAdminWithdrawalReconciliation, getAdminWithdrawalRules,
   listAdminWithdrawals, processAdminWithdrawal, rejectAdminWithdrawal,
-  retryAdminWithdrawal, reviewAdminWithdrawal, saveAdminWithdrawalRule,
+  retryAdminWithdrawal, reverseAdminWithdrawal, reviewAdminWithdrawal, saveAdminWithdrawalRule,
 } from "@/lib/payouts/admin.functions";
 import { CheckCircle2, Clock3, RefreshCw, Search, ShieldAlert, WalletCards, XCircle } from "lucide-react";
 
@@ -57,7 +57,7 @@ function Page() {
   const [message,setMessage]=useState<string|null>(null);
   const [reason,setReason]=useState("");
   const [reasonMode,setReasonMode]=useState<"reject"|"review"|null>(null);
-  const [reasonId,setReasonId]=useState<string|null>(null);
+  const [reasonId,setReasonId]=useState<string|null>(null);\n  const [reverseId,setReverseId]=useState<string|null>(null);\n  const [reverseTx,setReverseTx]=useState("");
   const [showRules,setShowRules]=useState(false);
   const [showRecon,setShowRecon]=useState(false);
 
@@ -92,6 +92,13 @@ function Page() {
   };
 
   const requestReason=(id:string,mode:"reject"|"review")=>{setReasonId(id);setReasonMode(mode);setReason("");};
+
+  const confirmReverse=async()=>{
+    if(!reverseId||reverseTx.trim().length<2||reason.trim().length<3)return;
+    const id=reverseId, tx=reverseTx.trim(), text=reason.trim();
+    setReverseId(null);setReverseTx("");setReason("");
+    await act(id,()=>reverseAdminWithdrawal({data:{id,providerTransactionId:tx,reason:text}}),"Reversão registada no ledger e no histórico.");
+  };
 
   const confirmReason=async()=>{
     if(!reasonId||!reasonMode||reason.trim().length<3)return;
@@ -162,7 +169,7 @@ function Page() {
             {r.status==="pending"&&<><button disabled={busy===r.id} onClick={()=>void act(r.id,()=>approveFn({data:{id:r.id}}),"Pedido aprovado.")} className="rounded-lg bg-primary px-2.5 py-1.5 text-xs font-semibold text-primary-foreground">Aprovar</button><button onClick={()=>requestReason(r.id,"reject")} className="rounded-lg border border-border px-2.5 py-1.5 text-xs">Rejeitar</button><button onClick={()=>requestReason(r.id,"review")} className="rounded-lg border border-border px-2.5 py-1.5 text-xs">Review</button></>}
             {r.status==="approved"&&<button disabled={busy===r.id} onClick={()=>void processOne(r.id)} className="rounded-lg bg-primary px-2.5 py-1.5 text-xs font-semibold text-primary-foreground">Processar</button>}
             {r.status==="processing"&&<button disabled={busy===r.id} onClick={()=>void act(r.id,()=>processFn({data:{id:r.id,mode:"query"}}),"Consulta enviada ao provedor.")} className="rounded-lg border border-border px-2.5 py-1.5 text-xs">Consultar</button>}
-            {r.status==="failed"&&<button disabled={busy===r.id} onClick={()=>void act(r.id,()=>retryFn({data:{id:r.id}}),"Retry preparado; pedido voltou para APPROVED.")} className="rounded-lg border border-border px-2.5 py-1.5 text-xs">Retry</button>}
+            {r.status==="failed"&&<button disabled={busy===r.id} onClick={()=>void act(r.id,()=>retryFn({data:{id:r.id}}),"Retry preparado; pedido voltou para APPROVED.")} className="rounded-lg border border-border px-2.5 py-1.5 text-xs">Retry</button>}\n            {(r.status==="pending"||r.status==="approved"||r.status==="review")&&<button onClick={()=>requestReason(r.id,"reject")} className="rounded-lg border border-border px-2.5 py-1.5 text-xs">Cancelar</button>}\n            {r.status==="paid"&&<button onClick={()=>{setReverseId(r.id);setReverseTx(r.transaction_id||"");setReason("")}} className="rounded-lg border border-destructive/30 px-2.5 py-1.5 text-xs text-destructive">Reverter</button>}
           </div></td>
         </tr>)}</tbody>
       </table></div>}
@@ -182,7 +189,7 @@ function Page() {
     {showRules&&<RulesSection rules={rules} saveRuleFn={saveRuleFn} onSaved={load}/>}
     {showRecon&&<section className="rounded-2xl border border-border bg-card p-5"><div className="flex items-center justify-between"><div><h2 className="font-semibold">Reconciliação financeira</h2><p className="text-xs text-muted-foreground">Nenhuma diferença é corrigida silenciosamente.</p></div><button onClick={()=>void load()} className="text-xs font-semibold">Actualizar</button></div><div className="mt-4 overflow-x-auto"><table className="w-full min-w-[700px] text-sm"><thead><tr className="border-b text-left text-xs text-muted-foreground"><th className="py-2">Moeda</th><th>Ledger reservado</th><th>Saques reservados</th><th>Provider PAID</th><th>Saques PAID</th><th>Divergência</th><th>Estado</th></tr></thead><tbody>{recon.map(r=><tr key={r.currency} className="border-b last:border-0"><td className="py-2 font-semibold">{r.currency}</td><td>{r.reserved_ledger}</td><td>{r.withdrawal_reserved}</td><td>{r.provider_paid}</td><td>{r.withdrawal_paid}</td><td>{r.divergence}</td><td>{r.status==="RECONCILIADO"?<span className="text-emerald-600">✓ RECONCILIADO</span>:<span className="text-destructive">⚠ DIVERGÊNCIA FINANCEIRA</span>}</td></tr>)}</tbody></table>{recon.length===0&&<p className="py-6 text-center text-sm text-muted-foreground">Sem movimentos de saque para reconciliar.</p>}</div></section>}
 
-    {reasonMode&&<div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4"><div className="w-full max-w-md rounded-2xl border border-border bg-card p-5 shadow-xl"><h2 className="font-semibold">{reasonMode==="reject"?"Rejeitar saque":"Enviar para revisão"}</h2><p className="mt-1 text-xs text-muted-foreground">O motivo ficará registado na auditoria.</p><textarea value={reason} onChange={e=>setReason(e.target.value)} className="mt-4 min-h-28 w-full rounded-xl border border-border bg-background p-3 text-sm outline-none" placeholder="Motivo obrigatório…"/><div className="mt-4 flex justify-end gap-2"><button onClick={()=>{setReasonMode(null);setReasonId(null)}} className="rounded-lg border border-border px-3 py-2 text-sm">Cancelar</button><button disabled={reason.trim().length<3} onClick={()=>void confirmReason()} className="rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground">Confirmar</button></div></div></div>}
+    <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4"><div className="w-full max-w-md rounded-2xl border border-border bg-card p-5 shadow-xl"><h2 className="font-semibold">Reverter payout confirmado</h2><p className="mt-1 text-xs text-muted-foreground">Use somente quando o provedor tiver confirmado a reversão.</p><input value={reverseTx} onChange={e=>setReverseTx(e.target.value)} className="mt-4 w-full rounded-xl border border-border bg-background p-3 text-sm outline-none" placeholder="transaction_id do provedor"/><textarea value={reason} onChange={e=>setReason(e.target.value)} className="mt-3 min-h-24 w-full rounded-xl border border-border bg-background p-3 text-sm outline-none" placeholder="Motivo obrigatório…"/><div className="mt-4 flex justify-end gap-2"><button onClick={()=>setReverseId(null)} className="rounded-lg border border-border px-3 py-2 text-sm">Cancelar</button><button disabled={reverseTx.trim().length<2||reason.trim().length<3} onClick={()=>void confirmReverse()} className="rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground">Confirmar reversão</button></div></div></div>{reasonMode&&<div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4"><div className="w-full max-w-md rounded-2xl border border-border bg-card p-5 shadow-xl"><h2 className="font-semibold">{reasonMode==="reject"?"Rejeitar saque":"Enviar para revisão"}</h2><p className="mt-1 text-xs text-muted-foreground">O motivo ficará registado na auditoria.</p><textarea value={reason} onChange={e=>setReason(e.target.value)} className="mt-4 min-h-28 w-full rounded-xl border border-border bg-background p-3 text-sm outline-none" placeholder="Motivo obrigatório…"/><div className="mt-4 flex justify-end gap-2"><button onClick={()=>{setReasonMode(null);setReasonId(null)}} className="rounded-lg border border-border px-3 py-2 text-sm">Cancelar</button><button disabled={reason.trim().length<3} onClick={()=>void confirmReason()} className="rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground">Confirmar</button></div></div></div>}
   </div>;
 }
 
