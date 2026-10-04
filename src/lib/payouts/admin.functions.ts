@@ -73,6 +73,26 @@ export const retryAdminWithdrawal = createServerFn({ method: "POST" })
     return row;
   });
 
+export const cancelAdminWithdrawal = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: unknown) => z.object({ id: z.string().uuid(), reason: z.string().trim().min(3).max(1000) }).parse(i))
+  .handler(async ({ data, context }) => {
+    await adminGate(context);
+    const { data: row, error } = await context.supabase.rpc("cancel_withdrawal", { p_withdrawal_id: data.id, p_reason: data.reason });
+    if (error) throw new Error(error.message);
+    return row;
+  });
+
+export const reverseAdminWithdrawal = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: unknown) => z.object({ id: z.string().uuid(), providerTransactionId: z.string().trim().min(2), reason: z.string().trim().min(3).max(1000) }).parse(i))
+  .handler(async ({ data, context }) => {
+    await adminGate(context);
+    const { data: row, error } = await context.supabase.rpc("reverse_withdrawal", { p_withdrawal_id: data.id, p_provider_transaction_id: data.providerTransactionId, p_reason: data.reason });
+    if (error) throw new Error(error.message);
+    return row;
+  });
+
 export const getAdminWithdrawalRules = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
