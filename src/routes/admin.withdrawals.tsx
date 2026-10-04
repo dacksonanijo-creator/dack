@@ -159,7 +159,7 @@ function Page() {
         </tr></thead>
         <tbody>{rows.map(r=><tr key={r.id} className="border-b border-border/50 last:border-0">
           <td className="px-4 py-3">{r.status==="approved"?<input type="checkbox" checked={selected.includes(r.id)} onChange={e=>setSelected(v=>e.target.checked?[...v,r.id]:v.filter(x=>x!==r.id))}/>:null}</td>
-          <td className="px-3 py-3"><div className="font-mono text-xs">{r.reference||r.id.slice(0,8)}</div><div className="text-[11px] text-muted-foreground">{r.id}</div></td>
+          <td className="px-3 py-3"><div className="font-mono text-xs">{r.reference||r.id.slice(0,8)}</div><div className="text-[11px] text-muted-foreground">{r.id}</div><div className="text-[10px] text-muted-foreground">Reserva: {r.reservation_id ? r.reservation_id.slice(0,8) : "—"} · Tx: {r.transaction_id ? r.transaction_id : "—"}</div></td>
           <td className="px-3 py-3"><div className="font-medium">{r.user_name}</div><div className="text-xs text-muted-foreground">{r.user_email||"—"}</div></td>
           <td className="px-3 py-3 font-semibold">{Number(r.amount).toLocaleString("pt-PT")} {r.currency}</td>
           <td className="px-3 py-3"><div className="font-medium">{r.method}</div><div className="text-xs text-muted-foreground">{r.destination_masked}</div></td>
