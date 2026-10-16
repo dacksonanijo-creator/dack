@@ -140,7 +140,7 @@ function Login() {
         p_device: /Mobi|Android|iPhone/i.test(navigator.userAgent) ? "Dispositivo móvel" : "Computador",
         p_browser: navigator.userAgent.match(/(Chrome|Firefox|Safari|Edge|Opera)\/?[\d.]*/i)?.[0] ?? "Navegador",
       });
-      const { data: profile } = await supabase.from("profiles").select("account_type").eq("id", session.user.id).maybeSingle();
+      const { data: profile } = await (supabase as any).from("profiles").select("account_type").eq("id", session.user.id).maybeSingle();
       await navigate({ to: profile?.account_type === "client" ? "/client" : "/app", replace: true });
     } catch (err) {
       const msg = t(authErrorMessage(err instanceof Error ? err.message : String(err)));

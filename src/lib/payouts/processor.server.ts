@@ -20,7 +20,7 @@ export async function processWithdrawal(id: string, mode: "send" | "query"): Pro
 
   const environment = provider.environment();
   if (mode === "send") {
-    const { data: locked, error: lockError } = await supabaseAdmin.rpc("mark_withdrawal_processing", {
+    const { data: locked, error: lockError } = await (supabaseAdmin as any).rpc("mark_withdrawal_processing", {
       _id: id,
       _environment: environment,
     });
@@ -53,7 +53,7 @@ export async function processWithdrawal(id: string, mode: "send" | "query"): Pro
   });
 
   if (outcome.state === "success") {
-    const { error } = await supabaseAdmin.rpc("finalize_withdrawal", {
+    const { error } = await (supabaseAdmin as any).rpc("finalize_withdrawal", {
       _id: id,
       _success: true,
       _transaction_id: outcome.transactionId ?? null,
@@ -65,7 +65,7 @@ export async function processWithdrawal(id: string, mode: "send" | "query"): Pro
   }
 
   if (outcome.state === "failed") {
-    const { error } = await supabaseAdmin.rpc("finalize_withdrawal", {
+    const { error } = await (supabaseAdmin as any).rpc("finalize_withdrawal", {
       _id: id,
       _success: false,
       _transaction_id: null,

@@ -30,7 +30,7 @@ export const requestWithdrawal = createServerFn({ method: "POST" })
     if (!msisdn) return { ok: false, error: "invalid_account" };
 
     const rate = PAYOUT_RATES.USD_TO_MZN;
-    const { data: row, error } = await context.supabase.rpc("request_withdrawal", {
+    const { data: row, error } = await (context.supabase as any).rpc("request_withdrawal", {
       _method: data.method,
       _amount: Math.round(data.amountUsd * rate),
       _account_holder: data.accountHolder || "—",
@@ -56,7 +56,7 @@ export const getMyPayouts = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const [{ data: summary }, { data: rows }] = await Promise.all([
-      context.supabase.rpc("get_my_withdrawal_summary"),
+      (context.supabase as any).rpc("get_my_withdrawal_summary"),
       context.supabase.from("withdrawals").select("id,reference,method,amount,currency,status,created_at,failure_reason").eq("user_id", context.userId).order("created_at", { ascending: false }).limit(50),
     ]);
     const s = Array.isArray(summary) ? summary[0] : summary;

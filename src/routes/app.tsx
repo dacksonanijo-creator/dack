@@ -14,7 +14,7 @@ export const Route = createFileRoute("/app")({
     // but should land directly in the administrative area after OAuth.
     if (isAdminEmail(data.user.email)) throw redirect({ to: "/admin" });
 
-    const { data: profile } = await supabase.from("profiles").select("account_type").eq("id", data.user.id).maybeSingle();
+    const { data: profile } = await (supabase as any).from("profiles").select("account_type").eq("id", data.user.id).maybeSingle();
     if (profile?.account_type === "client") throw redirect({ to: "/client" });
 
     return { user: data.user };

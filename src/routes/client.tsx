@@ -9,7 +9,7 @@ export const Route = createFileRoute("/client")({
     const { data, error } = await supabase.auth.getUser();
     if (error || !data.user) throw redirect({ to: "/login" });
     if (isAdminEmail(data.user.email)) throw redirect({ to: "/admin" });
-    const { data: profile, error: profileError } = await supabase
+    const { data: profile, error: profileError } = await (supabase as any)
       .from("profiles").select("account_type, full_name, business_name").eq("id", data.user.id).maybeSingle();
     if (profileError || profile?.account_type !== "client") throw redirect({ to: "/app" });
     return { profile };
