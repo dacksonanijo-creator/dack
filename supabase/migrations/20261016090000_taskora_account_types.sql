@@ -81,8 +81,4 @@ CREATE TRIGGER trg_prevent_self_account_type_change
 BEFORE UPDATE ON public.profiles
 FOR EACH ROW EXECUTE FUNCTION public.prevent_self_account_type_change();
 
--- Company profile records remain private to their owner.
-DROP POLICY IF EXISTS "Companies viewable by all auth" ON public.companies;
-CREATE POLICY "Company owner views own company"
-ON public.companies FOR SELECT TO authenticated
-USING (auth.uid() = owner_id);
+-- Existing company/task policies are preserved in this stage.
