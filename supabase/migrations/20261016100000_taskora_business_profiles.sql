@@ -52,6 +52,7 @@ BEGIN
   IF auth.uid() IS NOT NULL
      AND auth.uid() = OLD.id
      AND NOT public.is_taskora_admin()
+     AND coalesce(current_setting('taskora.allow_business_status_change', true), '') <> 'on'
      AND NEW.verification_status IS DISTINCT FROM OLD.verification_status THEN
     RAISE EXCEPTION 'O estado de verificação só pode ser alterado pelo processo autorizado.';
   END IF;
@@ -98,6 +99,7 @@ BEGIN
   END IF;
 
   v_previous := v_profile.verification_status;
+  PERFORM set_config('taskora.allow_business_status_change', 'on', true);
   UPDATE public.profiles
   SET verification_status = 'pending', updated_at = now()
   WHERE id = auth.uid();
