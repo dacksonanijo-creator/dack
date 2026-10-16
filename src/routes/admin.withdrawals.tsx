@@ -74,12 +74,12 @@ function Page() {
         rulesFn(),
         reconFn(),
       ]);
-      setRows(r as WithdrawalRow[]);
+      setRows(r as unknown as WithdrawalRow[]);
       const summaryMap:Record<string,{count:number;amount:number}>={};
-      for(const item of (s as any[])) summaryMap[item.status]={count:Number(item.count),amount:Number(item.amount)};
+      for(const item of (s as unknown as any[])) summaryMap[item.status]={count:Number(item.count),amount:Number(item.amount)};
       setSummary(summaryMap);
-      setRules(rr as Rule[]);
-      setRecon(rc as Reconciliation[]);
+      setRules(rr as unknown as Rule[]);
+      setRecon(rc as unknown as Reconciliation[]);
       setSelected([]);
     } catch(e){setError(e instanceof Error?e.message:"Não foi possível carregar os saques.");}
   },[listFn,summaryFn,rulesFn,reconFn,status,search]);
