@@ -106,7 +106,7 @@ export const getAdminWithdrawalRules = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await adminGate(context);
-    const { data, error } = await context.supabase.from("withdrawal_rules").select("*").order("country").order("method");
+    const { data, error } = await (context.supabase as any).from("withdrawal_rules").select("*").order("country").order("method");
     if (error) throw new Error(error.message);
     return data ?? [];
   });
