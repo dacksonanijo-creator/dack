@@ -58,8 +58,8 @@ export const adminSections: AdminSection[] = [
   },
   {
     to: "/admin/companies",
-    label: "Empresas",
-    description: "Empresas anunciantes e respetivas campanhas.",
+    label: "Clientes empresariais",
+    description: "Perfis empresariais, verificação e decisões administrativas.",
     icon: Building2,
   },
   {
