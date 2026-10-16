@@ -313,17 +313,13 @@ function WithdrawalsPage() {
 
                 <div>
                   <label className="text-[11px] text-task-muted">
-                    {method === "paypal"
-                      ? t("withdraw.destination.paypal")
-                      : method === "card"
-                        ? t("withdraw.destination.card")
-                        : t("withdraw.destination.phone")}
+                    {t("withdraw.destination.phone")}
                   </label>
                   <input
                     value={destination}
                     onChange={(e) => setDestination(e.target.value.slice(0, 60))}
                     className="mt-1 w-full rounded-md border border-task-border bg-task-bg px-2.5 py-1.5 text-[13px] text-task-title outline-none placeholder:text-task-muted focus:border-task-accent/60"
-                    placeholder={method === "paypal" ? "nome@email.com" : "84 000 0000"}
+                    placeholder="84 000 0000"
                   />
                 </div>
 
