@@ -49,12 +49,14 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 BEGIN
-  IF auth.uid() IS NOT NULL
-     AND auth.uid() = OLD.id
-     AND NOT public.is_taskora_admin()
-     AND coalesce(current_setting('taskora.allow_business_status_change', true), '') <> 'on'
-     AND NEW.verification_status IS DISTINCT FROM OLD.verification_status THEN
-    RAISE EXCEPTION 'O estado de verificação só pode ser alterado pelo processo autorizado.';
+  IF auth.uid() IS NOT NULL AND auth.uid() = OLD.id AND NOT public.is_taskora_admin() THEN
+    IF coalesce(current_setting('taskora.allow_business_status_change', true), '') <> 'on'
+       AND NEW.verification_status IS DISTINCT FROM OLD.verification_status THEN
+      RAISE EXCEPTION 'O estado de verificação só pode ser alterado pelo processo autorizado.';
+    END IF;
+    IF NEW.business_status_before_suspension IS DISTINCT FROM OLD.business_status_before_suspension THEN
+      RAISE EXCEPTION 'O estado interno de suspensão não pode ser alterado pelo cliente.';
+    END IF;
   END IF;
   RETURN NEW;
 END;
