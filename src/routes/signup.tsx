@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Check, Eye, EyeOff, Loader2 } from "lucide-react";
+import { Check, Eye, EyeOff, Loader2, BriefcaseBusiness, UserRound } from "lucide-react";
 import { toast } from "sonner";
 import { AuthLayout, Field } from "@/components/taskora/auth-layout";
 import { Button } from "@/components/ui/button";
@@ -45,6 +45,7 @@ type Errors = Partial<Record<"fullName" | "email" | "password" | "confirm" | "te
 function Signup() {
   const t = useT();
   const navigate = useNavigate();
+  const [accountType, setAccountType] = useState<"worker" | "client">(() => new URLSearchParams(typeof window !== "undefined" ? window.location.search : "").get("type") === "client" ? "client" : "worker");
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [errors, setErrors] = useState<Errors>({});
@@ -129,7 +130,7 @@ function Signup() {
         password: form.password,
         options: {
           emailRedirectTo: window.location.origin + "/app",
-          data: { full_name: form.fullName.trim(), country: form.country },
+          data: { full_name: form.fullName.trim(), country: form.country, account_type: accountType },
         },
       });
 
@@ -169,7 +170,7 @@ function Signup() {
       }
 
       toast.success(t("auth.signup.createdSuccess"));
-      navigate({ to: "/app" });
+      navigate({ to: accountType === "client" ? "/client" : "/app" });
     } catch (err) {
       toast.error(t(authErrorMessage(err instanceof Error ? err.message : String(err))));
     } finally {
@@ -193,6 +194,18 @@ function Signup() {
         </>
       }
     >
+      <div className="mb-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
+        <button type="button" onClick={() => setAccountType("worker")} className={"rounded-xl border p-3.5 text-left transition-colors " + (accountType === "worker" ? "border-primary bg-primary/5 ring-2 ring-primary/10" : "border-border hover:bg-muted/40")}>
+          <UserRound className="mb-2 h-5 w-5 text-primary" />
+          <span className="block text-sm font-semibold">Quero trabalhar</span>
+          <span className="mt-1 block text-xs leading-5 text-muted-foreground">Realizar tarefas e receber recompensas.</span>
+        </button>
+        <button type="button" onClick={() => setAccountType("client")} className={"rounded-xl border p-3.5 text-left transition-colors " + (accountType === "client" ? "border-primary bg-primary/5 ring-2 ring-primary/10" : "border-border hover:bg-muted/40")}>
+          <BriefcaseBusiness className="mb-2 h-5 w-5 text-primary" />
+          <span className="block text-sm font-semibold">Quero contratar serviços</span>
+          <span className="mt-1 block text-xs leading-5 text-muted-foreground">Criar tarefas e promover produtos ou conteúdos.</span>
+        </button>
+      </div>
       <form ref={formRef} className="space-y-4" onSubmit={onSubmit} noValidate>
         <Field label={t("auth.signup.fullNameLabel")}>
           <input className={input} name="fullName" autoComplete="name" placeholder={t("auth.signup.fullNamePlaceholder")} value={form.fullName} onChange={set("fullName")} />
