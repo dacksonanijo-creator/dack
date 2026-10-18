@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import {
-  ArrowLeft, CalendarDays, CheckCircle2, ChevronLeft, ChevronRight,
+  ArrowLeft, CalendarDays, ChevronLeft, ChevronRight,
   Clock3, Eye, Filter, LoaderCircle, RefreshCw, Search, ShieldAlert, X, Plus, Pencil,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
