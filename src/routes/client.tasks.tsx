@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import {
-  ArrowLeft, CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, CircleHelp,
-  Clock3, Eye, Filter, LoaderCircle, RefreshCw, Search, ShieldAlert, X,
+  ArrowLeft, CalendarDays, CheckCircle2, ChevronLeft, ChevronRight,
+  Clock3, Eye, Filter, LoaderCircle, RefreshCw, Search, ShieldAlert, X, Plus, Pencil,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { isAdminEmail } from "@/lib/admin";
@@ -27,6 +27,7 @@ type TaskRow = {
   budget_paid: number | null;
   slots: number | null;
   slots_filled: number | null;
+  is_draft: boolean;
 };
 type AuditRow = { id: string; action: string; metadata: Record<string, unknown> | null; created_at: string; actor_id: string | null };
 type Counts = { participations: number; approved: number };
@@ -117,10 +118,11 @@ function ClientTasksPage() {
       setCategories(Array.from(new Set((categoryRows ?? []).map((row: { category: string | null }) => row.category).filter(Boolean))) as string[]);
 
       let request = db.from("tasks")
-        .select("id,title,description,category,status,created_at,updated_at,company_id,reward,currency,budget_total,budget_reserved,budget_approved,budget_paid,slots,slots_filled", { count: "exact" })
+        .select("id,title,description,category,status,created_at,updated_at,company_id,reward,currency,budget_total,budget_reserved,budget_approved,budget_paid,slots,slots_filled,is_draft", { count: "exact" })
         .in("company_id", ids);
       if (query.trim()) request = request.ilike("title", "%" + query.trim().replace(/[%_]/g, "\\$&") + "%");
-      if (status !== "all") request = request.eq("status", status);
+      if (status === "draft") request = request.eq("is_draft", true);
+      else if (status !== "all") request = request.eq("status", status).eq("is_draft", false);
       if (category !== "all") request = request.eq("category", category);
       if (dateFrom) request = request.gte("created_at", new Date(dateFrom + "T00:00:00").toISOString());
       if (dateTo) request = request.lt("created_at", new Date(new Date(dateTo + "T00:00:00").getTime() + 86400000).toISOString());
@@ -185,14 +187,14 @@ function ClientTasksPage() {
             <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary"><CalendarDays className="h-5 w-5" /></span>
             <div><p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">TASKORA · PAINEL EMPRESARIAL</p><h1 className="mt-1 text-2xl font-bold sm:text-3xl">Minhas tarefas</h1><p className="mt-1 max-w-2xl text-sm text-muted-foreground">Consulta o estado e os resultados das tarefas associadas à tua conta.</p></div>
           </div>
-          <button type="button" onClick={() => void load()} disabled={loading} className="inline-flex items-center justify-center gap-2 rounded-xl border border-border px-4 py-2.5 text-sm font-semibold hover:bg-muted disabled:opacity-50"><RefreshCw className={"h-4 w-4 " + (loading ? "animate-spin" : "")} /> Actualizar</button>
+          <div className="flex flex-col gap-2 sm:flex-row"><Link to="/client/tasks/new" className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90"><Plus className="h-4 w-4" /> Criar tarefa</Link><button type="button" onClick={() => void load()} disabled={loading} className="inline-flex items-center justify-center gap-2 rounded-xl border border-border px-4 py-2.5 text-sm font-semibold hover:bg-muted disabled:opacity-50"><RefreshCw className={"h-4 w-4 " + (loading ? "animate-spin" : "")} /> Actualizar</button></div>
         </header>
 
         <section className="rounded-2xl border border-border bg-card p-4 sm:p-5">
           <div className="mb-4 flex items-center gap-2"><Filter className="h-4 w-4 text-muted-foreground" /><h2 className="font-semibold">Pesquisar e filtrar</h2></div>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
             <label className="text-xs font-medium text-muted-foreground xl:col-span-2">Nome da tarefa<div className="relative mt-1"><Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" /><input className={inputClass + " pl-9"} value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Pesquisar pelo nome…" /></div></label>
-            <label className="text-xs font-medium text-muted-foreground">Estado<select className={inputClass + " mt-1"} value={status} onChange={(e) => setStatus(e.target.value)}><option value="all">Todos os estados</option><option value="active">Ativa</option><option value="paused">Pausada</option><option value="completed">Concluída</option></select></label>
+            <label className="text-xs font-medium text-muted-foreground">Estado<select className={inputClass + " mt-1"} value={status} onChange={(e) => setStatus(e.target.value)}><option value="all">Todos os estados</option><option value="draft">Rascunho</option><option value="active">Ativa</option><option value="paused">Pausada</option><option value="completed">Concluída</option></select></label>
             <label className="text-xs font-medium text-muted-foreground">Categoria<select className={inputClass + " mt-1"} value={category} onChange={(e) => setCategory(e.target.value)}><option value="all">Todas as categorias</option>{categories.map((item) => <option key={item} value={item}>{item}</option>)}</select></label>
             <label className="text-xs font-medium text-muted-foreground">Criada a partir de<input type="date" className={inputClass + " mt-1"} value={dateFrom} max={dateTo || undefined} onChange={(e) => setDateFrom(e.target.value)} /></label>
             <label className="text-xs font-medium text-muted-foreground">Criada até<input type="date" className={inputClass + " mt-1"} value={dateTo} min={dateFrom || undefined} onChange={(e) => setDateTo(e.target.value)} /></label>
@@ -206,15 +208,15 @@ function ClientTasksPage() {
         <section className="overflow-hidden rounded-2xl border border-border bg-card">
           <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-4 sm:px-5"><h2 className="font-semibold">Lista de tarefas</h2><span className="text-sm text-muted-foreground">{loading ? "A carregar…" : total + (total === 1 ? " tarefa" : " tarefas")}</span></div>
           {loading ? <div className="flex items-center justify-center gap-2 p-12 text-sm text-muted-foreground"><LoaderCircle className="h-5 w-5 animate-spin" /> A carregar as tuas tarefas…</div>
-          : !error && total === 0 ? <div className="px-5 py-12 text-center"><span className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-muted text-muted-foreground"><CalendarDays className="h-6 w-6" /></span><h3 className="mt-4 font-semibold">{hasFilters ? "Nenhuma tarefa encontrada" : "Ainda não tens tarefas"}</h3><p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">{hasFilters ? "Não existem tarefas que correspondam aos filtros seleccionados. Experimenta alterar a pesquisa." : "As tarefas associadas à tua conta aparecerão aqui quando forem criadas."}</p>{hasFilters ? <button type="button" onClick={clearFilters} className="mt-4 rounded-xl border border-border px-4 py-2.5 text-sm font-semibold hover:bg-muted">Limpar filtros</button> : <button type="button" disabled className="mt-4 inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground opacity-60" title="A criação de tarefas empresariais ainda não está disponível"><CircleHelp className="h-4 w-4" /> Criar tarefa · Indisponível</button>}</div>
+          : !error && total === 0 ? <div className="px-5 py-12 text-center"><span className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-muted text-muted-foreground"><CalendarDays className="h-6 w-6" /></span><h3 className="mt-4 font-semibold">{hasFilters ? "Nenhuma tarefa encontrada" : "Ainda não tens tarefas"}</h3><p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">{hasFilters ? "Não existem tarefas que correspondam aos filtros seleccionados. Experimenta alterar a pesquisa." : "As tarefas associadas à tua conta aparecerão aqui quando forem criadas."}</p>{hasFilters ? <button type="button" onClick={clearFilters} className="mt-4 rounded-xl border border-border px-4 py-2.5 text-sm font-semibold hover:bg-muted">Limpar filtros</button> : <Link to="/client/tasks/new" className="mt-4 inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90"><Plus className="h-4 w-4" /> Criar tarefa</Link>}</div>
           : !error && <><div className="divide-y divide-border">{tasks.map((task) => {
-            const presentation = statusPresentation[task.status] ?? { label: task.status, className: "bg-muted text-muted-foreground", description: "Estado guardado no sistema." };
+            const presentation = task.is_draft ? { label: "Rascunho", className: "bg-violet-500/10 text-violet-700 dark:text-violet-300", description: "Rascunho privado, ainda não publicado." } : statusPresentation[task.status] ?? { label: task.status, className: "bg-muted text-muted-foreground", description: "Estado guardado no sistema." };
             const count = counts[task.id];
             const used = task.budget_total == null ? null : Number(task.budget_reserved ?? 0) + Number(task.budget_approved ?? 0) + Number(task.budget_paid ?? 0);
             const remaining = task.budget_total == null || used == null ? null : Math.max(0, Number(task.budget_total) - used);
             return <article key={task.id} className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
               <div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-2"><h3 className="font-semibold">{task.title}</h3><span className={"rounded-full px-2.5 py-1 text-xs font-semibold " + presentation.className}>{presentation.label}</span><span className="rounded-full bg-muted px-2.5 py-1 text-xs text-muted-foreground">{task.category || "Sem categoria"}</span></div><p className="mt-1 text-xs text-muted-foreground">Criada {formatDate(task.created_at)} · Actualizada {formatDate(task.updated_at)}</p><div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-xs text-muted-foreground"><span>{count ? count.participations + " participações" : count ? "0 participações" : "Participações: —"}</span><span>{count ? count.approved + " conclusões aprovadas" : "Conclusões aprovadas: —"}</span>{task.budget_total != null && <span>Orçamento: {formatMoney(task.budget_total, task.currency)}</span>}{used != null && <span>Utilizado: {formatMoney(used, task.currency)}</span>}{remaining != null && <span>Restante: {formatMoney(remaining, task.currency)}</span>}</div></div>
-              <button type="button" onClick={() => void openDetails(task)} className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-border px-4 py-2.5 text-sm font-semibold hover:bg-muted"><Eye className="h-4 w-4" /> Ver detalhes</button>
+              <div className="flex flex-col gap-2 sm:flex-row">{task.is_draft && <Link to="/client/tasks/new" search={{ draft: task.id }} className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-primary/40 px-4 py-2.5 text-sm font-semibold text-primary hover:bg-primary/5"><Pencil className="h-4 w-4" /> Editar rascunho</Link>}<button type="button" onClick={() => void openDetails(task)} className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-border px-4 py-2.5 text-sm font-semibold hover:bg-muted"><Eye className="h-4 w-4" /> Ver detalhes</button></div>
             </article>;
           })}</div><div className="flex items-center justify-between gap-3 border-t border-border px-4 py-3 sm:px-5"><p className="text-xs text-muted-foreground">Página {page} de {totalPages}</p><div className="flex gap-2"><button type="button" disabled={page <= 1 || loading} onClick={() => setPage((p) => Math.max(1, p - 1))} className="inline-flex items-center gap-1 rounded-lg border border-border px-3 py-2 text-sm disabled:opacity-40"><ChevronLeft className="h-4 w-4" /> Anterior</button><button type="button" disabled={page >= totalPages || loading} onClick={() => setPage((p) => Math.min(totalPages, p + 1))} className="inline-flex items-center gap-1 rounded-lg border border-border px-3 py-2 text-sm disabled:opacity-40">Seguinte <ChevronRight className="h-4 w-4" /></button></div></div></>}
         </section>
