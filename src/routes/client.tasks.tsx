@@ -46,7 +46,7 @@ export const Route = createFileRoute("/client/tasks")({
 });
 
 const statusPresentation: Record<string, { label: string; className: string; description: string }> = {
-  active: { label: "Publicada", className: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300", description: "A tarefa está ativa no sistema." },
+  active: { label: "Ativa", className: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300", description: "A tarefa está ativa no sistema." },
   paused: { label: "Pausada", className: "bg-amber-500/10 text-amber-700 dark:text-amber-300", description: "A tarefa está temporariamente pausada." },
   completed: { label: "Concluída", className: "bg-sky-500/10 text-sky-700 dark:text-sky-300", description: "A tarefa está marcada como concluída." },
 };
@@ -192,7 +192,7 @@ function ClientTasksPage() {
           <div className="mb-4 flex items-center gap-2"><Filter className="h-4 w-4 text-muted-foreground" /><h2 className="font-semibold">Pesquisar e filtrar</h2></div>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
             <label className="text-xs font-medium text-muted-foreground xl:col-span-2">Nome da tarefa<div className="relative mt-1"><Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" /><input className={inputClass + " pl-9"} value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Pesquisar pelo nome…" /></div></label>
-            <label className="text-xs font-medium text-muted-foreground">Estado<select className={inputClass + " mt-1"} value={status} onChange={(e) => setStatus(e.target.value)}><option value="all">Todos os estados</option><option value="active">Publicada</option><option value="paused">Pausada</option><option value="completed">Concluída</option></select></label>
+            <label className="text-xs font-medium text-muted-foreground">Estado<select className={inputClass + " mt-1"} value={status} onChange={(e) => setStatus(e.target.value)}><option value="all">Todos os estados</option><option value="active">Ativa</option><option value="paused">Pausada</option><option value="completed">Concluída</option></select></label>
             <label className="text-xs font-medium text-muted-foreground">Categoria<select className={inputClass + " mt-1"} value={category} onChange={(e) => setCategory(e.target.value)}><option value="all">Todas as categorias</option>{categories.map((item) => <option key={item} value={item}>{item}</option>)}</select></label>
             <label className="text-xs font-medium text-muted-foreground">Criada a partir de<input type="date" className={inputClass + " mt-1"} value={dateFrom} max={dateTo || undefined} onChange={(e) => setDateFrom(e.target.value)} /></label>
             <label className="text-xs font-medium text-muted-foreground">Criada até<input type="date" className={inputClass + " mt-1"} value={dateTo} min={dateFrom || undefined} onChange={(e) => setDateTo(e.target.value)} /></label>
