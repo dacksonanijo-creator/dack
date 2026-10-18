@@ -315,10 +315,6 @@ export interface FileRoutesByFullPath {
   '/client': typeof ClientRoute
   '/client/profile': typeof ClientProfileRoute
   '/client/tasks': typeof ClientTasksRoute
-  '/client/profile': typeof ClientProfileRoute
-  '/client/tasks': typeof ClientTasksRoute
-  '/client/profile': typeof ClientProfileRoute
-  '/client/tasks': typeof ClientTasksRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/privacy': typeof PrivacyRoute
@@ -467,10 +463,6 @@ export interface FileRouteTypes {
     | '/admin'
     | '/app'
     | '/client'
-    | '/client/profile'
-    | '/client/tasks'
-    | '/client/profile'
-    | '/client/tasks'
     | '/client/profile'
     | '/client/tasks'
     | '/forgot-password'
