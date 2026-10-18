@@ -479,8 +479,6 @@ export interface FileRouteTypes {
     | '/client/profile'
     | '/client/tasks'
     | '/client/tasks/new'
-    | '/client/tasks/new'
-    | '/client/tasks/new'
     | '/forgot-password'
     | '/login'
     | '/privacy'
