@@ -248,34 +248,6 @@ $$;
 REVOKE ALL ON FUNCTION public.save_company_task_draft(uuid, jsonb) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.save_company_task_draft(uuid, jsonb) TO authenticated;
 
-CREATE OR REPLACE FUNCTION public.delete_company_task_draft(p_task_id uuid)
-RETURNS void
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = ''
-AS $$
-DECLARE
-  v_user_id uuid := auth.uid();
-BEGIN
-  IF v_user_id IS NULL OR NOT EXISTS (
-    SELECT 1 FROM public.profiles p WHERE p.id=v_user_id AND p.account_type='client'
-  ) THEN RAISE EXCEPTION 'Conta empresarial não autorizada.'; END IF;
-  IF NOT EXISTS (
-    SELECT 1 FROM public.tasks t
-    JOIN public.companies c ON c.id=t.company_id
-    WHERE t.id=p_task_id AND c.owner_id=v_user_id AND t.is_draft=true
-  ) THEN RAISE EXCEPTION 'O rascunho não existe ou não pertence a esta conta.'; END IF;
-  IF EXISTS (SELECT 1 FROM public.task_submissions s WHERE s.task_id=p_task_id) THEN
-    RAISE EXCEPTION 'Não é possível eliminar um rascunho que já tem participações.';
-  END IF;
-  PERFORM set_config('taskora.allow_company_draft_write', 'on', true);
-  DELETE FROM public.tasks WHERE id=p_task_id;
-END;
-$$;
-
-REVOKE ALL ON FUNCTION public.delete_company_task_draft(uuid) FROM PUBLIC, anon;
-GRANT EXECUTE ON FUNCTION public.delete_company_task_draft(uuid) TO authenticated;
-
 CREATE OR REPLACE FUNCTION public.get_company_task_draft(p_task_id uuid)
 RETURNS public.tasks
 LANGUAGE plpgsql
