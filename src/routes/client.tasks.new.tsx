@@ -217,7 +217,7 @@ function CompanyTaskWizard() {
     await navigate({ to: "/client/tasks/new", search: { draft: data.id }, replace: true });
   };
 
-  const minDate = new Date(Date.now() + 60_000).toISOString().slice(0, 16);
+  const minDate = toLocalDateTime(new Date(Date.now() + 60_000).toISOString());
 
   return (
     <main className="min-h-screen bg-background px-4 py-6 sm:px-6 sm:py-9">
