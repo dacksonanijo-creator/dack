@@ -80,6 +80,10 @@ function ClientDashboard() {
   const loadDashboard = useCallback(async () => {
     setLoading(true);
     setLoadError("");
+    setTasks([]);
+    setParticipations(null);
+    setRecent([]);
+    setParticipationAvailable(true);
     try {
       // The owner filter is explicit; database RLS remains the security boundary.
       const { data: companies, error: companyError } = await db.from("companies")
@@ -173,12 +177,12 @@ function ClientDashboard() {
   const pausedCount = tasks.filter((task) => task.status === "paused").length;
 
   const indicators = [
-    { label: "Tarefas criadas", value: String(tasks.length), description: "Total de tarefas da tua conta", icon: ClipboardList, real: true },
-    { label: "Ativas e publicadas", value: String(activeCount), description: "Tarefas atualmente ativas", icon: Activity, real: true },
-    { label: "Concluídas", value: String(completedCount), description: "Tarefas marcadas como concluídas", icon: CheckCircle2, real: true },
-    { label: "Pausadas", value: String(pausedCount), description: "Tarefas temporariamente pausadas", icon: Clock3, real: true },
-    { label: "Em análise", value: "—", description: "Fluxo de análise de tarefas empresariais ainda não disponível", icon: History, real: false },
-    { label: "Rejeitadas ou canceladas", value: "—", description: "Estados empresariais de rejeição/cancelamento ainda não disponíveis", icon: ShieldAlert, real: false },
+    { label: "Tarefas criadas", value: loadError ? "—" : String(tasks.length), description: "Total de tarefas da tua conta", icon: ClipboardList },
+    { label: "Ativas e publicadas", value: loadError ? "—" : String(activeCount), description: "Tarefas atualmente ativas", icon: Activity },
+    { label: "Concluídas", value: loadError ? "—" : String(completedCount), description: "Tarefas marcadas como concluídas", icon: CheckCircle2 },
+    { label: "Pausadas", value: loadError ? "—" : String(pausedCount), description: "Tarefas temporariamente pausadas", icon: Clock3 },
+    { label: "Em análise", value: "—", description: "Fluxo de análise de tarefas empresariais ainda não disponível", icon: History },
+    { label: "Rejeitadas ou canceladas", value: "—", description: "Estados empresariais de rejeição/cancelamento ainda não disponíveis", icon: ShieldAlert },
   ];
 
   return (
