@@ -11,6 +11,24 @@ ALTER TABLE public.tasks
   ADD COLUMN IF NOT EXISTS destination_url text,
   ADD COLUMN IF NOT EXISTS completion_criteria text;
 
+DO $
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conname = 'tasks_company_draft_safe'
+      AND conrelid = 'public.tasks'::regclass
+  ) THEN
+    ALTER TABLE public.tasks
+      ADD CONSTRAINT tasks_company_draft_safe
+      CHECK (
+        NOT is_draft
+        OR (status = 'paused'::public.task_status AND reward = 0
+            AND budget_total IS NULL AND slots_filled = 0)
+      );
+  END IF;
+END;
+$;
+
 CREATE INDEX IF NOT EXISTS idx_tasks_company_drafts
   ON public.tasks(company_id, updated_at DESC)
   WHERE is_draft = true;
