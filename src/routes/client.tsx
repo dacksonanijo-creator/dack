@@ -60,7 +60,7 @@ const dateTime = (value: string) => new Intl.DateTimeFormat("pt-PT", { dateStyle
 
 const quickLinks = [
   { label: "Perfil empresarial", description: "Dados e estado da conta", icon: Settings2, available: true, to: "/client/profile" },
-  { label: "Minhas tarefas", description: "Consultar tarefas e estados", icon: ClipboardList, available: false },
+  { label: "Minhas tarefas", description: "Consultar e filtrar tarefas da conta", icon: ClipboardList, available: true, to: "/client/tasks" },
   { label: "Criar tarefa", description: "Disponível após os controlos necessários", icon: FilePlus2, available: false },
   { label: "Carteira e orçamento", description: "Disponível com o módulo empresarial", icon: CreditCard, available: false },
   { label: "Participações e resultados", description: "Acompanhar resultados", icon: Users, available: false },
