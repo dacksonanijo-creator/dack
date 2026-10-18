@@ -362,6 +362,8 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/client': typeof ClientRoute
+  '/client/profile': typeof ClientProfileRoute
+  '/client/tasks': typeof ClientTasksRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/privacy': typeof PrivacyRoute
@@ -412,6 +414,8 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/app': typeof AppRouteWithChildren
   '/client': typeof ClientRoute
+  '/client/profile': typeof ClientProfileRoute
+  '/client/tasks': typeof ClientTasksRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/privacy': typeof PrivacyRoute
@@ -512,6 +516,8 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/client'
+    | '/client/profile'
+    | '/client/tasks'
     | '/forgot-password'
     | '/login'
     | '/privacy'
@@ -561,6 +567,8 @@ export interface FileRouteTypes {
     | '/admin'
     | '/app'
     | '/client'
+    | '/client/profile'
+    | '/client/tasks'
     | '/forgot-password'
     | '/login'
     | '/privacy'
