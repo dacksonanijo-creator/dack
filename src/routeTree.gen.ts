@@ -16,6 +16,7 @@ import { Route as AppRouteImport } from './routes/app'
 import { Route as ClientRouteImport } from './routes/client'
 import { Route as ClientProfileRouteImport } from './routes/client.profile'
 import { Route as ClientTasksRouteImport } from './routes/client.tasks'
+import { Route as ClientTasksNewRouteImport } from './routes/client.tasks.new'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as PrivacyRouteImport } from './routes/privacy'
@@ -92,6 +93,11 @@ const ClientProfileRoute = ClientProfileRouteImport.update({
 const ClientTasksRoute = ClientTasksRouteImport.update({
   id: '/client/tasks',
   path: '/client/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClientTasksNewRoute = ClientTasksNewRouteImport.update({
+  id: '/client/tasks/new',
+  path: '/client/tasks/new',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
@@ -315,6 +321,7 @@ export interface FileRoutesByFullPath {
   '/client': typeof ClientRoute
   '/client/profile': typeof ClientProfileRoute
   '/client/tasks': typeof ClientTasksRoute
+  '/client/tasks/new': typeof ClientTasksNewRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/privacy': typeof PrivacyRoute
@@ -364,6 +371,7 @@ export interface FileRoutesByTo {
   '/client': typeof ClientRoute
   '/client/profile': typeof ClientProfileRoute
   '/client/tasks': typeof ClientTasksRoute
+  '/client/tasks/new': typeof ClientTasksNewRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/privacy': typeof PrivacyRoute
@@ -416,6 +424,7 @@ export interface FileRoutesById {
   '/client': typeof ClientRoute
   '/client/profile': typeof ClientProfileRoute
   '/client/tasks': typeof ClientTasksRoute
+  '/client/tasks/new': typeof ClientTasksNewRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/privacy': typeof PrivacyRoute
@@ -469,6 +478,9 @@ export interface FileRouteTypes {
     | '/client'
     | '/client/profile'
     | '/client/tasks'
+    | '/client/tasks/new'
+    | '/client/tasks/new'
+    | '/client/tasks/new'
     | '/forgot-password'
     | '/login'
     | '/privacy'
@@ -621,6 +633,7 @@ export interface RootRouteChildren {
   ClientRoute: typeof ClientRoute
   ClientProfileRoute: typeof ClientProfileRoute
   ClientTasksRoute: typeof ClientTasksRoute
+  ClientTasksNewRoute: typeof ClientTasksNewRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
   PrivacyRoute: typeof PrivacyRoute
@@ -680,6 +693,20 @@ declare module '@tanstack/react-router' {
       path: '/client/tasks'
       fullPath: '/client/tasks'
       preLoaderRoute: typeof ClientTasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/client/tasks/new': {
+      id: '/client/tasks/new'
+      path: '/client/tasks/new'
+      fullPath: '/client/tasks/new'
+      preLoaderRoute: typeof ClientTasksNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/client/tasks/new': {
+      id: '/client/tasks/new'
+      path: '/client/tasks/new'
+      fullPath: '/client/tasks/new'
+      preLoaderRoute: typeof ClientTasksNewRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/forgot-password': {
@@ -1091,6 +1118,7 @@ const rootRouteChildren: RootRouteChildren = {
   ClientRoute: ClientRoute,
   ClientProfileRoute: ClientProfileRoute,
   ClientTasksRoute: ClientTasksRoute,
+  ClientTasksNewRoute: ClientTasksNewRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
   PrivacyRoute: PrivacyRoute,
