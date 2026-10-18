@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import {
   ArrowLeft, CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, CircleHelp,
@@ -81,7 +81,6 @@ function ClientTasksPage() {
   const { userId } = Route.useRouteContext();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [companyIds, setCompanyIds] = useState<string[]>([]);
   const [tasks, setTasks] = useState<TaskRow[]>([]);
   const [total, setTotal] = useState(0);
   const [categories, setCategories] = useState<string[]>([]);
@@ -106,7 +105,6 @@ function ClientTasksPage() {
         .select("id").eq("owner_id", userId);
       if (companiesError) throw companiesError;
       const ids = (companies ?? []).map((item: { id: string }) => item.id as string);
-      setCompanyIds(ids);
       if (ids.length === 0) {
         setTasks([]); setTotal(0); setCategories([]); setCounts({});
         setLoading(false);
@@ -125,7 +123,7 @@ function ClientTasksPage() {
       if (status !== "all") request = request.eq("status", status);
       if (category !== "all") request = request.eq("category", category);
       if (dateFrom) request = request.gte("created_at", new Date(dateFrom + "T00:00:00").toISOString());
-      if (dateTo) request = request.lt("created_at", new Date(dateTo + "T00:00:00").getTime() + 86400000 ? new Date(new Date(dateTo + "T00:00:00").getTime() + 86400000).toISOString() : dateTo);
+      if (dateTo) request = request.lt("created_at", new Date(new Date(dateTo + "T00:00:00").getTime() + 86400000).toISOString());
       const offset = (page - 1) * PAGE_SIZE;
       const { data: taskRows, error: taskError, count: taskCount } = await request
         .order(sortBy, { ascending: false }).range(offset, offset + PAGE_SIZE - 1);
