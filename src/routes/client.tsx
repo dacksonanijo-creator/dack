@@ -129,7 +129,7 @@ function ClientDashboard() {
         setParticipations((submissionResult.data ?? []).length);
       }
 
-      const taskById = new Map(ownTasks.map((task) => [task.id, task]));
+      const taskById = new Map<string, TaskRow>(ownTasks.map((task) => [task.id, task] as const));
       const activityItems: RecentItem[] = [];
       for (const task of ownTasks) {
         activityItems.push({
