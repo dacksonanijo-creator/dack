@@ -149,7 +149,7 @@ BEGIN
   IF v_criteria IS NULL OR length(v_criteria) < 5 OR length(v_criteria) > 2000 THEN
     RAISE EXCEPTION 'Os critérios de conclusão são obrigatórios e devem ter entre 5 e 2000 caracteres.';
   END IF;
-  IF v_category NOT IN (
+  IF v_category IS NULL OR v_category NOT IN (
     'questionnaires_surveys','website_app_testing','product_service_review',
     'verified_page_visits','content_promotion','media_promotion','other_digital'
   ) THEN
@@ -186,26 +186,29 @@ BEGIN
     RAISE EXCEPTION 'O prazo deve estar no futuro e não pode ultrapassar dois anos.';
   END IF;
 
-  SELECT * INTO v_company FROM public.companies
-  WHERE owner_id = v_user_id ORDER BY created_at ASC LIMIT 1;
-  IF NOT FOUND THEN
-    INSERT INTO public.companies(owner_id, name, description, website, country)
-    VALUES (
-      v_user_id,
-      left(coalesce(nullif(btrim(v_profile.business_name), ''), nullif(btrim(v_profile.full_name), ''), 'Cliente TASKORA'), 160),
-      v_profile.business_description,
-      v_profile.business_website,
-      coalesce(nullif(btrim(v_profile.country), ''), 'MZ')
-    ) RETURNING * INTO v_company;
-  END IF;
-
   IF p_task_id IS NOT NULL THEN
-    SELECT * INTO v_task FROM public.tasks
-    WHERE id = p_task_id AND company_id = v_company.id AND is_draft = true
-    FOR UPDATE;
+    SELECT t.* INTO v_task
+    FROM public.tasks t
+    JOIN public.companies c ON c.id = t.company_id
+    WHERE t.id = p_task_id AND c.owner_id = v_user_id AND t.is_draft = true
+    FOR UPDATE OF t;
     IF NOT FOUND THEN RAISE EXCEPTION 'O rascunho não existe ou não pertence a esta conta.'; END IF;
+    SELECT * INTO v_company FROM public.companies WHERE id = v_task.company_id;
     IF EXISTS (SELECT 1 FROM public.task_submissions s WHERE s.task_id = v_task.id) THEN
       RAISE EXCEPTION 'Este rascunho já tem participações e não pode ser alterado.';
+    END IF;
+  ELSE
+    SELECT * INTO v_company FROM public.companies
+    WHERE owner_id = v_user_id ORDER BY created_at ASC LIMIT 1;
+    IF NOT FOUND THEN
+      INSERT INTO public.companies(owner_id, name, description, website, country)
+      VALUES (
+        v_user_id,
+        left(coalesce(nullif(btrim(v_profile.business_name), ''), nullif(btrim(v_profile.full_name), ''), 'Cliente TASKORA'), 160),
+        v_profile.business_description,
+        v_profile.business_website,
+        coalesce(nullif(btrim(v_profile.country), ''), 'MZ')
+      ) RETURNING * INTO v_company;
     END IF;
   END IF;
 
