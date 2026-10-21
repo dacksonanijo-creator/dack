@@ -12,9 +12,8 @@ const db = supabase as any;
 
 export const Route = createFileRoute("/client/tasks/new")({
   ssr: false,
-  validateSearch: (search: Record<string, unknown>) => ({
-    draft: typeof search.draft === "string" ? search.draft : undefined,
-  }),
+  validateSearch: (search: Record<string, unknown>): { draft?: string } =>
+    typeof search.draft === "string" ? { draft: search.draft } : {},
   beforeLoad: async () => {
     const { data, error } = await supabase.auth.getUser();
     if (error || !data.user) throw redirect({ to: "/login" });
