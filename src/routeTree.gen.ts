@@ -14,9 +14,6 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as ClientRouteImport } from './routes/client'
-import { Route as ClientProfileRouteImport } from './routes/client.profile'
-import { Route as ClientTasksRouteImport } from './routes/client.tasks'
-import { Route as ClientTasksNewRouteImport } from './routes/client.tasks.new'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as PrivacyRouteImport } from './routes/privacy'
@@ -54,10 +51,13 @@ import { Route as AppSecurityRouteImport } from './routes/app.security'
 import { Route as AppSettingsRouteImport } from './routes/app.settings'
 import { Route as AppWalletRouteImport } from './routes/app.wallet'
 import { Route as AppWithdrawalsRouteImport } from './routes/app.withdrawals'
+import { Route as ClientProfileRouteImport } from './routes/client.profile'
+import { Route as ClientTasksRouteImport } from './routes/client.tasks'
 import { Route as AdminFinanceDistributionRouteImport } from './routes/admin.finance.distribution'
 import { Route as AdminTasksNewRouteImport } from './routes/admin.tasks.new'
 import { Route as AppTasksIndexRouteImport } from './routes/app.tasks.index'
 import { Route as AppTasksTaskIdRouteImport } from './routes/app.tasks.$taskId'
+import { Route as ClientTasksNewRouteImport } from './routes/client.tasks.new'
 import { Route as ApiPublicPaymentsMpesaCallbackRouteImport } from './routes/api/public/payments/mpesa/callback'
 
 const IndexRoute = IndexRouteImport.update({
@@ -83,21 +83,6 @@ const AppRoute = AppRouteImport.update({
 const ClientRoute = ClientRouteImport.update({
   id: '/client',
   path: '/client',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ClientProfileRoute = ClientProfileRouteImport.update({
-  id: '/client/profile',
-  path: '/client/profile',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ClientTasksRoute = ClientTasksRouteImport.update({
-  id: '/client/tasks',
-  path: '/client/tasks',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ClientTasksNewRoute = ClientTasksNewRouteImport.update({
-  id: '/client/tasks/new',
-  path: '/client/tasks/new',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
@@ -285,6 +270,16 @@ const AppWithdrawalsRoute = AppWithdrawalsRouteImport.update({
   path: '/withdrawals',
   getParentRoute: () => AppRoute,
 } as any)
+const ClientProfileRoute = ClientProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => ClientRoute,
+} as any)
+const ClientTasksRoute = ClientTasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => ClientRoute,
+} as any)
 const AdminFinanceDistributionRoute =
   AdminFinanceDistributionRouteImport.update({
     id: '/distribution',
@@ -306,6 +301,11 @@ const AppTasksTaskIdRoute = AppTasksTaskIdRouteImport.update({
   path: '/tasks/$taskId',
   getParentRoute: () => AppRoute,
 } as any)
+const ClientTasksNewRoute = ClientTasksNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => ClientTasksRoute,
+} as any)
 const ApiPublicPaymentsMpesaCallbackRoute =
   ApiPublicPaymentsMpesaCallbackRouteImport.update({
     id: '/api/public/payments/mpesa/callback',
@@ -318,10 +318,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/admin': typeof AdminRouteWithChildren
   '/app': typeof AppRouteWithChildren
-  '/client': typeof ClientRoute
-  '/client/profile': typeof ClientProfileRoute
-  '/client/tasks': typeof ClientTasksRoute
-  '/client/tasks/new': typeof ClientTasksNewRoute
+  '/client': typeof ClientRouteWithChildren
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/privacy': typeof PrivacyRoute
@@ -357,21 +354,21 @@ export interface FileRoutesByFullPath {
   '/app/settings': typeof AppSettingsRoute
   '/app/wallet': typeof AppWalletRoute
   '/app/withdrawals': typeof AppWithdrawalsRoute
+  '/client/profile': typeof ClientProfileRoute
+  '/client/tasks': typeof ClientTasksRouteWithChildren
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/admin/finance/distribution': typeof AdminFinanceDistributionRoute
   '/admin/tasks/new': typeof AdminTasksNewRoute
   '/app/tasks/$taskId': typeof AppTasksTaskIdRoute
+  '/client/tasks/new': typeof ClientTasksNewRoute
   '/app/tasks/': typeof AppTasksIndexRoute
   '/api/public/payments/mpesa/callback': typeof ApiPublicPaymentsMpesaCallbackRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/client': typeof ClientRoute
-  '/client/profile': typeof ClientProfileRoute
-  '/client/tasks': typeof ClientTasksRoute
-  '/client/tasks/new': typeof ClientTasksNewRoute
+  '/client': typeof ClientRouteWithChildren
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/privacy': typeof PrivacyRoute
@@ -407,11 +404,14 @@ export interface FileRoutesByTo {
   '/app/settings': typeof AppSettingsRoute
   '/app/wallet': typeof AppWalletRoute
   '/app/withdrawals': typeof AppWithdrawalsRoute
+  '/client/profile': typeof ClientProfileRoute
+  '/client/tasks': typeof ClientTasksRouteWithChildren
   '/admin': typeof AdminIndexRoute
   '/app': typeof AppIndexRoute
   '/admin/finance/distribution': typeof AdminFinanceDistributionRoute
   '/admin/tasks/new': typeof AdminTasksNewRoute
   '/app/tasks/$taskId': typeof AppTasksTaskIdRoute
+  '/client/tasks/new': typeof ClientTasksNewRoute
   '/app/tasks': typeof AppTasksIndexRoute
   '/api/public/payments/mpesa/callback': typeof ApiPublicPaymentsMpesaCallbackRoute
 }
@@ -421,10 +421,7 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/admin': typeof AdminRouteWithChildren
   '/app': typeof AppRouteWithChildren
-  '/client': typeof ClientRoute
-  '/client/profile': typeof ClientProfileRoute
-  '/client/tasks': typeof ClientTasksRoute
-  '/client/tasks/new': typeof ClientTasksNewRoute
+  '/client': typeof ClientRouteWithChildren
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/privacy': typeof PrivacyRoute
@@ -460,11 +457,14 @@ export interface FileRoutesById {
   '/app/settings': typeof AppSettingsRoute
   '/app/wallet': typeof AppWalletRoute
   '/app/withdrawals': typeof AppWithdrawalsRoute
+  '/client/profile': typeof ClientProfileRoute
+  '/client/tasks': typeof ClientTasksRouteWithChildren
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/admin/finance/distribution': typeof AdminFinanceDistributionRoute
   '/admin/tasks/new': typeof AdminTasksNewRoute
   '/app/tasks/$taskId': typeof AppTasksTaskIdRoute
+  '/client/tasks/new': typeof ClientTasksNewRoute
   '/app/tasks/': typeof AppTasksIndexRoute
   '/api/public/payments/mpesa/callback': typeof ApiPublicPaymentsMpesaCallbackRoute
 }
@@ -476,9 +476,6 @@ export interface FileRouteTypes {
     | '/admin'
     | '/app'
     | '/client'
-    | '/client/profile'
-    | '/client/tasks'
-    | '/client/tasks/new'
     | '/forgot-password'
     | '/login'
     | '/privacy'
@@ -514,11 +511,14 @@ export interface FileRouteTypes {
     | '/app/settings'
     | '/app/wallet'
     | '/app/withdrawals'
+    | '/client/profile'
+    | '/client/tasks'
     | '/admin/'
     | '/app/'
     | '/admin/finance/distribution'
     | '/admin/tasks/new'
     | '/app/tasks/$taskId'
+    | '/client/tasks/new'
     | '/app/tasks/'
     | '/api/public/payments/mpesa/callback'
   fileRoutesByTo: FileRoutesByTo
@@ -526,8 +526,6 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/client'
-    | '/client/profile'
-    | '/client/tasks'
     | '/forgot-password'
     | '/login'
     | '/privacy'
@@ -563,11 +561,14 @@ export interface FileRouteTypes {
     | '/app/settings'
     | '/app/wallet'
     | '/app/withdrawals'
+    | '/client/profile'
+    | '/client/tasks'
     | '/admin'
     | '/app'
     | '/admin/finance/distribution'
     | '/admin/tasks/new'
     | '/app/tasks/$taskId'
+    | '/client/tasks/new'
     | '/app/tasks'
     | '/api/public/payments/mpesa/callback'
   id:
@@ -577,8 +578,6 @@ export interface FileRouteTypes {
     | '/admin'
     | '/app'
     | '/client'
-    | '/client/profile'
-    | '/client/tasks'
     | '/forgot-password'
     | '/login'
     | '/privacy'
@@ -614,11 +613,14 @@ export interface FileRouteTypes {
     | '/app/settings'
     | '/app/wallet'
     | '/app/withdrawals'
+    | '/client/profile'
+    | '/client/tasks'
     | '/admin/'
     | '/app/'
     | '/admin/finance/distribution'
     | '/admin/tasks/new'
     | '/app/tasks/$taskId'
+    | '/client/tasks/new'
     | '/app/tasks/'
     | '/api/public/payments/mpesa/callback'
   fileRoutesById: FileRoutesById
@@ -628,10 +630,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   AdminRoute: typeof AdminRouteWithChildren
   AppRoute: typeof AppRouteWithChildren
-  ClientRoute: typeof ClientRoute
-  ClientProfileRoute: typeof ClientProfileRoute
-  ClientTasksRoute: typeof ClientTasksRoute
-  ClientTasksNewRoute: typeof ClientTasksNewRoute
+  ClientRoute: typeof ClientRouteWithChildren
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
   PrivacyRoute: typeof PrivacyRoute
@@ -677,34 +676,6 @@ declare module '@tanstack/react-router' {
       path: '/client'
       fullPath: '/client'
       preLoaderRoute: typeof ClientRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/client/profile': {
-      id: '/client/profile'
-      path: '/client/profile'
-      fullPath: '/client/profile'
-      preLoaderRoute: typeof ClientProfileRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/client/tasks': {
-      id: '/client/tasks'
-      path: '/client/tasks'
-      fullPath: '/client/tasks'
-      preLoaderRoute: typeof ClientTasksRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/client/tasks/new': {
-      id: '/client/tasks/new'
-      path: '/client/tasks/new'
-      fullPath: '/client/tasks/new'
-      preLoaderRoute: typeof ClientTasksNewRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/client/tasks/new': {
-      id: '/client/tasks/new'
-      path: '/client/tasks/new'
-      fullPath: '/client/tasks/new'
-      preLoaderRoute: typeof ClientTasksNewRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/forgot-password': {
@@ -966,6 +937,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppWithdrawalsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/client/profile': {
+      id: '/client/profile'
+      path: '/profile'
+      fullPath: '/client/profile'
+      preLoaderRoute: typeof ClientProfileRouteImport
+      parentRoute: typeof ClientRoute
+    }
+    '/client/tasks': {
+      id: '/client/tasks'
+      path: '/tasks'
+      fullPath: '/client/tasks'
+      preLoaderRoute: typeof ClientTasksRouteImport
+      parentRoute: typeof ClientRoute
+    }
     '/admin/finance/distribution': {
       id: '/admin/finance/distribution'
       path: '/distribution'
@@ -993,6 +978,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/app/tasks/$taskId'
       preLoaderRoute: typeof AppTasksTaskIdRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/client/tasks/new': {
+      id: '/client/tasks/new'
+      path: '/new'
+      fullPath: '/client/tasks/new'
+      preLoaderRoute: typeof ClientTasksNewRouteImport
+      parentRoute: typeof ClientTasksRoute
     }
     '/api/public/payments/mpesa/callback': {
       id: '/api/public/payments/mpesa/callback'
@@ -1108,15 +1100,37 @@ const AppRouteChildren: AppRouteChildren = {
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
+interface ClientTasksRouteChildren {
+  ClientTasksNewRoute: typeof ClientTasksNewRoute
+}
+
+const ClientTasksRouteChildren: ClientTasksRouteChildren = {
+  ClientTasksNewRoute: ClientTasksNewRoute,
+}
+
+const ClientTasksRouteWithChildren = ClientTasksRoute._addFileChildren(
+  ClientTasksRouteChildren,
+)
+
+interface ClientRouteChildren {
+  ClientProfileRoute: typeof ClientProfileRoute
+  ClientTasksRoute: typeof ClientTasksRouteWithChildren
+}
+
+const ClientRouteChildren: ClientRouteChildren = {
+  ClientProfileRoute: ClientProfileRoute,
+  ClientTasksRoute: ClientTasksRouteWithChildren,
+}
+
+const ClientRouteWithChildren =
+  ClientRoute._addFileChildren(ClientRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   AdminRoute: AdminRouteWithChildren,
   AppRoute: AppRouteWithChildren,
-  ClientRoute: ClientRoute,
-  ClientProfileRoute: ClientProfileRoute,
-  ClientTasksRoute: ClientTasksRoute,
-  ClientTasksNewRoute: ClientTasksNewRoute,
+  ClientRoute: ClientRouteWithChildren,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
   PrivacyRoute: PrivacyRoute,
