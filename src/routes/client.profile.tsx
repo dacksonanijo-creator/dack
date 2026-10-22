@@ -34,6 +34,7 @@ function BusinessProfilePage() {
   const { userId } = Route.useRouteContext();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [loadError, setLoadError] = useState("");
   const [status, setStatus] = useState("incomplete");
   const [reason, setReason] = useState("");
   const [form, setForm] = useState({
@@ -48,7 +49,7 @@ function BusinessProfilePage() {
         .select("business_name,business_type,country,business_category,email,phone,business_website,business_description,verification_status")
         .eq("id", userId).maybeSingle();
       if (!alive) return;
-      if (error) toast.error("Não foi possível carregar o perfil empresarial.");
+      if (error) { setLoadError("Não foi possível carregar o perfil empresarial. Verifica a ligação e tenta novamente."); toast.error("Não foi possível carregar o perfil empresarial."); setLoading(false); return; }
       if (data) {
         setForm({
           business_name: data.business_name ?? "", business_type: data.business_type ?? "empresa",
@@ -57,30 +58,64 @@ function BusinessProfilePage() {
           business_description: data.business_description ?? "",
         });
         setStatus(data.verification_status ?? "incomplete");
+      } else {
+        setLoadError("Não foi encontrado um perfil empresarial para esta conta. Não foram carregados dados de exemplo.");
       }
       setLoading(false);
-    })();
+    })().catch((error) => {
+      console.error("Taskora business profile load failed", error);
+      if (alive) { setLoadError("Ocorreu um erro ao carregar o perfil. Tenta novamente."); setLoading(false); }
+    });
     return () => { alive = false; };
   }, [userId]);
 
   const update = (key: keyof typeof form, value: string) => setForm((old) => ({ ...old, [key]: value }));
   const save = async () => {
-    if (!form.business_name.trim() || !form.business_type || !form.country.trim() ||
-        !form.business_category.trim() || !form.email.trim() || !form.phone.trim()) {
+    if (saving || loading || loadError) return;
+    if (![form.business_name, form.business_type, form.country, form.business_category, form.email, form.phone].every((value) => value.trim())) {
       toast.error("Preenche todos os campos obrigatórios.");
       return;
     }
+    if (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(form.email.trim())) {
+      toast.error("Introduz um endereço de email válido.");
+      return;
+    }
+    if (form.business_website.trim()) {
+      try { new URL(form.business_website.trim()); }
+      catch { toast.error("Introduz um endereço de website válido, incluindo https://."); return; }
+    }
+    if (!["empresa", "comerciante", "criador_conteudo", "outro"].includes(form.business_type)) {
+      toast.error("Seleciona um tipo de cliente válido.");
+      return;
+    }
     setSaving(true);
-    const { error } = await db.from("profiles").update({
-      business_name: form.business_name.trim(), business_type: form.business_type,
-      country: form.country.trim(), business_category: form.business_category.trim(),
-      email: form.email.trim(), phone: form.phone.trim(),
-      business_website: form.business_website.trim() || null,
-      business_description: form.business_description.trim() || null,
-    }).eq("id", userId);
-    setSaving(false);
-    if (error) { toast.error("Não foi possível guardar o perfil. Tenta novamente."); return; }
-    toast.success("Perfil empresarial guardado.");
+    try {
+      const { error } = await db.from("profiles").update({
+        business_name: form.business_name.trim(), business_type: form.business_type,
+        country: form.country.trim(), business_category: form.business_category.trim(),
+        email: form.email.trim(), phone: form.phone.trim(),
+        business_website: form.business_website.trim() || null,
+        business_description: form.business_description.trim() || null,
+      }).eq("id", userId);
+      if (error) throw error;
+      const { data, error: reloadError } = await db.from("profiles")
+        .select("business_name,business_type,country,business_category,email,phone,business_website,business_description,verification_status")
+        .eq("id", userId).maybeSingle();
+      if (reloadError || !data) throw reloadError ?? new Error("O perfil guardado não pôde ser confirmado.");
+      setForm({
+        business_name: data.business_name ?? "", business_type: data.business_type ?? "empresa",
+        country: data.country ?? "MZ", business_category: data.business_category ?? "",
+        email: data.email ?? "", phone: data.phone ?? "", business_website: data.business_website ?? "",
+        business_description: data.business_description ?? "",
+      });
+      setStatus(data.verification_status ?? "incomplete");
+      toast.success("Perfil guardado e alterações confirmadas.");
+    } catch (error) {
+      console.error("Taskora business profile save failed", error);
+      toast.error("Não foi possível guardar ou confirmar as alterações. Verifica a ligação e as permissões da conta.");
+    } finally {
+      setSaving(false);
+    }
   };
   const submit = async () => {
     setSaving(true);
@@ -112,23 +147,23 @@ function BusinessProfilePage() {
           {isSuspended && <p className="mt-3 text-sm text-destructive">A conta está temporariamente impedida de utilizar funcionalidades restritas. Contacta o apoio.</p>}
           {status === "verified" && <p className="mt-3 text-sm text-muted-foreground">A conta foi aprovada pela administração.</p>}
         </section>
-        {loading ? <div className="rounded-2xl border border-border p-8 text-center text-sm text-muted-foreground">A carregar perfil…</div> : (
+        {loading ? <div className="rounded-2xl border border-border p-8 text-center text-sm text-muted-foreground">A carregar perfil…</div> : loadError ? (<section role="alert" className="rounded-2xl border border-destructive/30 bg-destructive/5 p-5"><p className="text-sm text-destructive">{loadError}</p><Button className="mt-3" variant="outline" onClick={() => window.location.reload()}>Tentar novamente</Button></section>) : (
           <section className="rounded-2xl border border-border bg-card p-4 sm:p-6">
             <h2 className="mb-4 font-semibold">Dados do cliente</h2>
             <div className="grid gap-4 sm:grid-cols-2">
-              <label className="text-sm font-medium">Nome comercial ou nome público *<input className={inputClass} value={form.business_name} onChange={(e) => update("business_name", e.target.value)} maxLength={120} /></label>
-              <label className="text-sm font-medium">Tipo de cliente *<select className={inputClass} value={form.business_type} onChange={(e) => update("business_type", e.target.value)}><option value="empresa">Empresa</option><option value="comerciante">Comerciante</option><option value="criador_conteudo">Criador de conteúdo</option><option value="outro">Outro</option></select></label>
-              <label className="text-sm font-medium">País *<input className={inputClass} value={form.country} onChange={(e) => update("country", e.target.value)} placeholder="Ex.: MZ ou Moçambique" maxLength={80} /></label>
-              <label className="text-sm font-medium">Categoria de atividade *<input className={inputClass} value={form.business_category} onChange={(e) => update("business_category", e.target.value)} placeholder="Ex.: Comércio, educação, tecnologia" maxLength={120} /></label>
-              <label className="text-sm font-medium">Email de contacto *<input type="email" className={inputClass} value={form.email} onChange={(e) => update("email", e.target.value)} maxLength={254} /></label>
-              <label className="text-sm font-medium">Número de telefone *<input type="tel" className={inputClass} value={form.phone} onChange={(e) => update("phone", e.target.value)} maxLength={40} /></label>
+              <label className="text-sm font-medium">Nome comercial ou nome público *<input required className={inputClass} value={form.business_name} onChange={(e) => update("business_name", e.target.value)} maxLength={120} /></label>
+              <label className="text-sm font-medium">Tipo de cliente *<select required className={inputClass} value={form.business_type} onChange={(e) => update("business_type", e.target.value)}><option value="empresa">Empresa</option><option value="comerciante">Comerciante</option><option value="criador_conteudo">Criador de conteúdo</option><option value="outro">Outro</option></select></label>
+              <label className="text-sm font-medium">País *<input required className={inputClass} value={form.country} onChange={(e) => update("country", e.target.value)} placeholder="Ex.: MZ ou Moçambique" maxLength={80} /></label>
+              <label className="text-sm font-medium">Categoria de atividade *<input required className={inputClass} value={form.business_category} onChange={(e) => update("business_category", e.target.value)} placeholder="Ex.: Comércio, educação, tecnologia" maxLength={120} /></label>
+              <label className="text-sm font-medium">Email de contacto *<input required type="email" className={inputClass} value={form.email} onChange={(e) => update("email", e.target.value)} maxLength={254} /></label>
+              <label className="text-sm font-medium">Número de telefone *<input required type="tel" className={inputClass} value={form.phone} onChange={(e) => update("phone", e.target.value)} maxLength={40} /></label>
               <label className="text-sm font-medium sm:col-span-2">Website ou link principal (opcional)<input type="url" className={inputClass} value={form.business_website} onChange={(e) => update("business_website", e.target.value)} placeholder="https://" maxLength={500} /></label>
               <label className="text-sm font-medium sm:col-span-2">Descrição breve (opcional)<textarea className={inputClass} rows={4} value={form.business_description} onChange={(e) => update("business_description", e.target.value)} maxLength={1000} /></label>
             </div>
             <p className="mt-4 text-xs text-muted-foreground">Os campos assinalados com * são obrigatórios. Não é necessário enviar documentos nesta etapa.</p>
             <div className="mt-5 flex flex-col gap-3 sm:flex-row">
-              <Button onClick={save} disabled={saving || isSuspended} className="w-full sm:w-auto">{saving ? "A guardar…" : "Guardar alterações"}</Button>
-              <Button onClick={submit} disabled={saving || isSuspended || status === "verified" || status === "pending"} variant="outline" className="w-full sm:w-auto">{saving ? "A processar…" : status === "pending" ? "Em análise" : "Submeter para verificação"}</Button>
+              <Button onClick={save} disabled={saving || loading || !!loadError || isSuspended} className="w-full sm:w-auto">{saving ? "A guardar…" : "Guardar alterações"}</Button>
+              <Button onClick={submit} disabled={saving || loading || !!loadError || isSuspended || status === "verified" || status === "pending"} variant="outline" className="w-full sm:w-auto">{saving ? "A processar…" : status === "pending" ? "Em análise" : "Submeter para verificação"}</Button>
             </div>
           </section>
         )}
