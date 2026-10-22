@@ -8,6 +8,13 @@
       "when": 1790176307204,
       "tag": "0000_mpesa_b2c_payouts",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792670095781,
+      "tag": "0001_taskora_account_types",
+      "breakpoints": true
     }
   ]
 }
