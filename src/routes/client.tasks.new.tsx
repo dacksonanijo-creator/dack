@@ -27,15 +27,19 @@ export const Route = createFileRoute("/client/tasks/new")({
 });
 
 const categories = [
-  { value: "questionnaires_surveys", label: "Questionários e pesquisas", detail: "Recolher respostas a perguntas ou estudos." },
-  { value: "website_app_testing", label: "Testes de sites e aplicações", detail: "Testar funcionalidades e reportar resultados reais." },
-  { value: "product_service_review", label: "Avaliação de produtos e serviços", detail: "Recolher avaliações honestas de uma experiência real." },
-  { value: "verified_page_visits", label: "Visitas a páginas com objetivo verificável", detail: "Visitas com uma ação legítima e verificável, não apenas métricas artificiais." },
-  { value: "content_promotion", label: "Promoção de conteúdo", detail: "Divulgação transparente sem manipular métricas ou violar regras externas." },
-  { value: "media_promotion", label: "Divulgação de vídeos e músicas", detail: "Divulgação legítima; não inclui reproduções ou interações artificiais." },
-  { value: "other_digital", label: "Outras tarefas digitais permitidas", detail: "Outra atividade digital legítima, sujeita a análise futura." },
+  { value: "questionnaires_surveys", label: "Pesquisas e questionários", detail: "Recolher respostas honestas a estudos e inquéritos.", examples: "Ex.: questionário de satisfação ou hábitos de consumo." },
+  { value: "information_research", label: "Pesquisa de informações", detail: "Localizar informação pública e verificar fontes.", examples: "Ex.: recolher horários publicados ou comparar informação pública." },
+  { value: "data_entry_organization", label: "Entrada e organização de dados", detail: "Introduzir, estruturar ou categorizar dados autorizados.", examples: "Ex.: organizar listas públicas ou classificar registos não sensíveis." },
+  { value: "website_app_testing", label: "Teste de aplicações e websites", detail: "Testar funções reais e comunicar problemas encontrados.", examples: "Ex.: testar um formulário ou reportar um erro reproduzível." },
+  { value: "photography", label: "Fotografia", detail: "Produzir fotografias próprias, autorizadas e relevantes.", examples: "Ex.: fotografar um produto próprio ou local com autorização." },
+  { value: "audio_voice_recording", label: "Gravação de áudio e voz", detail: "Gravar voz ou sons com consentimento e direitos necessários.", examples: "Ex.: ler frases fornecidas ou gravar pronúncias." },
+  { value: "video_recording", label: "Gravação de vídeo", detail: "Criar vídeos originais respeitando privacidade e consentimento.", examples: "Ex.: demonstrar uma função ou gravar uma apresentação." },
+  { value: "writing_editing", label: "Escrita e revisão de conteúdo", detail: "Escrever, corrigir ou rever conteúdo original.", examples: "Ex.: rever gramática, preparar descrições ou resumir texto autorizado." },
+  { value: "data_annotation", label: "Classificação e anotação de dados", detail: "Aplicar etiquetas ou critérios consistentes a dados permitidos.", examples: "Ex.: categorizar imagens licenciadas ou classificar frases." },
+  { value: "product_service_review", label: "Avaliação de produtos e experiências", detail: "Recolher opiniões genuínas sobre uma experiência real.", examples: "Ex.: avaliar usabilidade após teste; nunca publicar avaliações falsas." },
+  { value: "translation_transcription", label: "Tradução e transcrição", detail: "Traduzir conteúdo autorizado ou transcrever áudio com direitos.", examples: "Ex.: transcrever entrevista consentida ou traduzir texto próprio." },
+  { value: "custom_digital_tasks", label: "Tarefas digitais personalizadas", detail: "Descrever uma atividade digital legítima para análise.", examples: "Ex.: verificar links públicos ou executar um fluxo de teste." },
 ] as const;
-
 type DraftForm = {
   category: string;
   title: string;
@@ -125,11 +129,11 @@ function CompanyTaskWizard() {
     setValidationError("");
   };
   const category = categories.find((item) => item.value === form.category);
-  const requiresUrl = ["website_app_testing", "product_service_review", "verified_page_visits", "content_promotion", "media_promotion"].includes(form.category);
+  const requiresUrl = ["website_app_testing", "product_service_review"].includes(form.category);
 
   const validateStep = (stepIndex: number) => {
     if (stepIndex === 0) {
-      if (!category) return "Escolhe um tipo de serviço permitido.";
+      if (!category) return "Escolhe uma das 12 categorias disponíveis.";
     }
     if (stepIndex === 1) {
       if (form.title.trim().length < 3 || form.title.trim().length > 120) return "O título deve ter entre 3 e 120 caracteres.";
@@ -240,7 +244,7 @@ function CompanyTaskWizard() {
             <section className="rounded-2xl border border-border bg-card p-4 sm:p-6">
               {step === 0 && <>
                 <h2 className="text-lg font-semibold">Escolhe o tipo de serviço</h2><p className="mt-1 text-sm text-muted-foreground">Seleciona uma categoria adequada à atividade pretendida.</p>
-                <div className="mt-4 grid gap-3 sm:grid-cols-2">{categories.map((item) => <button key={item.value} type="button" onClick={() => update("category", item.value)} className={"rounded-xl border p-4 text-left transition-colors " + (form.category === item.value ? "border-primary bg-primary/5 ring-2 ring-primary/20" : "border-border hover:bg-muted/50")}><span className="flex items-start justify-between gap-2"><span className="font-semibold">{item.label}</span>{form.category === item.value && <CheckCircle2 className="h-5 w-5 shrink-0 text-primary" />}</span><span className="mt-2 block text-sm text-muted-foreground">{item.detail}</span></button>)}</div>
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">{categories.map((item) => <button key={item.value} type="button" onClick={() => update("category", item.value)} className={"rounded-xl border p-4 text-left transition-colors " + (form.category === item.value ? "border-primary bg-primary/5 ring-2 ring-primary/20" : "border-border hover:bg-muted/50")}><span className="flex items-start justify-between gap-2"><span className="font-semibold">{item.label}</span>{form.category === item.value && <CheckCircle2 className="h-5 w-5 shrink-0 text-primary" />}</span><span className="mt-2 block text-sm text-muted-foreground">{item.detail}</span><span className="mt-2 block text-xs leading-5 text-muted-foreground">{item.examples}</span></button>)}</div>
                 <div className="mt-4 flex items-start gap-2 rounded-xl border border-amber-500/30 bg-amber-500/5 p-3 text-xs leading-5 text-muted-foreground"><ShieldAlert className="mt-0.5 h-4 w-4 shrink-0" />Não são permitidas compras de seguidores, likes artificiais, reproduções falsas, avaliações enganosas nem outras ações que violem as regras das plataformas.</div>
               </>}
               {step === 1 && <>
