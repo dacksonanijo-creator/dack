@@ -35,7 +35,9 @@ export const Route = createFileRoute("/client")({
     const { data: profile, error: profileError } = await db.from("profiles")
       .select("account_type,full_name,business_name,verification_status,email")
       .eq("id", data.user.id).maybeSingle();
-    if (profileError || profile?.account_type !== "client") throw redirect({ to: "/app" });
+    // Do not turn profile-query failures or missing profiles into worker access.
+    if (profileError || !profile) throw redirect({ to: "/welcome" });
+    if (profile.account_type !== "client") throw redirect({ to: "/app" });
     return { userId: data.user.id, profile: profile as ClientProfile, authEmail: data.user.email ?? null };
   },
   component: ClientDashboard,

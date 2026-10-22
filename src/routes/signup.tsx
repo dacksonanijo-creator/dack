@@ -96,7 +96,7 @@ function Signup() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: window.location.origin + "/app",
+          redirectTo: window.location.origin + "/",
           queryParams: { prompt: "select_account" },
         },
       });
@@ -129,7 +129,7 @@ function Signup() {
         email,
         password: form.password,
         options: {
-          emailRedirectTo: window.location.origin + "/app",
+          emailRedirectTo: window.location.origin + "/",
           data: { full_name: form.fullName.trim(), country: form.country, account_type: accountType },
         },
       });
@@ -165,12 +165,20 @@ function Signup() {
           full_name: form.fullName.trim(),
           email,
           country: form.country,
+          account_type: accountType,
+          // Persist the selected account type in the trusted profile row so
+          // route guards can reliably open the correct dashboard after signup.
+          account_type: accountType,
         });
-        if (profileError) console.error("[signup] perfil:", profileError.message);
+        if (profileError) {
+          console.error("[signup] perfil:", profileError.message);
+          toast.error("A conta foi autenticada, mas não foi possível guardar o perfil. Tenta iniciar sessão novamente ou contacta o apoio.");
+          return;
+        }
       }
 
       toast.success(t("auth.signup.createdSuccess"));
-      navigate({ to: accountType === "client" ? "/client" : "/app" });
+      navigate({ to: accountType === "client" ? "/client" : "/app", replace: true });
     } catch (err) {
       toast.error(t(authErrorMessage(err instanceof Error ? err.message : String(err))));
     } finally {

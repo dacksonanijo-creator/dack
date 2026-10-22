@@ -12,8 +12,12 @@ export const Route = createFileRoute("/client/profile")({
   beforeLoad: async () => {
     const { data, error } = await supabase.auth.getUser();
     if (error || !data.user) throw redirect({ to: "/login" });
-    const { data: profile } = await db.from("profiles").select("account_type").eq("id", data.user.id).maybeSingle();
-    if (profile?.account_type !== "client") throw redirect({ to: "/app" });
+    const { data: profile, error: profileError } = await db.from("profiles")
+      .select("account_type")
+      .eq("id", data.user.id)
+      .maybeSingle();
+    if (profileError || !profile) throw redirect({ to: "/welcome" });
+    if (profile.account_type !== "client") throw redirect({ to: "/app" });
     return { userId: data.user.id };
   },
   component: BusinessProfilePage,

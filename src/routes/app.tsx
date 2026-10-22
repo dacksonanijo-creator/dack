@@ -14,8 +14,14 @@ export const Route = createFileRoute("/app")({
     if (isAdminEmail(data.user.email)) return { user: data.user };
 
 
-    const { data: profile } = await (supabase as any).from("profiles").select("account_type").eq("id", data.user.id).maybeSingle();
-    if (profile?.account_type === "client") throw redirect({ to: "/client" });
+    const { data: profile, error: profileError } = await (supabase as any)
+      .from("profiles")
+      .select("account_type")
+      .eq("id", data.user.id)
+      .maybeSingle();
+    if (profileError || !profile) throw redirect({ to: "/welcome" });
+    if (profile.account_type === "client") throw redirect({ to: "/client" });
+    if (profile.account_type !== "worker") throw redirect({ to: "/welcome" });
 
     return { user: data.user };
   },
