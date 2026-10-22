@@ -234,7 +234,11 @@ export type Database = {
       }
       profiles: {
         Row: {
+          account_type: string
           avatar_url: string | null
+          business_category: string | null
+          business_contact: string | null
+          business_name: string | null
           country: string | null
           created_at: string
           email: string | null
@@ -243,9 +247,14 @@ export type Database = {
           phone: string | null
           preferred_language: string | null
           updated_at: string
+          verification_status: string
         }
         Insert: {
+          account_type?: string
           avatar_url?: string | null
+          business_category?: string | null
+          business_contact?: string | null
+          business_name?: string | null
           country?: string | null
           created_at?: string
           email?: string | null
@@ -254,9 +263,14 @@ export type Database = {
           phone?: string | null
           preferred_language?: string | null
           updated_at?: string
+          verification_status?: string
         }
         Update: {
+          account_type?: string
           avatar_url?: string | null
+          business_category?: string | null
+          business_contact?: string | null
+          business_name?: string | null
           country?: string | null
           created_at?: string
           email?: string | null
@@ -265,6 +279,7 @@ export type Database = {
           phone?: string | null
           preferred_language?: string | null
           updated_at?: string
+          verification_status?: string
         }
         Relationships: []
       }
