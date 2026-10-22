@@ -129,7 +129,7 @@ function Signup() {
         email,
         password: form.password,
         options: {
-          emailRedirectTo: window.location.origin + "/app",
+          emailRedirectTo: window.location.origin + "/",
           data: { full_name: form.fullName.trim(), country: form.country, account_type: accountType },
         },
       });
