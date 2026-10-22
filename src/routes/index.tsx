@@ -37,14 +37,26 @@ function Splash() {
       try {
         // Validate the persisted Supabase session before deciding where to land.
         // Supabase handles refresh-token renewal through the configured auth client.
-        const { data } = await supabase.auth.getUser();
+        const { data, error } = await supabase.auth.getUser();
         if (!active) return;
+        if (error) throw error;
 
         if (data.user) {
           if (isAdminEmail(data.user.email)) {
             await navigate({ to: "/admin", replace: true });
-          } else {
+            return;
+          }
+          const { data: profile, error: profileError } = await (supabase as any)
+            .from("profiles").select("account_type").eq("id", data.user.id).maybeSingle();
+          if (!active) return;
+          if (profileError || !profile?.account_type) {
+            await navigate({ to: "/welcome", replace: true });
+          } else if (profile.account_type === "client") {
+            await navigate({ to: "/client", replace: true });
+          } else if (profile.account_type === "worker") {
             await navigate({ to: "/app", replace: true });
+          } else {
+            await navigate({ to: "/welcome", replace: true });
           }
           return;
         }
