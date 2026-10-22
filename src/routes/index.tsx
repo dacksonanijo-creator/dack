@@ -43,8 +43,28 @@ function Splash() {
         if (data.user) {
           if (isAdminEmail(data.user.email)) {
             await navigate({ to: "/admin", replace: true });
-          } else {
+            return;
+          }
+
+          // The database profile is the source of truth; do not default failed
+          // lookups to the worker dashboard.
+          const { data: profile, error: profileError } = await (supabase as any)
+            .from("profiles")
+            .select("account_type")
+            .eq("id", data.user.id)
+            .maybeSingle();
+          if (!active) return;
+
+          if (profileError || !profile) {
+            await navigate({ to: "/welcome", replace: true });
+            return;
+          }
+          if (profile.account_type === "client") {
+            await navigate({ to: "/client", replace: true });
+          } else if (profile.account_type === "worker") {
             await navigate({ to: "/app", replace: true });
+          } else {
+            await navigate({ to: "/welcome", replace: true });
           }
           return;
         }
