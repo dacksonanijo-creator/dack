@@ -15,6 +15,13 @@
       "when": 1792670095781,
       "tag": "0001_taskora_account_types",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792670141080,
+      "tag": "0002_backfill_client_accounts",
+      "breakpoints": true
     }
   ]
 }
