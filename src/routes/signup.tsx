@@ -165,6 +165,9 @@ function Signup() {
           full_name: form.fullName.trim(),
           email,
           country: form.country,
+          // Persist the selected account type in the trusted profile row so
+          // route guards can reliably open the correct dashboard after signup.
+          account_type: accountType,
         });
         if (profileError) console.error("[signup] perfil:", profileError.message);
       }
