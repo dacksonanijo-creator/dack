@@ -17,6 +17,10 @@ type ClientProfile = {
   business_name: string | null;
   verification_status: string | null;
   email: string | null;
+  business_type?: string | null;
+  country?: string | null;
+  business_category?: string | null;
+  phone?: string | null;
 };
 type TaskRow = {
   id: string; title: string; status: string; created_at: string; updated_at: string;
@@ -33,7 +37,7 @@ export const Route = createFileRoute("/client")({
     if (error || !data.user) throw redirect({ to: "/login" });
     if (isAdminEmail(data.user.email)) throw redirect({ to: "/admin" });
     const { data: profile, error: profileError } = await db.from("profiles")
-      .select("account_type,full_name,business_name,verification_status,email")
+      .select("account_type,full_name,business_name,verification_status,email,business_type,country,business_category,phone")
       .eq("id", data.user.id).maybeSingle();
     if (profileError || profile?.account_type !== "client") throw redirect({ to: "/app" });
     return { userId: data.user.id, profile: profile as ClientProfile, authEmail: data.user.email ?? null };
@@ -215,6 +219,7 @@ function ClientDashboard() {
 
   const displayName = profile.business_name?.trim() || profile.full_name?.trim() || authEmail || "Cliente";
   const verificationStatus = profile.verification_status ?? "incomplete";
+  const profileIncomplete = !profile.business_name?.trim() || !profile.business_type?.trim() || !profile.country?.trim() || !profile.business_category?.trim() || !profile.email?.trim() || !profile.phone?.trim();
   const activeCount = tasks.filter((task) => task.status === "active").length;
   const completedCount = tasks.filter((task) => task.status === "completed").length;
   const pausedCount = tasks.filter((task) => task.status === "paused").length;
@@ -265,6 +270,10 @@ function ClientDashboard() {
           </Button>
         </header>
 
+        {profileIncomplete && <section className="flex flex-col gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/5 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div><p className="text-sm font-semibold">Completa o teu perfil empresarial</p><p className="mt-1 text-sm text-muted-foreground">Faltam informações obrigatórias. Preenche os dados para poderes solicitar a verificação quando estiver disponível.</p></div>
+          <Link to="/client/profile" className="inline-flex shrink-0 items-center justify-center rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90">Completar perfil</Link>
+        </section>}
         <section className="rounded-2xl border border-border bg-card p-4 sm:p-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-start gap-3">
