@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
-import { createFileRoute, Link, redirect } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
 import {
   ArrowRight, BarChart3, BriefcaseBusiness, CheckCircle2, CircleHelp, Clock3,
   ClipboardList, CreditCard, FilePlus2, History, LoaderCircle, RefreshCw,
-  Settings2, ShieldAlert, Users, Activity, LockKeyhole, AlertCircle
+  Settings2, ShieldAlert, Users, Activity, LockKeyhole, AlertCircle, Menu, X, LogOut, Bell, Wallet, FileText, CircleHelp, Megaphone
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { isAdminEmail } from "@/lib/admin";
@@ -70,6 +70,9 @@ const quickLinks = [
 
 function ClientDashboard() {
   const { userId, profile, authEmail } = Route.useRouteContext();
+  const navigate = useNavigate();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
   const [tasks, setTasks] = useState<TaskRow[]>([]);
@@ -170,6 +173,46 @@ function ClientDashboard() {
 
   useEffect(() => { void loadDashboard(); }, [loadDashboard]);
 
+
+  const signOut = async () => {
+    if (signingOut) return;
+    if (!window.confirm("Queres terminar a sessão da conta empresarial?")) return;
+    setSigningOut(true);
+    const { error } = await supabase.auth.signOut();
+    setSigningOut(false);
+    if (error) {
+      console.error("Taskora sign out failed", error);
+      window.alert("Não foi possível terminar a sessão. Verifica a ligação e tenta novamente.");
+      return;
+    }
+    setMenuOpen(false);
+    await navigate({ to: "/", replace: true });
+  };
+
+  const navGroups = [
+    { title: "MENU PRINCIPAL", items: [
+      { label: "Visão geral", to: "/client", icon: BriefcaseBusiness, available: true },
+      { label: "Criar tarefa", to: "/client/tasks/new", icon: FilePlus2, available: true },
+      { label: "Minhas tarefas", to: "/client/tasks", icon: ClipboardList, available: true },
+      { label: "Campanhas", icon: Megaphone, available: false, detail: "A gestão de campanhas ainda não está disponível." },
+      { label: "Participações", icon: Users, available: false, detail: "A gestão detalhada de participações ainda não está disponível." },
+      { label: "Resultados", icon: BarChart3, available: false, detail: "Os resultados detalhados ainda não estão disponíveis." }
+    ]},
+    { title: "GESTÃO FINANCEIRA", items: [
+      { label: "Carteira empresarial", icon: Wallet, available: false, detail: "A carteira empresarial ainda não está disponível." },
+      { label: "Adicionar fundos", icon: CreditCard, available: false, detail: "Os depósitos empresariais ainda não estão disponíveis." },
+      { label: "Histórico financeiro", icon: History, available: false, detail: "O histórico financeiro empresarial ainda não está disponível." },
+      { label: "Faturação", icon: FileText, available: false, detail: "A faturação empresarial ainda não está disponível." }
+    ]},
+    { title: "CONTA EMPRESARIAL", items: [
+      { label: "Perfil empresarial", to: "/client/profile", icon: Settings2, available: true },
+      { label: "Verificação da conta", to: "/client/profile", icon: ShieldAlert, available: true },
+      { label: "Notificações", icon: Bell, available: false, detail: "As notificações empresariais ainda não estão disponíveis." },
+      { label: "Definições", icon: Settings2, available: false, detail: "As definições empresariais ainda não estão disponíveis." },
+      { label: "Ajuda e suporte", icon: CircleHelp, available: false, detail: "A área de ajuda e suporte ainda não está disponível." }
+    ]}
+  ];
+
   const displayName = profile.business_name?.trim() || profile.full_name?.trim() || authEmail || "Cliente";
   const verificationStatus = profile.verification_status ?? "incomplete";
   const activeCount = tasks.filter((task) => task.status === "active").length;
@@ -187,7 +230,27 @@ function ClientDashboard() {
 
   return (
     <main className="min-h-screen bg-background px-4 py-5 sm:px-6 sm:py-8">
-      <div className="mx-auto max-w-6xl space-y-6">
+      <div className="mx-auto max-w-7xl space-y-6">
+        <div className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-card px-4 py-3">
+          <div className="flex min-w-0 items-center gap-3"><span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary"><BriefcaseBusiness className="h-5 w-5" /></span><div className="min-w-0"><p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">TASKORA</p><p className="truncate text-sm font-semibold">Área empresarial</p></div></div>
+          <Button variant="outline" size="sm" className="shrink-0 lg:hidden" aria-expanded={menuOpen} aria-controls="business-navigation" onClick={() => setMenuOpen((open) => !open)}>{menuOpen ? <X className="mr-2 h-4 w-4" /> : <Menu className="mr-2 h-4 w-4" />}{menuOpen ? "Fechar menu" : "Menu"}</Button>
+          <Button variant="ghost" size="sm" onClick={() => void signOut()} disabled={signingOut} className="hidden sm:inline-flex">{signingOut ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin" /> : <LogOut className="mr-2 h-4 w-4" />}{signingOut ? "A terminar..." : "Terminar sessão"}</Button>
+        </div>
+        <div className="grid gap-6 lg:grid-cols-[250px_minmax(0,1fr)]">
+          <aside id="business-navigation" className={(menuOpen ? "block" : "hidden") + " rounded-2xl border border-border bg-card p-3 lg:block lg:self-start"}>
+            <div className="mb-3 px-3 py-2"><p className="truncate text-sm font-semibold">{displayName}</p><p className="truncate text-xs text-muted-foreground">{authEmail ?? "Conta empresarial"}</p></div>
+            <nav aria-label="Menu empresarial" className="space-y-5">
+              {navGroups.map((group) => <section key={group.title}><h2 className="mb-2 px-3 text-[10px] font-bold tracking-widest text-muted-foreground">{group.title}</h2><div className="space-y-1">{group.items.map((item) => {
+                const Icon = item.icon;
+                const cls = "flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm transition-colors " + (item.available ? "text-foreground hover:bg-muted" : "cursor-not-allowed text-muted-foreground opacity-70");
+                return item.available && item.to
+                  ? <Link key={item.label} to={item.to} onClick={() => setMenuOpen(false)} className={cls} activeProps={{ className: "bg-primary/10 font-semibold text-primary" }}><Icon className="h-4 w-4 shrink-0" /><span>{item.label}</span></Link>
+                  : <button key={item.label} type="button" className={cls} aria-disabled="true" title={item.detail}><Icon className="h-4 w-4 shrink-0" /><span className="flex-1">{item.label}</span><LockKeyhole className="h-3.5 w-3.5 shrink-0" /></button>;
+              })}</div></section>)}
+            </nav>
+            <div className="mt-4 border-t border-border pt-3 lg:hidden"><Button variant="outline" className="w-full justify-start" onClick={() => void signOut()} disabled={signingOut}>{signingOut ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin" /> : <LogOut className="mr-2 h-4 w-4" />}{signingOut ? "A terminar..." : "Terminar sessão"}</Button></div>
+          </aside>
+          <div className="min-w-0 space-y-6">
         <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-3">
             <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary"><BriefcaseBusiness className="h-5 w-5" /></span>
@@ -260,6 +323,8 @@ function ClientDashboard() {
           })}</div>
         </section>
         <footer className="border-t border-border pt-4 text-xs leading-5 text-muted-foreground">Os indicadores refletem apenas dados acessíveis à conta autenticada. Tarefas remuneradas, campanhas, carteira empresarial e estatísticas avançadas dependem de etapas posteriores.</footer>
+          </div>
+        </div>
       </div>
     </main>
   );
