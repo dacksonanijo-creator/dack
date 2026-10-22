@@ -140,8 +140,30 @@ function Login() {
         p_device: /Mobi|Android|iPhone/i.test(navigator.userAgent) ? "Dispositivo móvel" : "Computador",
         p_browser: navigator.userAgent.match(/(Chrome|Firefox|Safari|Edge|Opera)\/?[\d.]*/i)?.[0] ?? "Navegador",
       });
-      const { data: profile } = await (supabase as any).from("profiles").select("account_type").eq("id", session.user.id).maybeSingle();
-      await navigate({ to: profile?.account_type === "client" ? "/client" : "/app", replace: true });
+      const { data: profile, error: profileError } = await db
+        .from("profiles")
+        .select("account_type")
+        .eq("id", session.user.id)
+        .maybeSingle();
+
+      // Never silently treat a missing/failed profile lookup as a worker account.
+      if (profileError || !profile) {
+        const message = profileError
+          ? "Não foi possível carregar o teu perfil. Tenta novamente."
+          : "A tua conta foi autenticada, mas o perfil ainda não está disponível. Contacta o apoio.";
+        setError(message);
+        toast.error(message);
+        return;
+      }
+
+      if (profile.account_type !== "worker" && profile.account_type !== "client") {
+        const message = "O tipo de conta não é válido. Contacta o apoio.";
+        setError(message);
+        toast.error(message);
+        return;
+      }
+
+      await navigate({ to: profile.account_type === "client" ? "/client" : "/app", replace: true });
     } catch (err) {
       const msg = t(authErrorMessage(err instanceof Error ? err.message : String(err)));
       setError(msg);
@@ -159,7 +181,7 @@ function Login() {
       const { error: err } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: window.location.origin + "/app",
+          redirectTo: window.location.origin + "/",
           queryParams: { prompt: "select_account" },
         },
       });
