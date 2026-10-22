@@ -65,22 +65,51 @@ function BusinessProfilePage() {
 
   const update = (key: keyof typeof form, value: string) => setForm((old) => ({ ...old, [key]: value }));
   const save = async () => {
-    if (!form.business_name.trim() || !form.business_type || !form.country.trim() ||
-        !form.business_category.trim() || !form.email.trim() || !form.phone.trim()) {
+    if (saving || loading || loadError) return;
+    if (![form.business_name, form.business_type, form.country, form.business_category, form.email, form.phone].every((value) => value.trim())) {
       toast.error("Preenche todos os campos obrigatórios.");
       return;
     }
+    if (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(form.email.trim())) {
+      toast.error("Introduz um endereço de email válido.");
+      return;
+    }
+    if (form.business_website.trim()) {
+      try { new URL(form.business_website.trim()); }
+      catch { toast.error("Introduz um endereço de website válido, incluindo https://."); return; }
+    }
+    if (!["empresa", "comerciante", "criador_conteudo", "outro"].includes(form.business_type)) {
+      toast.error("Seleciona um tipo de cliente válido.");
+      return;
+    }
     setSaving(true);
-    const { error } = await db.from("profiles").update({
-      business_name: form.business_name.trim(), business_type: form.business_type,
-      country: form.country.trim(), business_category: form.business_category.trim(),
-      email: form.email.trim(), phone: form.phone.trim(),
-      business_website: form.business_website.trim() || null,
-      business_description: form.business_description.trim() || null,
-    }).eq("id", userId);
-    setSaving(false);
-    if (error) { toast.error("Não foi possível guardar o perfil. Tenta novamente."); return; }
-    toast.success("Perfil empresarial guardado.");
+    try {
+      const { error } = await db.from("profiles").update({
+        business_name: form.business_name.trim(), business_type: form.business_type,
+        country: form.country.trim(), business_category: form.business_category.trim(),
+        email: form.email.trim(), phone: form.phone.trim(),
+        business_website: form.business_website.trim() || null,
+        business_description: form.business_description.trim() || null,
+      }).eq("id", userId);
+      if (error) throw error;
+      const { data, error: reloadError } = await db.from("profiles")
+        .select("business_name,business_type,country,business_category,email,phone,business_website,business_description,verification_status")
+        .eq("id", userId).maybeSingle();
+      if (reloadError || !data) throw reloadError ?? new Error("O perfil guardado não pôde ser confirmado.");
+      setForm({
+        business_name: data.business_name ?? "", business_type: data.business_type ?? "empresa",
+        country: data.country ?? "MZ", business_category: data.business_category ?? "",
+        email: data.email ?? "", phone: data.phone ?? "", business_website: data.business_website ?? "",
+        business_description: data.business_description ?? "",
+      });
+      setStatus(data.verification_status ?? "incomplete");
+      toast.success("Perfil guardado e alterações confirmadas.");
+    } catch (error) {
+      console.error("Taskora business profile save failed", error);
+      toast.error("Não foi possível guardar ou confirmar as alterações. Verifica a ligação e as permissões da conta.");
+    } finally {
+      setSaving(false);
+    }
   };
   const submit = async () => {
     setSaving(true);
