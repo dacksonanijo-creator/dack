@@ -3,7 +3,7 @@ import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-ro
 import {
   ArrowRight, BarChart3, BriefcaseBusiness, CheckCircle2, CircleHelp, Clock3,
   ClipboardList, CreditCard, FilePlus2, History, LoaderCircle, RefreshCw,
-  Settings2, ShieldAlert, Users, Activity, LockKeyhole, AlertCircle, Menu, X, LogOut, Bell, Wallet, FileText, CircleHelp, Megaphone
+  Settings2, ShieldAlert, Users, Activity, LockKeyhole, AlertCircle, Menu, X, LogOut, Bell, Wallet, FileText, Megaphone
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { isAdminEmail } from "@/lib/admin";
