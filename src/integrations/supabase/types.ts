@@ -283,6 +283,77 @@ export type Database = {
         }
         Relationships: []
       }
+      security_audit_log: {
+        Row: {
+          action: string
+          admin_user_id: string | null
+          area: string
+          created_at: string
+          id: string
+          metadata: Json
+          resource_id: string | null
+          resource_type: string | null
+          result: string
+        }
+        Insert: {
+          action: string
+          admin_user_id?: string | null
+          area: string
+          created_at?: string
+          id?: string
+          metadata?: Json
+          resource_id?: string | null
+          resource_type?: string | null
+          result?: string
+        }
+        Update: {
+          action?: string
+          admin_user_id?: string | null
+          area?: string
+          created_at?: string
+          id?: string
+          metadata?: Json
+          resource_id?: string | null
+          resource_type?: string | null
+          result?: string
+        }
+        Relationships: []
+      }
+      task_audit_log: {
+        Row: {
+          action: string
+          actor_id: string | null
+          created_at: string
+          id: string
+          metadata: Json
+          task_id: string
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          task_id: string
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          task_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_audit_log_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       task_submissions: {
         Row: {
           created_at: string
@@ -326,55 +397,82 @@ export type Database = {
       }
       tasks: {
         Row: {
+          budget_total: number | null
           category: string
           company_id: string | null
+          completion_criteria: string | null
           created_at: string
           deadline: string | null
           description: string
+          destination_url: string | null
           external_id: string | null
           external_source: string | null
           id: string
+          is_draft: boolean
+          objective: string | null
+          origin: string | null
           partner_api_id: string | null
           reward: number
           slots: number
           slots_filled: number
           status: Database["public"]["Enums"]["task_status"]
+          target_country: string | null
+          target_language: string | null
           title: string
           updated_at: string
+          worker_instructions: string | null
         }
         Insert: {
+          budget_total?: number | null
           category?: string
           company_id?: string | null
+          completion_criteria?: string | null
           created_at?: string
           deadline?: string | null
           description: string
+          destination_url?: string | null
           external_id?: string | null
           external_source?: string | null
           id?: string
+          is_draft?: boolean
+          objective?: string | null
+          origin?: string | null
           partner_api_id?: string | null
           reward?: number
           slots?: number
           slots_filled?: number
           status?: Database["public"]["Enums"]["task_status"]
+          target_country?: string | null
+          target_language?: string | null
           title: string
           updated_at?: string
+          worker_instructions?: string | null
         }
         Update: {
+          budget_total?: number | null
           category?: string
           company_id?: string | null
+          completion_criteria?: string | null
           created_at?: string
           deadline?: string | null
           description?: string
+          destination_url?: string | null
           external_id?: string | null
           external_source?: string | null
           id?: string
+          is_draft?: boolean
+          objective?: string | null
+          origin?: string | null
           partner_api_id?: string | null
           reward?: number
           slots?: number
           slots_filled?: number
           status?: Database["public"]["Enums"]["task_status"]
+          target_country?: string | null
+          target_language?: string | null
           title?: string
           updated_at?: string
+          worker_instructions?: string | null
         }
         Relationships: [
           {
@@ -619,6 +717,7 @@ export type Database = {
         Returns: boolean
       }
       is_platform_admin: { Args: never; Returns: boolean }
+      is_taskora_admin: { Args: never; Returns: boolean }
       mark_withdrawal_processing: {
         Args: { _environment: string; _id: string }
         Returns: boolean

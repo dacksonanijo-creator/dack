@@ -4,7 +4,6 @@ import {
   ArrowLeft, BadgeCheck, Bell, Globe2, LogOut, Monitor, Moon, Settings,
   ShieldAlert, Sun, User,
 } from "lucide-react";
-import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useNavigate } from "@tanstack/react-router";
@@ -138,7 +137,6 @@ function ClientSettingsPage() {
       </section>
 
       <p className="text-xs leading-5 text-muted-foreground">Mais definições (2FA, PIN de segurança, preferências de dados) serão adicionadas em etapas posteriores.</p>
-      {preference === "system" && <span className="hidden">{toast}</span>}
     </div>
   );
 }
