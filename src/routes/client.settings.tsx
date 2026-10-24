@@ -4,7 +4,6 @@ import {
   ArrowLeft, BadgeCheck, Bell, Globe2, LogOut, Monitor, Moon, Settings,
   ShieldAlert, Sun, User,
 } from "lucide-react";
-import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useNavigate } from "@tanstack/react-router";
