@@ -52,7 +52,9 @@ import { Route as AppSettingsRouteImport } from './routes/app.settings'
 import { Route as AppWalletRouteImport } from './routes/app.wallet'
 import { Route as AppWithdrawalsRouteImport } from './routes/app.withdrawals'
 import { Route as ClientIndexRouteImport } from './routes/client.index'
+import { Route as ClientNotificationsRouteImport } from './routes/client.notifications'
 import { Route as ClientProfileRouteImport } from './routes/client.profile'
+import { Route as ClientSettingsRouteImport } from './routes/client.settings'
 import { Route as ClientStatsRouteImport } from './routes/client.stats'
 import { Route as ClientTasksRouteImport } from './routes/client.tasks'
 import { Route as AdminFinanceDistributionRouteImport } from './routes/admin.finance.distribution'
@@ -277,9 +279,19 @@ const ClientIndexRoute = ClientIndexRouteImport.update({
   path: '/',
   getParentRoute: () => ClientRoute,
 } as any)
+const ClientNotificationsRoute = ClientNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => ClientRoute,
+} as any)
 const ClientProfileRoute = ClientProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => ClientRoute,
+} as any)
+const ClientSettingsRoute = ClientSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => ClientRoute,
 } as any)
 const ClientStatsRoute = ClientStatsRouteImport.update({
@@ -366,7 +378,9 @@ export interface FileRoutesByFullPath {
   '/app/settings': typeof AppSettingsRoute
   '/app/wallet': typeof AppWalletRoute
   '/app/withdrawals': typeof AppWithdrawalsRoute
+  '/client/notifications': typeof ClientNotificationsRoute
   '/client/profile': typeof ClientProfileRoute
+  '/client/settings': typeof ClientSettingsRoute
   '/client/stats': typeof ClientStatsRoute
   '/client/tasks': typeof ClientTasksRouteWithChildren
   '/admin/': typeof AdminIndexRoute
@@ -417,7 +431,9 @@ export interface FileRoutesByTo {
   '/app/settings': typeof AppSettingsRoute
   '/app/wallet': typeof AppWalletRoute
   '/app/withdrawals': typeof AppWithdrawalsRoute
+  '/client/notifications': typeof ClientNotificationsRoute
   '/client/profile': typeof ClientProfileRoute
+  '/client/settings': typeof ClientSettingsRoute
   '/client/stats': typeof ClientStatsRoute
   '/client/tasks': typeof ClientTasksRouteWithChildren
   '/admin': typeof AdminIndexRoute
@@ -472,7 +488,9 @@ export interface FileRoutesById {
   '/app/settings': typeof AppSettingsRoute
   '/app/wallet': typeof AppWalletRoute
   '/app/withdrawals': typeof AppWithdrawalsRoute
+  '/client/notifications': typeof ClientNotificationsRoute
   '/client/profile': typeof ClientProfileRoute
+  '/client/settings': typeof ClientSettingsRoute
   '/client/stats': typeof ClientStatsRoute
   '/client/tasks': typeof ClientTasksRouteWithChildren
   '/admin/': typeof AdminIndexRoute
@@ -528,7 +546,9 @@ export interface FileRouteTypes {
     | '/app/settings'
     | '/app/wallet'
     | '/app/withdrawals'
+    | '/client/notifications'
     | '/client/profile'
+    | '/client/settings'
     | '/client/stats'
     | '/client/tasks'
     | '/admin/'
@@ -579,7 +599,9 @@ export interface FileRouteTypes {
     | '/app/settings'
     | '/app/wallet'
     | '/app/withdrawals'
+    | '/client/notifications'
     | '/client/profile'
+    | '/client/settings'
     | '/client/stats'
     | '/client/tasks'
     | '/admin'
@@ -633,7 +655,9 @@ export interface FileRouteTypes {
     | '/app/settings'
     | '/app/wallet'
     | '/app/withdrawals'
+    | '/client/notifications'
     | '/client/profile'
+    | '/client/settings'
     | '/client/stats'
     | '/client/tasks'
     | '/admin/'
@@ -966,11 +990,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClientIndexRouteImport
       parentRoute: typeof ClientRoute
     }
+    '/client/notifications': {
+      id: '/client/notifications'
+      path: '/notifications'
+      fullPath: '/client/notifications'
+      preLoaderRoute: typeof ClientNotificationsRouteImport
+      parentRoute: typeof ClientRoute
+    }
     '/client/profile': {
       id: '/client/profile'
       path: '/profile'
       fullPath: '/client/profile'
       preLoaderRoute: typeof ClientProfileRouteImport
+      parentRoute: typeof ClientRoute
+    }
+    '/client/settings': {
+      id: '/client/settings'
+      path: '/settings'
+      fullPath: '/client/settings'
+      preLoaderRoute: typeof ClientSettingsRouteImport
       parentRoute: typeof ClientRoute
     }
     '/client/stats': {
@@ -1149,14 +1187,18 @@ const ClientTasksRouteWithChildren = ClientTasksRoute._addFileChildren(
 )
 
 interface ClientRouteChildren {
+  ClientNotificationsRoute: typeof ClientNotificationsRoute
   ClientProfileRoute: typeof ClientProfileRoute
+  ClientSettingsRoute: typeof ClientSettingsRoute
   ClientStatsRoute: typeof ClientStatsRoute
   ClientTasksRoute: typeof ClientTasksRouteWithChildren
   ClientIndexRoute: typeof ClientIndexRoute
 }
 
 const ClientRouteChildren: ClientRouteChildren = {
+  ClientNotificationsRoute: ClientNotificationsRoute,
   ClientProfileRoute: ClientProfileRoute,
+  ClientSettingsRoute: ClientSettingsRoute,
   ClientStatsRoute: ClientStatsRoute,
   ClientTasksRoute: ClientTasksRouteWithChildren,
   ClientIndexRoute: ClientIndexRoute,
