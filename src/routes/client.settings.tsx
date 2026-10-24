@@ -138,7 +138,6 @@ function ClientSettingsPage() {
       </section>
 
       <p className="text-xs leading-5 text-muted-foreground">Mais definições (2FA, PIN de segurança, preferências de dados) serão adicionadas em etapas posteriores.</p>
-      {preference === "system" && <span className="hidden">{toast}</span>}
     </div>
   );
 }
