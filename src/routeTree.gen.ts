@@ -35,6 +35,7 @@ import { Route as AdminPaymentsRouteImport } from './routes/admin.payments'
 import { Route as AdminReportsRouteImport } from './routes/admin.reports'
 import { Route as AdminSecurityRouteImport } from './routes/admin.security'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
+import { Route as AdminTaskReviewsRouteImport } from './routes/admin.task-reviews'
 import { Route as AdminTasksRouteImport } from './routes/admin.tasks'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminVerificationsRouteImport } from './routes/admin.verifications'
@@ -192,6 +193,11 @@ const AdminSecurityRoute = AdminSecurityRouteImport.update({
 const AdminSettingsRoute = AdminSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminTaskReviewsRoute = AdminTaskReviewsRouteImport.update({
+  id: '/task-reviews',
+  path: '/task-reviews',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminTasksRoute = AdminTasksRouteImport.update({
@@ -363,6 +369,7 @@ export interface FileRoutesByFullPath {
   '/admin/reports': typeof AdminReportsRoute
   '/admin/security': typeof AdminSecurityRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/admin/task-reviews': typeof AdminTaskReviewsRoute
   '/admin/tasks': typeof AdminTasksRouteWithChildren
   '/admin/users': typeof AdminUsersRoute
   '/admin/verifications': typeof AdminVerificationsRoute
@@ -416,6 +423,7 @@ export interface FileRoutesByTo {
   '/admin/reports': typeof AdminReportsRoute
   '/admin/security': typeof AdminSecurityRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/admin/task-reviews': typeof AdminTaskReviewsRoute
   '/admin/tasks': typeof AdminTasksRouteWithChildren
   '/admin/users': typeof AdminUsersRoute
   '/admin/verifications': typeof AdminVerificationsRoute
@@ -473,6 +481,7 @@ export interface FileRoutesById {
   '/admin/reports': typeof AdminReportsRoute
   '/admin/security': typeof AdminSecurityRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/admin/task-reviews': typeof AdminTaskReviewsRoute
   '/admin/tasks': typeof AdminTasksRouteWithChildren
   '/admin/users': typeof AdminUsersRoute
   '/admin/verifications': typeof AdminVerificationsRoute
@@ -531,6 +540,7 @@ export interface FileRouteTypes {
     | '/admin/reports'
     | '/admin/security'
     | '/admin/settings'
+    | '/admin/task-reviews'
     | '/admin/tasks'
     | '/admin/users'
     | '/admin/verifications'
@@ -584,6 +594,7 @@ export interface FileRouteTypes {
     | '/admin/reports'
     | '/admin/security'
     | '/admin/settings'
+    | '/admin/task-reviews'
     | '/admin/tasks'
     | '/admin/users'
     | '/admin/verifications'
@@ -640,6 +651,7 @@ export interface FileRouteTypes {
     | '/admin/reports'
     | '/admin/security'
     | '/admin/settings'
+    | '/admin/task-reviews'
     | '/admin/tasks'
     | '/admin/users'
     | '/admin/verifications'
@@ -869,6 +881,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/admin/settings'
       preLoaderRoute: typeof AdminSettingsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/task-reviews': {
+      id: '/admin/task-reviews'
+      path: '/task-reviews'
+      fullPath: '/admin/task-reviews'
+      preLoaderRoute: typeof AdminTaskReviewsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/tasks': {
@@ -1108,6 +1127,7 @@ interface AdminRouteChildren {
   AdminReportsRoute: typeof AdminReportsRoute
   AdminSecurityRoute: typeof AdminSecurityRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminTaskReviewsRoute: typeof AdminTaskReviewsRoute
   AdminTasksRoute: typeof AdminTasksRouteWithChildren
   AdminUsersRoute: typeof AdminUsersRoute
   AdminVerificationsRoute: typeof AdminVerificationsRoute
@@ -1130,6 +1150,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminReportsRoute: AdminReportsRoute,
   AdminSecurityRoute: AdminSecurityRoute,
   AdminSettingsRoute: AdminSettingsRoute,
+  AdminTaskReviewsRoute: AdminTaskReviewsRoute,
   AdminTasksRoute: AdminTasksRouteWithChildren,
   AdminUsersRoute: AdminUsersRoute,
   AdminVerificationsRoute: AdminVerificationsRoute,
