@@ -41,6 +41,39 @@ export type Database = {
         }
         Relationships: []
       }
+      business_profile_decisions: {
+        Row: {
+          action: string
+          admin_user_id: string | null
+          client_user_id: string
+          created_at: string
+          id: string
+          new_status: string
+          previous_status: string | null
+          reason: string | null
+        }
+        Insert: {
+          action: string
+          admin_user_id?: string | null
+          client_user_id: string
+          created_at?: string
+          id?: string
+          new_status: string
+          previous_status?: string | null
+          reason?: string | null
+        }
+        Update: {
+          action?: string
+          admin_user_id?: string | null
+          client_user_id?: string
+          created_at?: string
+          id?: string
+          new_status?: string
+          previous_status?: string | null
+          reason?: string | null
+        }
+        Relationships: []
+      }
       companies: {
         Row: {
           country: string | null
@@ -238,7 +271,11 @@ export type Database = {
           avatar_url: string | null
           business_category: string | null
           business_contact: string | null
+          business_description: string | null
           business_name: string | null
+          business_status_before_suspension: string | null
+          business_type: string | null
+          business_website: string | null
           country: string | null
           created_at: string
           email: string | null
@@ -254,7 +291,11 @@ export type Database = {
           avatar_url?: string | null
           business_category?: string | null
           business_contact?: string | null
+          business_description?: string | null
           business_name?: string | null
+          business_status_before_suspension?: string | null
+          business_type?: string | null
+          business_website?: string | null
           country?: string | null
           created_at?: string
           email?: string | null
@@ -270,7 +311,11 @@ export type Database = {
           avatar_url?: string | null
           business_category?: string | null
           business_contact?: string | null
+          business_description?: string | null
           business_name?: string | null
+          business_status_before_suspension?: string | null
+          business_type?: string | null
+          business_website?: string | null
           country?: string | null
           created_at?: string
           email?: string | null
@@ -669,6 +714,29 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_decide_business_client: {
+        Args: { p_action: string; p_client_user_id: string; p_reason?: string }
+        Returns: Json
+      }
+      admin_list_business_clients: {
+        Args: never
+        Returns: {
+          business_category: string
+          business_contact: string
+          business_description: string
+          business_name: string
+          business_type: string
+          business_website: string
+          country: string
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          phone: string
+          updated_at: string
+          verification_status: string
+        }[]
+      }
       finalize_withdrawal: {
         Args: {
           _conversation_id: string
@@ -763,6 +831,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      submit_business_profile_for_review: { Args: never; Returns: Json }
     }
     Enums: {
       app_role: "admin" | "user" | "company"

@@ -29,6 +29,13 @@
       "when": 1792874949664,
       "tag": "0003_taskora_client_flow_dependencies",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1793058057931,
+      "tag": "0004_taskora_business_profiles",
+      "breakpoints": true
     }
   ]
 }
