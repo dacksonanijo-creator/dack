@@ -1,9 +1,9 @@
 import {
   Activity,
   CheckCircle2,
-  Banknote,
-  Bell,
   Building2,
+  CheckCircle2,
+  ClipboardCheck,
   CreditCard,
   FileBarChart,
   FolderTree,
@@ -67,6 +67,12 @@ export const adminSections: AdminSection[] = [
     label: "Tarefas",
     description: "Aprovação, edição e monitorização de tarefas.",
     icon: ListChecks,
+  },
+  {
+    to: "/admin/task-reviews",
+    label: "Moderação de tarefas",
+    description: "Análise das campanhas submetidas pelas empresas.",
+    icon: ClipboardCheck,
   },
   {
     to: "/admin/verifications",

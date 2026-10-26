@@ -41,6 +41,39 @@ export type Database = {
         }
         Relationships: []
       }
+      business_profile_decisions: {
+        Row: {
+          action: string
+          admin_user_id: string | null
+          client_user_id: string
+          created_at: string
+          id: string
+          new_status: string
+          previous_status: string | null
+          reason: string | null
+        }
+        Insert: {
+          action: string
+          admin_user_id?: string | null
+          client_user_id: string
+          created_at?: string
+          id?: string
+          new_status: string
+          previous_status?: string | null
+          reason?: string | null
+        }
+        Update: {
+          action?: string
+          admin_user_id?: string | null
+          client_user_id?: string
+          created_at?: string
+          id?: string
+          new_status?: string
+          previous_status?: string | null
+          reason?: string | null
+        }
+        Relationships: []
+      }
       companies: {
         Row: {
           country: string | null
@@ -238,7 +271,11 @@ export type Database = {
           avatar_url: string | null
           business_category: string | null
           business_contact: string | null
+          business_description: string | null
           business_name: string | null
+          business_status_before_suspension: string | null
+          business_type: string | null
+          business_website: string | null
           country: string | null
           created_at: string
           email: string | null
@@ -254,7 +291,11 @@ export type Database = {
           avatar_url?: string | null
           business_category?: string | null
           business_contact?: string | null
+          business_description?: string | null
           business_name?: string | null
+          business_status_before_suspension?: string | null
+          business_type?: string | null
+          business_website?: string | null
           country?: string | null
           created_at?: string
           email?: string | null
@@ -270,7 +311,11 @@ export type Database = {
           avatar_url?: string | null
           business_category?: string | null
           business_contact?: string | null
+          business_description?: string | null
           business_name?: string | null
+          business_status_before_suspension?: string | null
+          business_type?: string | null
+          business_website?: string | null
           country?: string | null
           created_at?: string
           email?: string | null
@@ -397,11 +442,15 @@ export type Database = {
       }
       tasks: {
         Row: {
+          budget_approved: number
+          budget_paid: number
+          budget_reserved: number
           budget_total: number | null
           category: string
           company_id: string | null
           completion_criteria: string | null
           created_at: string
+          currency: string
           deadline: string | null
           description: string
           destination_url: string | null
@@ -412,6 +461,10 @@ export type Database = {
           objective: string | null
           origin: string | null
           partner_api_id: string | null
+          review_reason: string | null
+          review_status: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
           reward: number
           slots: number
           slots_filled: number
@@ -423,11 +476,15 @@ export type Database = {
           worker_instructions: string | null
         }
         Insert: {
+          budget_approved?: number
+          budget_paid?: number
+          budget_reserved?: number
           budget_total?: number | null
           category?: string
           company_id?: string | null
           completion_criteria?: string | null
           created_at?: string
+          currency?: string
           deadline?: string | null
           description: string
           destination_url?: string | null
@@ -438,6 +495,10 @@ export type Database = {
           objective?: string | null
           origin?: string | null
           partner_api_id?: string | null
+          review_reason?: string | null
+          review_status?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           reward?: number
           slots?: number
           slots_filled?: number
@@ -449,11 +510,15 @@ export type Database = {
           worker_instructions?: string | null
         }
         Update: {
+          budget_approved?: number
+          budget_paid?: number
+          budget_reserved?: number
           budget_total?: number | null
           category?: string
           company_id?: string | null
           completion_criteria?: string | null
           created_at?: string
+          currency?: string
           deadline?: string | null
           description?: string
           destination_url?: string | null
@@ -464,6 +529,10 @@ export type Database = {
           objective?: string | null
           origin?: string | null
           partner_api_id?: string | null
+          review_reason?: string | null
+          review_status?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           reward?: number
           slots?: number
           slots_filled?: number
@@ -669,6 +738,58 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_decide_business_client: {
+        Args: { p_action: string; p_client_user_id: string; p_reason?: string }
+        Returns: Json
+      }
+      admin_list_business_clients: {
+        Args: never
+        Returns: {
+          business_category: string
+          business_contact: string
+          business_description: string
+          business_name: string
+          business_type: string
+          business_website: string
+          country: string
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          phone: string
+          updated_at: string
+          verification_status: string
+        }[]
+      }
+      admin_list_company_task_reviews: {
+        Args: never
+        Returns: {
+          category: string
+          company_id: string
+          company_name: string
+          completion_criteria: string
+          created_at: string
+          deadline: string
+          description: string
+          destination_url: string
+          id: string
+          owner_email: string
+          owner_id: string
+          review_reason: string
+          review_status: string
+          reviewed_at: string
+          slots: number
+          target_country: string
+          target_language: string
+          title: string
+          updated_at: string
+          verification_status: string
+        }[]
+      }
+      admin_review_company_task: {
+        Args: { p_action: string; p_reason?: string; p_task_id: string }
+        Returns: Json
+      }
       finalize_withdrawal: {
         Args: {
           _conversation_id: string
@@ -705,6 +826,49 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "withdrawals"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      get_company_task_draft: {
+        Args: { p_task_id: string }
+        Returns: {
+          budget_approved: number
+          budget_paid: number
+          budget_reserved: number
+          budget_total: number | null
+          category: string
+          company_id: string | null
+          completion_criteria: string | null
+          created_at: string
+          currency: string
+          deadline: string | null
+          description: string
+          destination_url: string | null
+          external_id: string | null
+          external_source: string | null
+          id: string
+          is_draft: boolean
+          objective: string | null
+          origin: string | null
+          partner_api_id: string | null
+          review_reason: string | null
+          review_status: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          reward: number
+          slots: number
+          slots_filled: number
+          status: Database["public"]["Enums"]["task_status"]
+          target_country: string | null
+          target_language: string | null
+          title: string
+          updated_at: string
+          worker_instructions: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "tasks"
           isOneToOne: true
           isSetofReturn: false
         }
@@ -762,6 +926,54 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      save_company_task_draft: {
+        Args: { p_draft: Json; p_task_id: string }
+        Returns: {
+          budget_approved: number
+          budget_paid: number
+          budget_reserved: number
+          budget_total: number | null
+          category: string
+          company_id: string | null
+          completion_criteria: string | null
+          created_at: string
+          currency: string
+          deadline: string | null
+          description: string
+          destination_url: string | null
+          external_id: string | null
+          external_source: string | null
+          id: string
+          is_draft: boolean
+          objective: string | null
+          origin: string | null
+          partner_api_id: string | null
+          review_reason: string | null
+          review_status: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          reward: number
+          slots: number
+          slots_filled: number
+          status: Database["public"]["Enums"]["task_status"]
+          target_country: string | null
+          target_language: string | null
+          title: string
+          updated_at: string
+          worker_instructions: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "tasks"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      submit_business_profile_for_review: { Args: never; Returns: Json }
+      submit_company_task_for_review: {
+        Args: { p_task_id: string }
+        Returns: Json
       }
     }
     Enums: {
