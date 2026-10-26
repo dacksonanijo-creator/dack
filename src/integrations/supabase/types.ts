@@ -777,6 +777,41 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      get_company_task_draft: {
+        Args: { p_task_id: string }
+        Returns: {
+          budget_total: number | null
+          category: string
+          company_id: string | null
+          completion_criteria: string | null
+          created_at: string
+          deadline: string | null
+          description: string
+          destination_url: string | null
+          external_id: string | null
+          external_source: string | null
+          id: string
+          is_draft: boolean
+          objective: string | null
+          origin: string | null
+          partner_api_id: string | null
+          reward: number
+          slots: number
+          slots_filled: number
+          status: Database["public"]["Enums"]["task_status"]
+          target_country: string | null
+          target_language: string | null
+          title: string
+          updated_at: string
+          worker_instructions: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "tasks"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -827,6 +862,41 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "withdrawals"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      save_company_task_draft: {
+        Args: { p_draft: Json; p_task_id: string }
+        Returns: {
+          budget_total: number | null
+          category: string
+          company_id: string | null
+          completion_criteria: string | null
+          created_at: string
+          deadline: string | null
+          description: string
+          destination_url: string | null
+          external_id: string | null
+          external_source: string | null
+          id: string
+          is_draft: boolean
+          objective: string | null
+          origin: string | null
+          partner_api_id: string | null
+          reward: number
+          slots: number
+          slots_filled: number
+          status: Database["public"]["Enums"]["task_status"]
+          target_country: string | null
+          target_language: string | null
+          title: string
+          updated_at: string
+          worker_instructions: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "tasks"
           isOneToOne: true
           isSetofReturn: false
         }
