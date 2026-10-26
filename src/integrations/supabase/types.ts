@@ -442,11 +442,15 @@ export type Database = {
       }
       tasks: {
         Row: {
+          budget_approved: number
+          budget_paid: number
+          budget_reserved: number
           budget_total: number | null
           category: string
           company_id: string | null
           completion_criteria: string | null
           created_at: string
+          currency: string
           deadline: string | null
           description: string
           destination_url: string | null
@@ -457,6 +461,10 @@ export type Database = {
           objective: string | null
           origin: string | null
           partner_api_id: string | null
+          review_reason: string | null
+          review_status: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
           reward: number
           slots: number
           slots_filled: number
@@ -468,11 +476,15 @@ export type Database = {
           worker_instructions: string | null
         }
         Insert: {
+          budget_approved?: number
+          budget_paid?: number
+          budget_reserved?: number
           budget_total?: number | null
           category?: string
           company_id?: string | null
           completion_criteria?: string | null
           created_at?: string
+          currency?: string
           deadline?: string | null
           description: string
           destination_url?: string | null
@@ -483,6 +495,10 @@ export type Database = {
           objective?: string | null
           origin?: string | null
           partner_api_id?: string | null
+          review_reason?: string | null
+          review_status?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           reward?: number
           slots?: number
           slots_filled?: number
@@ -494,11 +510,15 @@ export type Database = {
           worker_instructions?: string | null
         }
         Update: {
+          budget_approved?: number
+          budget_paid?: number
+          budget_reserved?: number
           budget_total?: number | null
           category?: string
           company_id?: string | null
           completion_criteria?: string | null
           created_at?: string
+          currency?: string
           deadline?: string | null
           description?: string
           destination_url?: string | null
@@ -509,6 +529,10 @@ export type Database = {
           objective?: string | null
           origin?: string | null
           partner_api_id?: string | null
+          review_reason?: string | null
+          review_status?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           reward?: number
           slots?: number
           slots_filled?: number
@@ -737,6 +761,35 @@ export type Database = {
           verification_status: string
         }[]
       }
+      admin_list_company_task_reviews: {
+        Args: never
+        Returns: {
+          category: string
+          company_id: string
+          company_name: string
+          completion_criteria: string
+          created_at: string
+          deadline: string
+          description: string
+          destination_url: string
+          id: string
+          owner_email: string
+          owner_id: string
+          review_reason: string
+          review_status: string
+          reviewed_at: string
+          slots: number
+          target_country: string
+          target_language: string
+          title: string
+          updated_at: string
+          verification_status: string
+        }[]
+      }
+      admin_review_company_task: {
+        Args: { p_action: string; p_reason?: string; p_task_id: string }
+        Returns: Json
+      }
       finalize_withdrawal: {
         Args: {
           _conversation_id: string
@@ -780,11 +833,15 @@ export type Database = {
       get_company_task_draft: {
         Args: { p_task_id: string }
         Returns: {
+          budget_approved: number
+          budget_paid: number
+          budget_reserved: number
           budget_total: number | null
           category: string
           company_id: string | null
           completion_criteria: string | null
           created_at: string
+          currency: string
           deadline: string | null
           description: string
           destination_url: string | null
@@ -795,6 +852,10 @@ export type Database = {
           objective: string | null
           origin: string | null
           partner_api_id: string | null
+          review_reason: string | null
+          review_status: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
           reward: number
           slots: number
           slots_filled: number
@@ -869,11 +930,15 @@ export type Database = {
       save_company_task_draft: {
         Args: { p_draft: Json; p_task_id: string }
         Returns: {
+          budget_approved: number
+          budget_paid: number
+          budget_reserved: number
           budget_total: number | null
           category: string
           company_id: string | null
           completion_criteria: string | null
           created_at: string
+          currency: string
           deadline: string | null
           description: string
           destination_url: string | null
@@ -884,6 +949,10 @@ export type Database = {
           objective: string | null
           origin: string | null
           partner_api_id: string | null
+          review_reason: string | null
+          review_status: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
           reward: number
           slots: number
           slots_filled: number
@@ -902,6 +971,10 @@ export type Database = {
         }
       }
       submit_business_profile_for_review: { Args: never; Returns: Json }
+      submit_company_task_for_review: {
+        Args: { p_task_id: string }
+        Returns: Json
+      }
     }
     Enums: {
       app_role: "admin" | "user" | "company"

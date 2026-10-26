@@ -43,6 +43,13 @@
       "when": 1793058118574,
       "tag": "0005_taskora_company_task_drafts",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793058151655,
+      "tag": "0006_taskora_task_review_and_budget_columns",
+      "breakpoints": true
     }
   ]
 }
