@@ -4,7 +4,7 @@ import { useState, type FormEvent, type ReactNode } from "react";
 import { AdminPageHeader } from "@/components/taskora/admin-shell";
 import { supabase } from "@/integrations/supabase/client";
 
-export const Route = createFileRoute("/admin/tasks/new")({
+export const Route = createFileRoute("/admin/tasks_/new")({
   head: () => ({ meta: [{ title: "Criar tarefa — Admin Taskora" }, { name: "robots", content: "noindex" }] }),
   component: CreateAdminTask,
 });

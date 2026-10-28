@@ -1,6 +1,7 @@
 import {
   Activity,
-  CheckCircle2,
+  Banknote,
+  Bell,
   Building2,
   CheckCircle2,
   ClipboardCheck,
@@ -8,7 +9,6 @@ import {
   FileBarChart,
   FolderTree,
   ImageUp,
-
   LayoutDashboard,
   ListChecks,
   Plug,

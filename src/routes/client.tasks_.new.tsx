@@ -10,7 +10,7 @@ import { isAdminEmail } from "@/lib/admin";
 
 const db = supabase as any;
 
-export const Route = createFileRoute("/client/tasks/new")({
+export const Route = createFileRoute("/client/tasks_/new")({
   ssr: false,
   validateSearch: (search: Record<string, unknown>): { draft?: string } =>
     typeof search.draft === "string" ? { draft: search.draft } : {},
@@ -73,8 +73,8 @@ const steps = [
 
 function CompanyTaskWizard() {
   const { userId } = Route.useRouteContext();
-  const { draft } = useSearch({ from: "/client/tasks/new" });
-  const navigate = useNavigate({ from: "/client/tasks/new" });
+  const { draft } = useSearch({ from: "/client/tasks_/new" });
+  const navigate = useNavigate({ from: "/client/tasks_/new" });
   const [form, setForm] = useState<DraftForm>(emptyForm);
   const [step, setStep] = useState(0);
   const [loadingDraft, setLoadingDraft] = useState(Boolean(draft));
