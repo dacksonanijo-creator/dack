@@ -1,6 +1,7 @@
 import {
   Activity,
   Banknote,
+  Bell,
   Building2,
   CheckCircle2,
   ClipboardCheck,
