@@ -10,7 +10,7 @@ import { isAdminEmail } from "@/lib/admin";
 
 const db = supabase as any;
 
-export const Route = createFileRoute("/client/tasks/new")({
+export const Route = createFileRoute("/client/tasks_/new")({
   ssr: false,
   validateSearch: (search: Record<string, unknown>): { draft?: string } =>
     typeof search.draft === "string" ? { draft: search.draft } : {},

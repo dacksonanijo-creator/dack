@@ -59,10 +59,10 @@ import { Route as ClientSettingsRouteImport } from './routes/client.settings'
 import { Route as ClientStatsRouteImport } from './routes/client.stats'
 import { Route as ClientTasksRouteImport } from './routes/client.tasks'
 import { Route as AdminFinanceDistributionRouteImport } from './routes/admin.finance.distribution'
-import { Route as AdminTasksNewRouteImport } from './routes/admin.tasks.new'
+import { Route as AdminTasksNewRouteImport } from './routes/admin.tasks_.new'
 import { Route as AppTasksIndexRouteImport } from './routes/app.tasks.index'
 import { Route as AppTasksTaskIdRouteImport } from './routes/app.tasks.$taskId'
-import { Route as ClientTasksNewRouteImport } from './routes/client.tasks.new'
+import { Route as ClientTasksNewRouteImport } from './routes/client.tasks_.new'
 import { Route as ApiPublicPaymentsMpesaCallbackRouteImport } from './routes/api/public/payments/mpesa/callback'
 
 const IndexRoute = IndexRouteImport.update({
@@ -317,9 +317,9 @@ const AdminFinanceDistributionRoute =
     getParentRoute: () => AdminFinanceRoute,
   } as any)
 const AdminTasksNewRoute = AdminTasksNewRouteImport.update({
-  id: '/new',
-  path: '/new',
-  getParentRoute: () => AdminTasksRoute,
+  id: '/tasks_/new',
+  path: '/tasks/new',
+  getParentRoute: () => AdminRoute,
 } as any)
 const AppTasksIndexRoute = AppTasksIndexRouteImport.update({
   id: '/tasks/',
@@ -332,9 +332,9 @@ const AppTasksTaskIdRoute = AppTasksTaskIdRouteImport.update({
   getParentRoute: () => AppRoute,
 } as any)
 const ClientTasksNewRoute = ClientTasksNewRouteImport.update({
-  id: '/new',
-  path: '/new',
-  getParentRoute: () => ClientTasksRoute,
+  id: '/tasks_/new',
+  path: '/tasks/new',
+  getParentRoute: () => ClientRoute,
 } as any)
 const ApiPublicPaymentsMpesaCallbackRoute =
   ApiPublicPaymentsMpesaCallbackRouteImport.update({
@@ -370,7 +370,7 @@ export interface FileRoutesByFullPath {
   '/admin/security': typeof AdminSecurityRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/task-reviews': typeof AdminTaskReviewsRoute
-  '/admin/tasks': typeof AdminTasksRouteWithChildren
+  '/admin/tasks': typeof AdminTasksRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/verifications': typeof AdminVerificationsRoute
   '/admin/wallet': typeof AdminWalletRoute
@@ -389,7 +389,7 @@ export interface FileRoutesByFullPath {
   '/client/profile': typeof ClientProfileRoute
   '/client/settings': typeof ClientSettingsRoute
   '/client/stats': typeof ClientStatsRoute
-  '/client/tasks': typeof ClientTasksRouteWithChildren
+  '/client/tasks': typeof ClientTasksRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/client/': typeof ClientIndexRoute
@@ -424,7 +424,7 @@ export interface FileRoutesByTo {
   '/admin/security': typeof AdminSecurityRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/task-reviews': typeof AdminTaskReviewsRoute
-  '/admin/tasks': typeof AdminTasksRouteWithChildren
+  '/admin/tasks': typeof AdminTasksRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/verifications': typeof AdminVerificationsRoute
   '/admin/wallet': typeof AdminWalletRoute
@@ -443,7 +443,7 @@ export interface FileRoutesByTo {
   '/client/profile': typeof ClientProfileRoute
   '/client/settings': typeof ClientSettingsRoute
   '/client/stats': typeof ClientStatsRoute
-  '/client/tasks': typeof ClientTasksRouteWithChildren
+  '/client/tasks': typeof ClientTasksRoute
   '/admin': typeof AdminIndexRoute
   '/app': typeof AppIndexRoute
   '/client': typeof ClientIndexRoute
@@ -482,7 +482,7 @@ export interface FileRoutesById {
   '/admin/security': typeof AdminSecurityRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/task-reviews': typeof AdminTaskReviewsRoute
-  '/admin/tasks': typeof AdminTasksRouteWithChildren
+  '/admin/tasks': typeof AdminTasksRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/verifications': typeof AdminVerificationsRoute
   '/admin/wallet': typeof AdminWalletRoute
@@ -501,14 +501,14 @@ export interface FileRoutesById {
   '/client/profile': typeof ClientProfileRoute
   '/client/settings': typeof ClientSettingsRoute
   '/client/stats': typeof ClientStatsRoute
-  '/client/tasks': typeof ClientTasksRouteWithChildren
+  '/client/tasks': typeof ClientTasksRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/client/': typeof ClientIndexRoute
   '/admin/finance/distribution': typeof AdminFinanceDistributionRoute
-  '/admin/tasks/new': typeof AdminTasksNewRoute
+  '/admin/tasks_/new': typeof AdminTasksNewRoute
   '/app/tasks/$taskId': typeof AppTasksTaskIdRoute
-  '/client/tasks/new': typeof ClientTasksNewRoute
+  '/client/tasks_/new': typeof ClientTasksNewRoute
   '/app/tasks/': typeof AppTasksIndexRoute
   '/api/public/payments/mpesa/callback': typeof ApiPublicPaymentsMpesaCallbackRoute
 }
@@ -676,9 +676,9 @@ export interface FileRouteTypes {
     | '/app/'
     | '/client/'
     | '/admin/finance/distribution'
-    | '/admin/tasks/new'
+    | '/admin/tasks_/new'
     | '/app/tasks/$taskId'
-    | '/client/tasks/new'
+    | '/client/tasks_/new'
     | '/app/tasks/'
     | '/api/public/payments/mpesa/callback'
   fileRoutesById: FileRoutesById
@@ -1051,12 +1051,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminFinanceDistributionRouteImport
       parentRoute: typeof AdminFinanceRoute
     }
-    '/admin/tasks/new': {
-      id: '/admin/tasks/new'
-      path: '/new'
+    '/admin/tasks_/new': {
+      id: '/admin/tasks_/new'
+      path: '/tasks/new'
       fullPath: '/admin/tasks/new'
       preLoaderRoute: typeof AdminTasksNewRouteImport
-      parentRoute: typeof AdminTasksRoute
+      parentRoute: typeof AdminRoute
     }
     '/app/tasks/': {
       id: '/app/tasks/'
@@ -1072,12 +1072,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppTasksTaskIdRouteImport
       parentRoute: typeof AppRoute
     }
-    '/client/tasks/new': {
-      id: '/client/tasks/new'
-      path: '/new'
+    '/client/tasks_/new': {
+      id: '/client/tasks_/new'
+      path: '/tasks/new'
       fullPath: '/client/tasks/new'
       preLoaderRoute: typeof ClientTasksNewRouteImport
-      parentRoute: typeof ClientTasksRoute
+      parentRoute: typeof ClientRoute
     }
     '/api/public/payments/mpesa/callback': {
       id: '/api/public/payments/mpesa/callback'
@@ -1101,18 +1101,6 @@ const AdminFinanceRouteWithChildren = AdminFinanceRoute._addFileChildren(
   AdminFinanceRouteChildren,
 )
 
-interface AdminTasksRouteChildren {
-  AdminTasksNewRoute: typeof AdminTasksNewRoute
-}
-
-const AdminTasksRouteChildren: AdminTasksRouteChildren = {
-  AdminTasksNewRoute: AdminTasksNewRoute,
-}
-
-const AdminTasksRouteWithChildren = AdminTasksRoute._addFileChildren(
-  AdminTasksRouteChildren,
-)
-
 interface AdminRouteChildren {
   Admin2faRoute: typeof Admin2faRoute
   AdminApisRoute: typeof AdminApisRoute
@@ -1128,12 +1116,13 @@ interface AdminRouteChildren {
   AdminSecurityRoute: typeof AdminSecurityRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminTaskReviewsRoute: typeof AdminTaskReviewsRoute
-  AdminTasksRoute: typeof AdminTasksRouteWithChildren
+  AdminTasksRoute: typeof AdminTasksRoute
   AdminUsersRoute: typeof AdminUsersRoute
   AdminVerificationsRoute: typeof AdminVerificationsRoute
   AdminWalletRoute: typeof AdminWalletRoute
   AdminWithdrawalsRoute: typeof AdminWithdrawalsRoute
   AdminIndexRoute: typeof AdminIndexRoute
+  AdminTasksNewRoute: typeof AdminTasksNewRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
@@ -1151,12 +1140,13 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminSecurityRoute: AdminSecurityRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   AdminTaskReviewsRoute: AdminTaskReviewsRoute,
-  AdminTasksRoute: AdminTasksRouteWithChildren,
+  AdminTasksRoute: AdminTasksRoute,
   AdminUsersRoute: AdminUsersRoute,
   AdminVerificationsRoute: AdminVerificationsRoute,
   AdminWalletRoute: AdminWalletRoute,
   AdminWithdrawalsRoute: AdminWithdrawalsRoute,
   AdminIndexRoute: AdminIndexRoute,
+  AdminTasksNewRoute: AdminTasksNewRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
@@ -1195,25 +1185,14 @@ const AppRouteChildren: AppRouteChildren = {
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
-interface ClientTasksRouteChildren {
-  ClientTasksNewRoute: typeof ClientTasksNewRoute
-}
-
-const ClientTasksRouteChildren: ClientTasksRouteChildren = {
-  ClientTasksNewRoute: ClientTasksNewRoute,
-}
-
-const ClientTasksRouteWithChildren = ClientTasksRoute._addFileChildren(
-  ClientTasksRouteChildren,
-)
-
 interface ClientRouteChildren {
   ClientNotificationsRoute: typeof ClientNotificationsRoute
   ClientProfileRoute: typeof ClientProfileRoute
   ClientSettingsRoute: typeof ClientSettingsRoute
   ClientStatsRoute: typeof ClientStatsRoute
-  ClientTasksRoute: typeof ClientTasksRouteWithChildren
+  ClientTasksRoute: typeof ClientTasksRoute
   ClientIndexRoute: typeof ClientIndexRoute
+  ClientTasksNewRoute: typeof ClientTasksNewRoute
 }
 
 const ClientRouteChildren: ClientRouteChildren = {
@@ -1221,8 +1200,9 @@ const ClientRouteChildren: ClientRouteChildren = {
   ClientProfileRoute: ClientProfileRoute,
   ClientSettingsRoute: ClientSettingsRoute,
   ClientStatsRoute: ClientStatsRoute,
-  ClientTasksRoute: ClientTasksRouteWithChildren,
+  ClientTasksRoute: ClientTasksRoute,
   ClientIndexRoute: ClientIndexRoute,
+  ClientTasksNewRoute: ClientTasksNewRoute,
 }
 
 const ClientRouteWithChildren =
