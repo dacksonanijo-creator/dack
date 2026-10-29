@@ -73,7 +73,7 @@ const steps = [
 
 function CompanyTaskWizard() {
   const { userId } = Route.useRouteContext();
-  const { draft } = useSearch({ from: "/client/tasks/new" });
+  const { draft } = useSearch({ from: "/client/tasks_/new" });
   const navigate = useNavigate({ from: "/client/tasks/new" });
   const [form, setForm] = useState<DraftForm>(emptyForm);
   const [step, setStep] = useState(0);
