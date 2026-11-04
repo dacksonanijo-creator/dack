@@ -328,6 +328,206 @@ export type Database = {
         }
         Relationships: []
       }
+      security_access_events: {
+        Row: {
+          browser: string | null
+          created_at: string
+          device: string | null
+          event_type: string
+          id: string
+          metadata: Json
+          success: boolean
+          user_id: string | null
+        }
+        Insert: {
+          browser?: string | null
+          created_at?: string
+          device?: string | null
+          event_type: string
+          id?: string
+          metadata?: Json
+          success: boolean
+          user_id?: string | null
+        }
+        Update: {
+          browser?: string | null
+          created_at?: string
+          device?: string | null
+          event_type?: string
+          id?: string
+          metadata?: Json
+          success?: boolean
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      security_account_blocks: {
+        Row: {
+          block_type: string
+          created_at: string
+          created_by: string | null
+          ends_at: string | null
+          id: string
+          reason: string
+          released_at: string | null
+          released_by: string | null
+          starts_at: string
+          user_id: string
+        }
+        Insert: {
+          block_type: string
+          created_at?: string
+          created_by?: string | null
+          ends_at?: string | null
+          id?: string
+          reason: string
+          released_at?: string | null
+          released_by?: string | null
+          starts_at?: string
+          user_id: string
+        }
+        Update: {
+          block_type?: string
+          created_at?: string
+          created_by?: string | null
+          ends_at?: string | null
+          id?: string
+          reason?: string
+          released_at?: string | null
+          released_by?: string | null
+          starts_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      security_admin_permissions: {
+        Row: {
+          allowed: boolean
+          area_key: string
+          id: string
+          role_key: string
+        }
+        Insert: {
+          allowed?: boolean
+          area_key: string
+          id?: string
+          role_key: string
+        }
+        Update: {
+          allowed?: boolean
+          area_key?: string
+          id?: string
+          role_key?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "security_admin_permissions_role_key_fkey"
+            columns: ["role_key"]
+            isOneToOne: false
+            referencedRelation: "security_admin_roles"
+            referencedColumns: ["role_key"]
+          },
+        ]
+      }
+      security_admin_roles: {
+        Row: {
+          created_at: string
+          description: string
+          name: string
+          role_key: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          name: string
+          role_key: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          name?: string
+          role_key?: string
+        }
+        Relationships: []
+      }
+      security_admin_sessions: {
+        Row: {
+          browser: string | null
+          created_at: string
+          device: string | null
+          id: string
+          last_activity_at: string
+          revoked_at: string | null
+          session_key: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          browser?: string | null
+          created_at?: string
+          device?: string | null
+          id?: string
+          last_activity_at?: string
+          revoked_at?: string | null
+          session_key: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          browser?: string | null
+          created_at?: string
+          device?: string | null
+          id?: string
+          last_activity_at?: string
+          revoked_at?: string | null
+          session_key?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      security_alerts: {
+        Row: {
+          alert_type: string
+          created_at: string
+          description: string
+          id: string
+          metadata: Json
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: string
+          status: string
+          title: string
+          user_id: string | null
+        }
+        Insert: {
+          alert_type: string
+          created_at?: string
+          description: string
+          id?: string
+          metadata?: Json
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          status?: string
+          title: string
+          user_id?: string | null
+        }
+        Update: {
+          alert_type?: string
+          created_at?: string
+          description?: string
+          id?: string
+          metadata?: Json
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          status?: string
+          title?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       security_audit_log: {
         Row: {
           action: string
@@ -361,6 +561,78 @@ export type Database = {
           resource_id?: string | null
           resource_type?: string | null
           result?: string
+        }
+        Relationships: []
+      }
+      security_fraud_rules: {
+        Row: {
+          configuration: Json
+          created_at: string
+          description: string
+          enabled: boolean
+          id: string
+          name: string
+          rule_key: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          configuration?: Json
+          created_at?: string
+          description: string
+          enabled?: boolean
+          id?: string
+          name: string
+          rule_key: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          configuration?: Json
+          created_at?: string
+          description?: string
+          enabled?: boolean
+          id?: string
+          name?: string
+          rule_key?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      security_suspicious_accounts: {
+        Row: {
+          created_at: string
+          evidence: Json
+          id: string
+          reason: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          evidence?: Json
+          id?: string
+          reason: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          evidence?: Json
+          id?: string
+          reason?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -882,6 +1154,15 @@ export type Database = {
       }
       is_platform_admin: { Args: never; Returns: boolean }
       is_taskora_admin: { Args: never; Returns: boolean }
+      log_security_access_event: {
+        Args: {
+          p_browser?: string
+          p_device?: string
+          p_event_type: string
+          p_success: boolean
+        }
+        Returns: string
+      }
       mark_withdrawal_processing: {
         Args: { _environment: string; _id: string }
         Returns: boolean
@@ -926,6 +1207,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      revoke_security_session: {
+        Args: { p_session_id: string }
+        Returns: undefined
       }
       save_company_task_draft: {
         Args: { p_draft: Json; p_task_id: string }
@@ -974,6 +1259,26 @@ export type Database = {
       submit_company_task_for_review: {
         Args: { p_task_id: string }
         Returns: Json
+      }
+      touch_security_session: {
+        Args: {
+          p_browser: string
+          p_device: string
+          p_session_key: string
+          p_user_agent: string
+        }
+        Returns: string
+      }
+      write_security_audit: {
+        Args: {
+          p_action: string
+          p_area: string
+          p_metadata?: Json
+          p_resource_id?: string
+          p_resource_type?: string
+          p_result?: string
+        }
+        Returns: string
       }
     }
     Enums: {

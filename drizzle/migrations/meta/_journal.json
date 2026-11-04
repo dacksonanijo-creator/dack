@@ -50,6 +50,13 @@
       "when": 1793058151655,
       "tag": "0006_taskora_task_review_and_budget_columns",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1793835291309,
+      "tag": "0007_taskora_security_foundation",
+      "breakpoints": true
     }
   ]
 }
